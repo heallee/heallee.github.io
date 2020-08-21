@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="什么是WMICWMI的全名为“Windows Management Instrumentation”。从Windows 98开始，Windows操作系统都支持WMI。WMI是由一系列工具集组成的，可以在本地或者远程管理计算机系统。 常规用法进程与服务 获取系统进程信息【brief摘要信息，full全部信息】 1234wmic process list brief&#x2F;full#获取指定信息wmic p">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Windows--Wmic_Get-CimInstance">
+<meta property="og:url" content="http://yoursite.com/2020/08/21/Windows--Wmic_Get-CimInstance/index.html">
+<meta property="og:site_name" content="Tansz">
+<meta property="og:description" content="什么是WMICWMI的全名为“Windows Management Instrumentation”。从Windows 98开始，Windows操作系统都支持WMI。WMI是由一系列工具集组成的，可以在本地或者远程管理计算机系统。 常规用法进程与服务 获取系统进程信息【brief摘要信息，full全部信息】 1234wmic process list brief&#x2F;full#获取指定信息wmic p">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-08-21T03:02:25.113Z">
+<meta property="article:modified_time" content="2020-08-21T03:02:30.924Z">
+<meta property="article:author" content="Tansz">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Windows--Wmic_Get-CimInstance</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" href="/2020/08/21/%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F--linux%E6%8F%90%E6%9D%83/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/08/21/Windows--Wmic_Get-CimInstance/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/08/21/Windows--Wmic_Get-CimInstance/&text=Windows--Wmic_Get-CimInstance" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/08/21/Windows--Wmic_Get-CimInstance/&title=Windows--Wmic_Get-CimInstance" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/08/21/Windows--Wmic_Get-CimInstance/&is_video=false&description=Windows--Wmic_Get-CimInstance" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Windows--Wmic_Get-CimInstance&body=Check out this article: http://yoursite.com/2020/08/21/Windows--Wmic_Get-CimInstance/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/08/21/Windows--Wmic_Get-CimInstance/&title=Windows--Wmic_Get-CimInstance" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/08/21/Windows--Wmic_Get-CimInstance/&title=Windows--Wmic_Get-CimInstance" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/08/21/Windows--Wmic_Get-CimInstance/&title=Windows--Wmic_Get-CimInstance" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/08/21/Windows--Wmic_Get-CimInstance/&title=Windows--Wmic_Get-CimInstance" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/08/21/Windows--Wmic_Get-CimInstance/&name=Windows--Wmic_Get-CimInstance&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/08/21/Windows--Wmic_Get-CimInstance/&t=Windows--Wmic_Get-CimInstance" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#什么是WMIC"><span class="toc-number">1.</span> <span class="toc-text">什么是WMIC</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#常规用法"><span class="toc-number">2.</span> <span class="toc-text">常规用法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#进程与服务"><span class="toc-number">2.1.</span> <span class="toc-text">进程与服务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#系统应用程序"><span class="toc-number">2.2.</span> <span class="toc-text">系统应用程序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#文件管理"><span class="toc-number">2.3.</span> <span class="toc-text">文件管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#用户账号管理"><span class="toc-number">2.4.</span> <span class="toc-text">用户账号管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#其他"><span class="toc-number">2.5.</span> <span class="toc-text">其他</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#WMIC之信息收集"><span class="toc-number">3.</span> <span class="toc-text">WMIC之信息收集</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#获取系统角色、用户名和制造商"><span class="toc-number">3.1.</span> <span class="toc-text">获取系统角色、用户名和制造商</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#获取操作系统详情"><span class="toc-number">3.2.</span> <span class="toc-text">获取操作系统详情</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#获取补丁信息"><span class="toc-number">3.3.</span> <span class="toc-text">获取补丁信息</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#获取SID"><span class="toc-number">3.4.</span> <span class="toc-text">获取SID</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#获取已安装的应用程序列表"><span class="toc-number">3.5.</span> <span class="toc-text">获取已安装的应用程序列表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#获取正在运行的服务列表"><span class="toc-number">3.6.</span> <span class="toc-text">获取正在运行的服务列表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#获取反病毒产品详情"><span class="toc-number">3.7.</span> <span class="toc-text">获取反病毒产品详情</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#判断目标系统是否为虚拟机"><span class="toc-number">3.8.</span> <span class="toc-text">判断目标系统是否为虚拟机</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#清理系统日志"><span class="toc-number">3.9.</span> <span class="toc-text">清理系统日志</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#WMIC之内网横移"><span class="toc-number">4.</span> <span class="toc-text">WMIC之内网横移</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#手动横移"><span class="toc-number">4.1.</span> <span class="toc-text">手动横移</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#脚本横移"><span class="toc-number">4.2.</span> <span class="toc-text">脚本横移</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Get-CimInstance"><span class="toc-number">5.</span> <span class="toc-text">Get-CimInstance</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#常规操作"><span class="toc-number">5.1.</span> <span class="toc-text">常规操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#获取WMI类"><span class="toc-number">5.2.</span> <span class="toc-text">获取WMI类</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#常规用法-1"><span class="toc-number">6.</span> <span class="toc-text">常规用法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#进程与服务-1"><span class="toc-number">6.1.</span> <span class="toc-text">进程与服务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#系统应用程序-1"><span class="toc-number">6.2.</span> <span class="toc-text">系统应用程序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#文件管理-1"><span class="toc-number">6.3.</span> <span class="toc-text">文件管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#用户账号管理-1"><span class="toc-number">6.4.</span> <span class="toc-text">用户账号管理</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#GIM之信息收集"><span class="toc-number">7.</span> <span class="toc-text">GIM之信息收集</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#获取系统角色、用户名和制造商-1"><span class="toc-number">7.1.</span> <span class="toc-text">获取系统角色、用户名和制造商</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#获取补丁信息-1"><span class="toc-number">7.2.</span> <span class="toc-text">获取补丁信息</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#获取SID-1"><span class="toc-number">7.3.</span> <span class="toc-text">获取SID</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#获取已安装的应用程序列表-1"><span class="toc-number">7.4.</span> <span class="toc-text">获取已安装的应用程序列表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#获取正在运行的服务列表-1"><span class="toc-number">7.5.</span> <span class="toc-text">获取正在运行的服务列表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#获取反病毒产品详情-1"><span class="toc-number">7.6.</span> <span class="toc-text">获取反病毒产品详情</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#判断目标系统是否为虚拟机-1"><span class="toc-number">7.7.</span> <span class="toc-text">判断目标系统是否为虚拟机</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#清理系统日志-1"><span class="toc-number">7.8.</span> <span class="toc-text">清理系统日志</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Windows--Wmic_Get-CimInstance
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Tansz</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-08-21T03:02:25.113Z" itemprop="datePublished">2020-08-21</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="什么是WMIC"><a href="#什么是WMIC" class="headerlink" title="什么是WMIC"></a>什么是WMIC</h1><p>WMI的全名为“Windows Management Instrumentation”。从Windows 98开始，Windows操作系统都支持WMI。WMI是由一系列工具集组成的，可以在本地或者远程管理计算机系统。</p>
+<h1 id="常规用法"><a href="#常规用法" class="headerlink" title="常规用法"></a>常规用法</h1><h2 id="进程与服务"><a href="#进程与服务" class="headerlink" title="进程与服务"></a>进程与服务</h2><ul>
+<li><p>获取系统进程信息<br>【brief摘要信息，full全部信息】</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">wmic process list brief/full</span><br><span class="line"><span class="comment">#获取指定信息</span></span><br><span class="line">wmic process get [属性]</span><br><span class="line"><span class="comment">#wmic process get processid,name,executablepath</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>创建/删除 进程</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">wmic process call  create/delete “[Process Name]”</span><br><span class="line"><span class="comment">#e.g</span></span><br><span class="line"><span class="comment">#wmic process call create calc (创建计算机进程，打开计算器)</span></span><br><span class="line">wmic process call create <span class="string">"FilePath"</span></span><br><span class="line"><span class="comment">#wmic process call create "C:\windows\system32\cmd.exe "(打开某一个路径的程序，杀软拦截的比较狠)</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>终止进程</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wmic process <span class="built_in">where</span> name=”explorer.exe” call terminate</span><br></pre></td></tr></table></figure>
+<ul>
+<li>查詢服务信息</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wmic service list brief</span><br><span class="line"><span class="comment">#查看运行中的服务</span></span><br><span class="line">wmic service <span class="built_in">where</span> <span class="string">"state='running'"</span> list brief</span><br></pre></td></tr></table></figure>
+<ul>
+<li>开启/关闭服务</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#开去服务</span></span><br><span class="line">wmic service <span class="built_in">where</span> <span class="string">"name='【SERVERNAME】'"</span> call startservice</span><br><span class="line"><span class="comment">#关闭服务</span></span><br><span class="line">wmic service <span class="built_in">where</span> <span class="string">"name='【SERVERNAME】'"</span> call stopservice</span><br></pre></td></tr></table></figure>
+
+<h2 id="系统应用程序"><a href="#系统应用程序" class="headerlink" title="系统应用程序"></a>系统应用程序</h2><ul>
+<li>查看安装的软件信息</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wmic product get name,version</span><br></pre></td></tr></table></figure>
+<h2 id="文件管理"><a href="#文件管理" class="headerlink" title="文件管理"></a>文件管理</h2><ul>
+<li>获取可执行文件列表</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wmic process <span class="built_in">where</span> <span class="string">"NOT ExecutablePath LIKE '%Windows%'"</span> GET ExecutablePath</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>获取目录属性</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"> wmic fsdir <span class="built_in">where</span> <span class="string">"drive='【盘符】:' and filename='【目录名】'"</span> get /format:list</span><br><span class="line"><span class="comment">#wmic fsdir where "drive='f:' and filename='kk'" get /format:list</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>删除目录<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wmic fsdir <span class="built_in">where</span> <span class="string">"[盘符]:\\[目录名]"</span> call delete</span><br><span class="line"><span class="comment">#使用双斜杆转义</span></span><br><span class="line"><span class="comment">#wmic fsdir where "f:\\test" call delete</span></span><br></pre></td></tr></table></figure>
+<h2 id="用户账号管理"><a href="#用户账号管理" class="headerlink" title="用户账号管理"></a>用户账号管理</h2></li>
+<li>用户信息获取</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wmic useraccount</span><br><span class="line">wmic useraccount list brief</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>用户账号重命名<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wmic useraccount <span class="built_in">where</span> <span class="string">"name='%UserName%'"</span> call rename newUserName   // 更改当前用户名</span><br><span class="line">wmic useraccount <span class="built_in">where</span> <span class="string">"name='Administrator'"</span> call Rename admin  // 更改指定用户名</span><br></pre></td></tr></table></figure>
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2></li>
+<li>以文件的形式输出获取的内容</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wmic /output:d:\install.txt product get name,version</span><br></pre></td></tr></table></figure>
+
+<h1 id="WMIC之信息收集"><a href="#WMIC之信息收集" class="headerlink" title="WMIC之信息收集"></a>WMIC之信息收集</h1><h2 id="获取系统角色、用户名和制造商"><a href="#获取系统角色、用户名和制造商" class="headerlink" title="获取系统角色、用户名和制造商"></a>获取系统角色、用户名和制造商</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wmic computersystem get Name,Domain,Manufacturer,Model,Username,Roles/format:list</span><br></pre></td></tr></table></figure>
+<h2 id="获取操作系统详情"><a href="#获取操作系统详情" class="headerlink" title="获取操作系统详情"></a>获取操作系统详情</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wmic os get /all /format:list</span><br></pre></td></tr></table></figure>
+<h2 id="获取补丁信息"><a href="#获取补丁信息" class="headerlink" title="获取补丁信息"></a>获取补丁信息</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wmic qfe get Caption,Description,HotFixID,InstalledOn</span><br></pre></td></tr></table></figure>
+
+<h2 id="获取SID"><a href="#获取SID" class="headerlink" title="获取SID"></a>获取SID</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wmic group get Caption,InstallDate,LocalAccount,Domain,SID,Status</span><br></pre></td></tr></table></figure>
+<h2 id="获取已安装的应用程序列表"><a href="#获取已安装的应用程序列表" class="headerlink" title="获取已安装的应用程序列表"></a>获取已安装的应用程序列表</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wmic product get name,version</span><br></pre></td></tr></table></figure>
+<h2 id="获取正在运行的服务列表"><a href="#获取正在运行的服务列表" class="headerlink" title="获取正在运行的服务列表"></a>获取正在运行的服务列表</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wmic service <span class="built_in">where</span> <span class="string">"state='running'"</span> list brief</span><br></pre></td></tr></table></figure>
+<h2 id="获取反病毒产品详情"><a href="#获取反病毒产品详情" class="headerlink" title="获取反病毒产品详情"></a>获取反病毒产品详情</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wmic /namespace:\\root\securitycenter2 path antivirusproduct GET displayName,productState, pathToSignedProductExe</span><br></pre></td></tr></table></figure>
+
+<h2 id="判断目标系统是否为虚拟机"><a href="#判断目标系统是否为虚拟机" class="headerlink" title="判断目标系统是否为虚拟机"></a>判断目标系统是否为虚拟机</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wmic onboarddevice get Desciption,DeviceType,Enabled,Status /format:list</span><br></pre></td></tr></table></figure>
+<h2 id="清理系统日志"><a href="#清理系统日志" class="headerlink" title="清理系统日志"></a>清理系统日志</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wmic nteventlog list brief</span><br><span class="line">wmic nteventlog <span class="built_in">where</span>  logfileName=’system’ call cleareventlog</span><br></pre></td></tr></table></figure>
+
+<h1 id="WMIC之内网横移"><a href="#WMIC之内网横移" class="headerlink" title="WMIC之内网横移"></a>WMIC之内网横移</h1><h2 id="手动横移"><a href="#手动横移" class="headerlink" title="手动横移"></a>手动横移</h2><p><strong>由于wmic执行远程命令没有回显，所以要将结果写入到txt中</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wmic /node:[TargetIp] /user:[UserName] /password:[Password] process call create <span class="string">"cmd.exe /c ipconfig &gt; c:\result.txt"</span></span><br><span class="line"><span class="comment"># /node：指定将对其进行操作的服务器</span></span><br><span class="line"><span class="built_in">type</span> result.txt</span><br></pre></td></tr></table></figure>
+<h2 id="脚本横移"><a href="#脚本横移" class="headerlink" title="脚本横移"></a>脚本横移</h2><p><a href="https://github.com/CoreSecurity/impacket/blob/master/examples/wmiexec.py" target="_blank" rel="noopener">wmiexec</a></p>
+<blockquote>
+<p><a href="https://www.freebuf.com/articles/network/246440.html" target="_blank" rel="noopener">参考链接</a><br><a href="https://www.freebuf.com/articles/system/182531.html" target="_blank" rel="noopener">参考链接</a></p>
+</blockquote>
+<h1 id="Get-CimInstance"><a href="#Get-CimInstance" class="headerlink" title="Get-CimInstance"></a>Get-CimInstance</h1><p>Get-CimInstance–wmic的替代品<br>配合<a href="https://github.com/vinaypamnani/wmie2/releases" target="_blank" rel="noopener">WmiExplorer</a>使用</p>
+<h2 id="常规操作"><a href="#常规操作" class="headerlink" title="常规操作"></a>常规操作</h2><h2 id="获取WMI类"><a href="#获取WMI类" class="headerlink" title="获取WMI类"></a>获取WMI类</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Get-CimClass -Namespace root/CIMV2 |</span><br><span class="line">  Where-Object CimClassName -like Win32* |</span><br><span class="line">    Select-Object CimClassName</span><br></pre></td></tr></table></figure>
+<h1 id="常规用法-1"><a href="#常规用法-1" class="headerlink" title="常规用法"></a>常规用法</h1><h2 id="进程与服务-1"><a href="#进程与服务-1" class="headerlink" title="进程与服务"></a>进程与服务</h2><ul>
+<li>获取系统进程信息<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Get-CimInstance</span> <span class="literal">-Namespace</span> ROOT\CIMV2 <span class="literal">-Class</span> Win32_Process|<span class="built_in">format-table</span> processid,name,executablepath |<span class="built_in">Select-Object</span> <span class="literal">-First</span> <span class="number">10</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#-Namespace 			指定命名空间</span></span><br><span class="line"><span class="comment">#-Class 				指定类名</span></span><br><span class="line"><span class="comment">#format-table/list		格式化输出</span></span><br><span class="line"><span class="comment">#Select-Object -First 	选取前十行</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#筛选某一进程</span></span><br><span class="line"><span class="built_in">Get-CimInstance</span> <span class="literal">-Namespace</span> ROOT\CIMV2 <span class="literal">-Class</span> Win32_Process <span class="literal">-Filter</span> <span class="string">"name = 'qq.exe'"</span>|<span class="built_in">format-table</span> processid,name,executablepath</span><br></pre></td></tr></table></figure></li>
+<li>创建/删除 进程</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#删除进程</span></span><br><span class="line"><span class="built_in">Get-CimInstance</span> <span class="literal">-Namespace</span> ROOT\CIMV2 <span class="literal">-Class</span> Win32_Process <span class="literal">-Filter</span> <span class="string">"name = 'qq.exe'"</span> |<span class="built_in">Invoke-CimMethod</span> <span class="literal">-Name</span> Terminate </span><br><span class="line">[| <span class="built_in">Out-NULL</span>]</span><br></pre></td></tr></table></figure>
+<ul>
+<li>查詢服务信息</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Get-CimInstance</span> <span class="literal">-Namespace</span> ROOT\CIMV2 <span class="literal">-Class</span> Win32_Service </span><br><span class="line"></span><br><span class="line"><span class="built_in">Get-CimInstance</span> <span class="literal">-Namespace</span> ROOT\CIMV2 <span class="literal">-Class</span> Win32_Service <span class="literal">-Filter</span> <span class="string">"State='Running'"</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>开启/关闭服务</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#开启打印后台处理程序</span></span><br><span class="line"><span class="built_in">Get-CimInstance</span> <span class="literal">-Namespace</span> ROOT\CIMV2 <span class="literal">-Class</span> Win32_Service <span class="literal">-Filter</span> <span class="string">"name='spooler'"</span>|<span class="built_in">Invoke-CimMethod</span> <span class="literal">-Name</span> startservice</span><br><span class="line"><span class="comment">#关闭打印后台处理程序</span></span><br><span class="line"><span class="built_in">Get-CimInstance</span> <span class="literal">-Namespace</span> ROOT\CIMV2 <span class="literal">-Class</span> Win32_Service <span class="literal">-Filter</span> <span class="string">"name='spooler'"</span>|<span class="built_in">Invoke-CimMethod</span> <span class="literal">-Name</span> stopservice</span><br></pre></td></tr></table></figure>
+<h2 id="系统应用程序-1"><a href="#系统应用程序-1" class="headerlink" title="系统应用程序"></a>系统应用程序</h2><ul>
+<li>查看安装的软件信息</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Get-CimInstance</span> <span class="literal">-Namespace</span> ROOT\CIMV2 <span class="literal">-Class</span> Win32_Product |<span class="built_in">format-table</span>[<span class="built_in">Select-Object</span>] name,version |<span class="built_in">Select-Object</span> <span class="literal">-First</span> <span class="number">10</span></span><br></pre></td></tr></table></figure>
+<h2 id="文件管理-1"><a href="#文件管理-1" class="headerlink" title="文件管理"></a>文件管理</h2><ul>
+<li>获取可执行文件列表</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Get-CimInstance</span> <span class="literal">-Namespace</span> ROOT\CIMV2 <span class="literal">-Class</span> Win32_Process <span class="literal">-Filter</span> <span class="string">"NOT ExecutablePath LIKE '%Windows%'"</span>|<span class="built_in">format-table</span> ExecutablePath</span><br></pre></td></tr></table></figure>
+<ul>
+<li>获取目录属性</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Get-CimInstance</span> <span class="literal">-Namespace</span> ROOT\CIMV2 <span class="literal">-Class</span> win32_directory <span class="literal">-filter</span> <span class="string">"drive='f:' and filename='kk'"</span> |<span class="built_in">select-object</span> <span class="literal">-first</span> <span class="number">10</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>删除目录</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Get-CimInstance</span> <span class="literal">-Namespace</span> ROOT\CIMV2 <span class="literal">-Class</span> win32_directory <span class="literal">-filter</span><span class="string">"drive='f:' and filename='test'"</span> |<span class="built_in">Invoke-CimMethod</span> <span class="literal">-Name</span> delete</span><br></pre></td></tr></table></figure>
+<h2 id="用户账号管理-1"><a href="#用户账号管理-1" class="headerlink" title="用户账号管理"></a>用户账号管理</h2><ul>
+<li>用户信息获取<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Get-CimInstance</span> <span class="literal">-Namespace</span> ROOT\CIMV2 <span class="literal">-Class</span> win32_useraccount</span><br></pre></td></tr></table></figure></li>
+<li>用户账号重命名</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Get-CimInstance</span> <span class="literal">-Namespace</span> ROOT\CIMV2 <span class="literal">-Class</span> win32_useraccount<span class="literal">-filter</span>  <span class="string">"name='%UserName%'"</span> |<span class="built_in">Invoke-CimMethod</span> <span class="literal">-Name</span> rename(<span class="string">"newUserName "</span>)</span><br></pre></td></tr></table></figure>
+
+<h1 id="GIM之信息收集"><a href="#GIM之信息收集" class="headerlink" title="GIM之信息收集"></a>GIM之信息收集</h1><h2 id="获取系统角色、用户名和制造商-1"><a href="#获取系统角色、用户名和制造商-1" class="headerlink" title="获取系统角色、用户名和制造商"></a>获取系统角色、用户名和制造商</h2><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Get-CimInstance</span> <span class="literal">-Namespace</span> ROOT\CIMV2 <span class="literal">-Class</span> win32_computersystem |<span class="built_in">select-object</span> Name,Domain,Manufacturer,Model,Username,Roles</span><br></pre></td></tr></table></figure>
+<h2 id="获取补丁信息-1"><a href="#获取补丁信息-1" class="headerlink" title="获取补丁信息"></a>获取补丁信息</h2><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Get-CimInstance</span> <span class="literal">-Namespace</span> ROOT\CIMV2 <span class="literal">-Class</span> Win32_QuickFixEngineering |<span class="built_in">select-object</span> Caption,Description,HotFixID,InstalledOn</span><br></pre></td></tr></table></figure>
+<h2 id="获取SID-1"><a href="#获取SID-1" class="headerlink" title="获取SID"></a>获取SID</h2><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Get-CimInstance</span> <span class="literal">-Namespace</span> ROOT\CIMV2 <span class="literal">-Class</span> Win32_Group |<span class="built_in">format-table</span> caption,InstallDate,LocalAccount,Domain,SID,Status</span><br></pre></td></tr></table></figure>
+<h2 id="获取已安装的应用程序列表-1"><a href="#获取已安装的应用程序列表-1" class="headerlink" title="获取已安装的应用程序列表"></a>获取已安装的应用程序列表</h2><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Get-CimInstance</span> <span class="literal">-Namespace</span> ROOT\CIMV2 <span class="literal">-Class</span> Win32_Product |<span class="built_in">format-table</span>[<span class="built_in">Select-Object</span>] name,version |<span class="built_in">Select-Object</span> <span class="literal">-First</span> <span class="number">10</span></span><br></pre></td></tr></table></figure>
+<h2 id="获取正在运行的服务列表-1"><a href="#获取正在运行的服务列表-1" class="headerlink" title="获取正在运行的服务列表"></a>获取正在运行的服务列表</h2><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Get-CimInstance</span> <span class="literal">-Namespace</span> ROOT\CIMV2 <span class="literal">-Class</span> Win32_Service <span class="literal">-Filter</span> <span class="string">"State='Running'"</span></span><br></pre></td></tr></table></figure>
+<h2 id="获取反病毒产品详情-1"><a href="#获取反病毒产品详情-1" class="headerlink" title="获取反病毒产品详情"></a>获取反病毒产品详情</h2><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Get-CimInstance</span> <span class="literal">-Namespace</span> ROOT\SecurityCenter2 <span class="literal">-Class</span> AntiVirusProduct | <span class="built_in">select-object</span> displayName,productState, pathToSignedProductExe</span><br></pre></td></tr></table></figure>
+<h2 id="判断目标系统是否为虚拟机-1"><a href="#判断目标系统是否为虚拟机-1" class="headerlink" title="判断目标系统是否为虚拟机"></a>判断目标系统是否为虚拟机</h2><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Get-CimInstance</span> <span class="literal">-Namespace</span> ROOT\CIMV2 <span class="literal">-Class</span> Win32_OnBoardDevice | <span class="built_in">select-object</span>  Desciption,DeviceType,Enabled,Status</span><br></pre></td></tr></table></figure>
+
+<h2 id="清理系统日志-1"><a href="#清理系统日志-1" class="headerlink" title="清理系统日志"></a>清理系统日志</h2><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Get-CimInstance</span> <span class="literal">-Namespace</span> ROOT\CIMV2 <span class="literal">-Class</span> Win32_NTEventlogFile</span><br><span class="line"></span><br><span class="line"><span class="comment">#需要管理员权限</span></span><br><span class="line"><span class="built_in">Get-CimInstance</span> <span class="literal">-Namespace</span> ROOT\CIMV2 <span class="literal">-Class</span> Win32_NTEventlogFile <span class="literal">-filter</span> <span class="string">"logfilename='windows powershell'"</span> |<span class="built_in">Invoke-CimMethod</span> <span class="literal">-Name</span> ClearEventlog</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><a href="https://docs.microsoft.com/en-us/powershell/module/cimcmdlets/get-ciminstance?view=powershell-7" target="_blank" rel="noopener">官方文档</a><br><a href="http://xntutor.com/demo/123.html" target="_blank" rel="noopener">参考链接</a><br><a href="https://www.cnblogs.com/ring-lcy/p/12495977.html" target="_blank" rel="noopener">参考链接</a><br><a href="https://blog.csdn.net/shuteer_xu/article/details/107925650" target="_blank" rel="noopener">参考链接</a><br><a href="https://www.ired.team/" target="_blank" rel="noopener">红队技巧</a></p>
+</blockquote>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#什么是WMIC"><span class="toc-number">1.</span> <span class="toc-text">什么是WMIC</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#常规用法"><span class="toc-number">2.</span> <span class="toc-text">常规用法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#进程与服务"><span class="toc-number">2.1.</span> <span class="toc-text">进程与服务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#系统应用程序"><span class="toc-number">2.2.</span> <span class="toc-text">系统应用程序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#文件管理"><span class="toc-number">2.3.</span> <span class="toc-text">文件管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#用户账号管理"><span class="toc-number">2.4.</span> <span class="toc-text">用户账号管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#其他"><span class="toc-number">2.5.</span> <span class="toc-text">其他</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#WMIC之信息收集"><span class="toc-number">3.</span> <span class="toc-text">WMIC之信息收集</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#获取系统角色、用户名和制造商"><span class="toc-number">3.1.</span> <span class="toc-text">获取系统角色、用户名和制造商</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#获取操作系统详情"><span class="toc-number">3.2.</span> <span class="toc-text">获取操作系统详情</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#获取补丁信息"><span class="toc-number">3.3.</span> <span class="toc-text">获取补丁信息</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#获取SID"><span class="toc-number">3.4.</span> <span class="toc-text">获取SID</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#获取已安装的应用程序列表"><span class="toc-number">3.5.</span> <span class="toc-text">获取已安装的应用程序列表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#获取正在运行的服务列表"><span class="toc-number">3.6.</span> <span class="toc-text">获取正在运行的服务列表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#获取反病毒产品详情"><span class="toc-number">3.7.</span> <span class="toc-text">获取反病毒产品详情</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#判断目标系统是否为虚拟机"><span class="toc-number">3.8.</span> <span class="toc-text">判断目标系统是否为虚拟机</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#清理系统日志"><span class="toc-number">3.9.</span> <span class="toc-text">清理系统日志</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#WMIC之内网横移"><span class="toc-number">4.</span> <span class="toc-text">WMIC之内网横移</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#手动横移"><span class="toc-number">4.1.</span> <span class="toc-text">手动横移</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#脚本横移"><span class="toc-number">4.2.</span> <span class="toc-text">脚本横移</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Get-CimInstance"><span class="toc-number">5.</span> <span class="toc-text">Get-CimInstance</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#常规操作"><span class="toc-number">5.1.</span> <span class="toc-text">常规操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#获取WMI类"><span class="toc-number">5.2.</span> <span class="toc-text">获取WMI类</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#常规用法-1"><span class="toc-number">6.</span> <span class="toc-text">常规用法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#进程与服务-1"><span class="toc-number">6.1.</span> <span class="toc-text">进程与服务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#系统应用程序-1"><span class="toc-number">6.2.</span> <span class="toc-text">系统应用程序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#文件管理-1"><span class="toc-number">6.3.</span> <span class="toc-text">文件管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#用户账号管理-1"><span class="toc-number">6.4.</span> <span class="toc-text">用户账号管理</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#GIM之信息收集"><span class="toc-number">7.</span> <span class="toc-text">GIM之信息收集</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#获取系统角色、用户名和制造商-1"><span class="toc-number">7.1.</span> <span class="toc-text">获取系统角色、用户名和制造商</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#获取补丁信息-1"><span class="toc-number">7.2.</span> <span class="toc-text">获取补丁信息</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#获取SID-1"><span class="toc-number">7.3.</span> <span class="toc-text">获取SID</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#获取已安装的应用程序列表-1"><span class="toc-number">7.4.</span> <span class="toc-text">获取已安装的应用程序列表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#获取正在运行的服务列表-1"><span class="toc-number">7.5.</span> <span class="toc-text">获取正在运行的服务列表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#获取反病毒产品详情-1"><span class="toc-number">7.6.</span> <span class="toc-text">获取反病毒产品详情</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#判断目标系统是否为虚拟机-1"><span class="toc-number">7.7.</span> <span class="toc-text">判断目标系统是否为虚拟机</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#清理系统日志-1"><span class="toc-number">7.8.</span> <span class="toc-text">清理系统日志</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/08/21/Windows--Wmic_Get-CimInstance/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/08/21/Windows--Wmic_Get-CimInstance/&text=Windows--Wmic_Get-CimInstance" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/08/21/Windows--Wmic_Get-CimInstance/&title=Windows--Wmic_Get-CimInstance" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/08/21/Windows--Wmic_Get-CimInstance/&is_video=false&description=Windows--Wmic_Get-CimInstance" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Windows--Wmic_Get-CimInstance&body=Check out this article: http://yoursite.com/2020/08/21/Windows--Wmic_Get-CimInstance/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/08/21/Windows--Wmic_Get-CimInstance/&title=Windows--Wmic_Get-CimInstance" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/08/21/Windows--Wmic_Get-CimInstance/&title=Windows--Wmic_Get-CimInstance" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/08/21/Windows--Wmic_Get-CimInstance/&title=Windows--Wmic_Get-CimInstance" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/08/21/Windows--Wmic_Get-CimInstance/&title=Windows--Wmic_Get-CimInstance" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/08/21/Windows--Wmic_Get-CimInstance/&name=Windows--Wmic_Get-CimInstance&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/08/21/Windows--Wmic_Get-CimInstance/&t=Windows--Wmic_Get-CimInstance" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    1970-2020
+    Tansz
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>

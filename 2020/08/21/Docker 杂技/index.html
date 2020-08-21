@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="权限不够 报错RTNETLINK answers: Operation not permittedDocker containers do not have full privileges by default. Try adding this to the docker run command  解决提示权限不够，非docker 直接 su root 即可   1docker run --cap">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker 杂技">
+<meta property="og:url" content="http://yoursite.com/2020/08/21/Docker%20%E6%9D%82%E6%8A%80/index.html">
+<meta property="og:site_name" content="Tansz">
+<meta property="og:description" content="权限不够 报错RTNETLINK answers: Operation not permittedDocker containers do not have full privileges by default. Try adding this to the docker run command  解决提示权限不够，非docker 直接 su root 即可   1docker run --cap">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200507090256657.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200602203218573.png">
+<meta property="article:published_time" content="2020-08-21T02:59:54.899Z">
+<meta property="article:modified_time" content="2020-08-21T02:59:57.401Z">
+<meta property="article:author" content="Tansz">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20200507090256657.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>Docker 杂技</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2020/08/21/tmux%20%E6%9D%82%E6%8A%80/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2020/08/21/Vulhub%20sickos1.1/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/08/21/Docker%20%E6%9D%82%E6%8A%80/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/08/21/Docker%20%E6%9D%82%E6%8A%80/&text=Docker 杂技" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/08/21/Docker%20%E6%9D%82%E6%8A%80/&title=Docker 杂技" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/08/21/Docker%20%E6%9D%82%E6%8A%80/&is_video=false&description=Docker 杂技" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Docker 杂技&body=Check out this article: http://yoursite.com/2020/08/21/Docker%20%E6%9D%82%E6%8A%80/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/08/21/Docker%20%E6%9D%82%E6%8A%80/&title=Docker 杂技" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/08/21/Docker%20%E6%9D%82%E6%8A%80/&title=Docker 杂技" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/08/21/Docker%20%E6%9D%82%E6%8A%80/&title=Docker 杂技" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/08/21/Docker%20%E6%9D%82%E6%8A%80/&title=Docker 杂技" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/08/21/Docker%20%E6%9D%82%E6%8A%80/&name=Docker 杂技&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/08/21/Docker%20%E6%9D%82%E6%8A%80/&t=Docker 杂技" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#权限不够"><span class="toc-number">1.</span> <span class="toc-text">权限不够</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#删除父镜像报错"><span class="toc-number">2.</span> <span class="toc-text">删除父镜像报错</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#镜像别名冲突"><span class="toc-number">3.</span> <span class="toc-text">镜像别名冲突</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#镜像名更改"><span class="toc-number">4.</span> <span class="toc-text">镜像名更改</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Docker-与win10物理机无法共享文件"><span class="toc-number">5.</span> <span class="toc-text">Docker 与win10物理机无法共享文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#docker镜像下载速度太慢"><span class="toc-number">6.</span> <span class="toc-text">docker镜像下载速度太慢</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#docker端口映射之后nmap扫描显示filtered"><span class="toc-number">7.</span> <span class="toc-text">docker端口映射之后nmap扫描显示filtered</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#error-during-connect"><span class="toc-number"></span> <span class="toc-text">error  during  connect:</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Hyper-V-not-available"><span class="toc-number"></span> <span class="toc-text">Hyper-V  not available</span></a>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        Docker 杂技
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Tansz</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-08-21T02:59:54.899Z" itemprop="datePublished">2020-08-21</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h2 id="权限不够"><a href="#权限不够" class="headerlink" title="权限不够"></a>权限不够</h2><ul>
+<li><p>报错<br>RTNETLINK answers: Operation not permitted<br>Docker containers do not have full privileges by default. Try adding this to the docker run command</p>
+</li>
+<li><p>解决<br>提示权限不够，非docker 直接 su root 即可</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --<span class="built_in">cap</span>-add=NET_ADMIN   -it   IMAGEID</span><br></pre></td></tr></table></figure>
+
+<h2 id="删除父镜像报错"><a href="#删除父镜像报错" class="headerlink" title="删除父镜像报错"></a>删除父镜像报错</h2><ul>
+<li><p>报错<br>Error response from daemon: conflict: unable to delete 6fa48e047721 (cannot be forced) - image has dependent child images</p>
+</li>
+<li><p>解决</p>
+</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">docker stop $(docker ps -a | grep <span class="string">"Exited"</span> | awk <span class="string">'&#123;print $1 &#125;'</span>)</span><br><span class="line">docker rm $(docker ps -a | grep <span class="string">"Exited"</span> | awk <span class="string">'&#123;print $1 &#125;'</span>) </span><br><span class="line">或</span><br><span class="line">docker rm -v $(docker ps -aq -f status=exited)</span><br><span class="line">删除镜像</span><br><span class="line">docker rmi $(docker images | grep <span class="string">"none"</span> | awk <span class="string">'&#123;print $3&#125;'</span>)</span><br><span class="line">或</span><br><span class="line">docker rmi 镜像ID:版本号 -f</span><br></pre></td></tr></table></figure>
+
+<h2 id="镜像别名冲突"><a href="#镜像别名冲突" class="headerlink" title="镜像别名冲突"></a>镜像别名冲突</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#查看冲突镜像 </span></span><br><span class="line">docker ps -l </span><br><span class="line"><span class="comment">#删除容器</span></span><br><span class="line">docker rm 镜像ID</span><br></pre></td></tr></table></figure>
+
+<h2 id="镜像名更改"><a href="#镜像名更改" class="headerlink" title="镜像名更改"></a>镜像名更改</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker tag imageID  NewImageID:tag</span><br></pre></td></tr></table></figure>
+
+<h2 id="Docker-与win10物理机无法共享文件"><a href="#Docker-与win10物理机无法共享文件" class="headerlink" title="Docker 与win10物理机无法共享文件"></a>Docker 与win10物理机无法共享文件</h2><ul>
+<li>报错</li>
+</ul>
+<p>Firewall detected<br>A firewall is blocking file Sharing between Windows and the containers.</p>
+<ul>
+<li>解决<br>根据提示可知为防火墙配置问题;【官网提示445端口必须开启】<br>找到防火墙配置，发现445配关闭且不能被修改<br>进入 【控制面板\系统和安全\管理工具\本地安全策略】<br><img src="https://img-blog.csdnimg.cn/20200507090256657.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述"><br>可在此直接删除配置；</li>
+</ul>
+<h2 id="docker镜像下载速度太慢"><a href="#docker镜像下载速度太慢" class="headerlink" title="docker镜像下载速度太慢"></a>docker镜像下载速度太慢</h2><ul>
+<li>报错</li>
+</ul>
+<p>ERROR:Get<a href="https://registry1.docker.io/v2/c0ny1/webgoat-server/manifests/v8.0.0.M14" target="_blank" rel="noopener">https://registry1.docker.io/v2/c0ny1/webgoat-server/manifests/v8.0.0.M14</a>: net/http: TLS handshake timeout   </p>
+<ul>
+<li>解决方法</li>
+</ul>
+<ol>
+<li>添加国内镜像（建议使用阿里镜像源）</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/docker/daemon.json</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">"registry-mirrors"</span>: [</span><br><span class="line">    <span class="string">"镜像地址"</span></span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>配置DNS解析</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/network/interfaces</span><br><span class="line"><span class="comment">#加入DNS服务</span></span><br><span class="line">dns-nameservers 8.8.8.8</span><br><span class="line"><span class="comment">#重启网络</span></span><br><span class="line">service networking restart</span><br></pre></td></tr></table></figure>
+
+<p>接下来就直接起飞～芜湖～</p>
+<h2 id="docker端口映射之后nmap扫描显示filtered"><a href="#docker端口映射之后nmap扫描显示filtered" class="headerlink" title="docker端口映射之后nmap扫描显示filtered"></a>docker端口映射之后nmap扫描显示filtered</h2><ul>
+<li>报错</li>
+</ul>
+<p><img src="https://img-blog.csdnimg.cn/20200602203218573.png" alt="在这里插入图片描述"></p>
+<ul>
+<li>解决方法</li>
+</ul>
+<ol>
+<li>关闭防火墙</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#需要安装ufw命令</span></span><br><span class="line">apt-get install ufw</span><br><span class="line">ufw <span class="built_in">disable</span></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>执行如下命令</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span>  <span class="string">"net.ipv4.ip_forward = 1"</span>  &gt;&gt;  /usr/lib/sysctl.d/00-system.conf</span><br><span class="line">service networking restart</span><br><span class="line">service docker restart</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="error-during-connect"><a href="#error-during-connect" class="headerlink" title="error  during  connect:"></a>error  during  connect:</h1><ul>
+<li><p>报错</p>
+<p>Get http://%2F%2F.%2Fpipe%2Fdocker_engine/v1.40/containers/json: open //./pipe/docker_engine: The system cannot find the file specified. In the default daemon configuration on Windows, the docker client must be run elevated to connect. This error may also indicate that the docker daemon is not running.</p>
+</li>
+<li><p>解决方法<br>方法1：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> <span class="string">"C:\Program Files\Docker\Docker"</span></span><br><span class="line">DockerCli.exe -SwitchDaemon</span><br></pre></td></tr></table></figure>
+<p>方法二：<br>在你的docker desktop的小图标上右键，找到Setting–&gt; General–&gt;勾选Expose daemon on tcp localhost那个选项。重启</p>
+</li>
+</ul>
+<h1 id="Hyper-V-not-available"><a href="#Hyper-V-not-available" class="headerlink" title="Hyper-V  not available"></a>Hyper-V  not available</h1><ul>
+<li>报错</li>
+</ul>
+<p>Hyper-V service vmms is not available</p>
+<ul>
+<li>解决方法<br>启用 Hyper-V</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All</span><br><span class="line"><span class="comment">## 或</span></span><br><span class="line">DISM /Online /Enable-Feature /All /FeatureName:Microsoft-Hyper-V</span><br></pre></td></tr></table></figure>
+
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#权限不够"><span class="toc-number">1.</span> <span class="toc-text">权限不够</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#删除父镜像报错"><span class="toc-number">2.</span> <span class="toc-text">删除父镜像报错</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#镜像别名冲突"><span class="toc-number">3.</span> <span class="toc-text">镜像别名冲突</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#镜像名更改"><span class="toc-number">4.</span> <span class="toc-text">镜像名更改</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Docker-与win10物理机无法共享文件"><span class="toc-number">5.</span> <span class="toc-text">Docker 与win10物理机无法共享文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#docker镜像下载速度太慢"><span class="toc-number">6.</span> <span class="toc-text">docker镜像下载速度太慢</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#docker端口映射之后nmap扫描显示filtered"><span class="toc-number">7.</span> <span class="toc-text">docker端口映射之后nmap扫描显示filtered</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#error-during-connect"><span class="toc-number"></span> <span class="toc-text">error  during  connect:</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Hyper-V-not-available"><span class="toc-number"></span> <span class="toc-text">Hyper-V  not available</span></a>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/08/21/Docker%20%E6%9D%82%E6%8A%80/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/08/21/Docker%20%E6%9D%82%E6%8A%80/&text=Docker 杂技" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/08/21/Docker%20%E6%9D%82%E6%8A%80/&title=Docker 杂技" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/08/21/Docker%20%E6%9D%82%E6%8A%80/&is_video=false&description=Docker 杂技" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Docker 杂技&body=Check out this article: http://yoursite.com/2020/08/21/Docker%20%E6%9D%82%E6%8A%80/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/08/21/Docker%20%E6%9D%82%E6%8A%80/&title=Docker 杂技" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/08/21/Docker%20%E6%9D%82%E6%8A%80/&title=Docker 杂技" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/08/21/Docker%20%E6%9D%82%E6%8A%80/&title=Docker 杂技" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/08/21/Docker%20%E6%9D%82%E6%8A%80/&title=Docker 杂技" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/08/21/Docker%20%E6%9D%82%E6%8A%80/&name=Docker 杂技&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/08/21/Docker%20%E6%9D%82%E6%8A%80/&t=Docker 杂技" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    1970-2020
+    Tansz
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>
