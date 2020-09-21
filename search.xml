@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>bWAPP-SQLInjection-LoginForm</title>
+    <url>/2020/09/21/bWAPP-SQLInjection-LoginForm/</url>
+    <content><![CDATA[<h1 id="表单注入"><a href="#表单注入" class="headerlink" title="表单注入"></a>表单注入</h1><h2 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h2><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">isset</span>($_POST[<span class="string">"form"</span>]))   <span class="comment">//获取提交的表单信息</span></span><br><span class="line">    &#123;</span><br><span class="line"></span><br><span class="line">        $login = $_POST[<span class="string">"login"</span>];</span><br><span class="line">        $login = sqli($login);</span><br><span class="line"></span><br><span class="line">        $password = $_POST[<span class="string">"password"</span>];</span><br><span class="line">        $password = sqli($password);</span><br><span class="line">		<span class="comment">//使用自定义的sqli()函数进行消毒</span></span><br><span class="line">        $sql = <span class="string">"SELECT * FROM heroes WHERE login = '"</span> . $login . <span class="string">"' AND password = '"</span> . $password . <span class="string">"'"</span>;</span><br><span class="line">        <span class="comment">// echo $sql;</span></span><br><span class="line">       $recordset = mysql_query($sql, $link);</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+]]></content>
+  </entry>
+  <entry>
     <title>bWAPP-SQLInjection-AJAXJSONjQuery</title>
     <url>/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/</url>
     <content><![CDATA[<h1 id="AJAX-JSON-jQuery注入"><a href="#AJAX-JSON-jQuery注入" class="headerlink" title="AJAX/JSON/jQuery注入"></a>AJAX/JSON/jQuery注入</h1><h2 id="常规流程"><a href="#常规流程" class="headerlink" title="常规流程"></a>常规流程</h2><p><strong>1.判断是否存在注入，注入是字符型还是整数型</strong></p>
