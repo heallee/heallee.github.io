@@ -6,7 +6,25 @@
     <content><![CDATA[<h1 id="盲注"><a href="#盲注" class="headerlink" title="盲注"></a>盲注</h1><h2 id="base"><a href="#base" class="headerlink" title="base"></a>base</h2><h3 id="low"><a href="#low" class="headerlink" title="low"></a>low</h3><p><img src="/2020/09/22/bWAPP-SQLiBlind/image-20200922202427091.png" alt="image-20200922202427091"></p>
 <p><img src="/2020/09/22/bWAPP-SQLiBlind/image-20200922202435555.png" alt="image-20200922202435555"></p>
 <p><img src="/2020/09/22/bWAPP-SQLiBlind/image-20200922202448731.png" alt="image-20200922202448731"></p>
-<h3 id="mid-high"><a href="#mid-high" class="headerlink" title="mid/high"></a>mid/high</h3>]]></content>
+<h3 id="mid-high"><a href="#mid-high" class="headerlink" title="mid/high"></a>mid/high</h3><h1 id="宽字节注入"><a href="#宽字节注入" class="headerlink" title="宽字节注入"></a>宽字节注入</h1><h2 id="注入原理"><a href="#注入原理" class="headerlink" title="注入原理"></a>注入原理</h2><p>注入原理很简单, 就是编码, 一点一点分析:</p>
+<p>假设一个url有注入, 但是有安全函数, 我们敲单引号会被过滤，那么怎么办呢？这时候就利用GBK双字节注入</p>
+<p>我们在后边这么构造url一个尝试:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">http:&#x2F;&#x2F;www.****.com&#x2F;index.php?id&#x3D;1%df&#39; and 1&#x3D;1</span><br></pre></td></tr></table></figure>
+
+<p>其中,</p>
+<p><strong>%df ‘ 经过安全函数之后在 ‘ 之前会被加上一个转义符号’&#39;, 即: %df &#39;</strong></p>
+<p>由于采用的是url编码, 最后转化为:</p>
+<p><strong>%df%5c%27</strong></p>
+<p>关键就在这，%df会吃掉%5c，形成一个新的字节, 形象一点就是%df遇到%5c会把%5c吃掉，形成%df%5c，这个编码经过代码</p>
+<p>解码后会形成一个汉字“誠”</p>
+<p>还不明白? 没关系, 举一个简单的栗子:</p>
+<p>xi’an (西安) ==&gt; xian(先) </p>
+<p>值得一提的是, 并不是唯一的使用%df, <strong>只要编码超过ascii码(128)之后, 可以自己组合。只要是汉字就都可以使用</strong></p>
+<p><strong>总的来解释一下,</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">因为%df的关系，\的编码%5c被吃掉了，也就失去了转义的效果，即安全函数丧失了作用, 被直接带入到mysql中，然后mysql在解读时无视了%df%5c形成的新字节，那么单引号便重新发挥了效果, 就可以构造注入了。</span><br></pre></td></tr></table></figure>
+
+<p><a href="https://blog.csdn.net/angry_program/article/details/103860262" target="_blank" rel="noopener">宽字节注入</a></p>
+]]></content>
   </entry>
   <entry>
     <title>bWAPP-SQLiXML</title>
