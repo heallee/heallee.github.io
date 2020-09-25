@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="Xpath注入基本概念XPath是一种用来在内存中导航整个XML树的语言,它的设计初衷是作为一种面向XSLT和XPointer的语言,后来独立成了一种W3C标准 Xpath是xml路径语言，用于配置文件的查找。数据库就是xml文件。因此只要是利用XPath语法的Web 应用程序如果未对输入的XPath查询做严格的处理都会存在XPath注入漏洞。 基础语法节点类型   节点类型 名称    elem">
+<meta property="og:type" content="article">
+<meta property="og:title" content="bWAPP-XPathInjection">
+<meta property="og:url" content="http://yoursite.com/2020/09/23/bWAPP-XPathInjection/index.html">
+<meta property="og:site_name" content="Tansz">
+<meta property="og:description" content="Xpath注入基本概念XPath是一种用来在内存中导航整个XML树的语言,它的设计初衷是作为一种面向XSLT和XPointer的语言,后来独立成了一种W3C标准 Xpath是xml路径语言，用于配置文件的查找。数据库就是xml文件。因此只要是利用XPath语法的Web 应用程序如果未对输入的XPath查询做严格的处理都会存在XPath注入漏洞。 基础语法节点类型   节点类型 名称    elem">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yoursite.com/2020/09/23/bWAPP-XPathInjection/image-20200925224234017.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/23/bWAPP-XPathInjection/image-20200925225823929.png">
+<meta property="article:published_time" content="2020-09-23T14:43:27.463Z">
+<meta property="article:modified_time" content="2020-09-25T15:08:09.622Z">
+<meta property="article:author" content="Tansz">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/2020/09/23/bWAPP-XPathInjection/image-20200925224234017.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>bWAPP-XPathInjection</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" href="/2020/09/23/bWAPP-SQLIBlind2/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/09/23/bWAPP-XPathInjection/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/09/23/bWAPP-XPathInjection/&text=bWAPP-XPathInjection" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/09/23/bWAPP-XPathInjection/&title=bWAPP-XPathInjection" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/09/23/bWAPP-XPathInjection/&is_video=false&description=bWAPP-XPathInjection" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=bWAPP-XPathInjection&body=Check out this article: http://yoursite.com/2020/09/23/bWAPP-XPathInjection/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/09/23/bWAPP-XPathInjection/&title=bWAPP-XPathInjection" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/09/23/bWAPP-XPathInjection/&title=bWAPP-XPathInjection" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/09/23/bWAPP-XPathInjection/&title=bWAPP-XPathInjection" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/09/23/bWAPP-XPathInjection/&title=bWAPP-XPathInjection" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/09/23/bWAPP-XPathInjection/&name=bWAPP-XPathInjection&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/09/23/bWAPP-XPathInjection/&t=bWAPP-XPathInjection" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Xpath注入"><span class="toc-number">1.</span> <span class="toc-text">Xpath注入</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#基本概念"><span class="toc-number">1.1.</span> <span class="toc-text">基本概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#基础语法"><span class="toc-number">1.2.</span> <span class="toc-text">基础语法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#节点类型"><span class="toc-number">1.3.</span> <span class="toc-text">节点类型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#语法规则"><span class="toc-number">1.3.1.</span> <span class="toc-text">语法规则</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#基本规则"><span class="toc-number">1.3.1.1.</span> <span class="toc-text">基本规则</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#常规语法"><span class="toc-number">1.3.2.</span> <span class="toc-text">常规语法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#限定语"><span class="toc-number">1.3.2.1.</span> <span class="toc-text">限定语</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#通配符"><span class="toc-number">1.3.2.2.</span> <span class="toc-text">通配符</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#选取多个路径"><span class="toc-number">1.3.2.3.</span> <span class="toc-text">选取多个路径</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#xpath函数"><span class="toc-number">1.3.2.4.</span> <span class="toc-text">xpath函数</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#xpath注入原理"><span class="toc-number">1.4.</span> <span class="toc-text">xpath注入原理</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#演练"><span class="toc-number">2.</span> <span class="toc-text">演练</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#XPath-Injection-Login-Form"><span class="toc-number">2.1.</span> <span class="toc-text">XPath Injection (Login Form)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#代码分析"><span class="toc-number">2.1.1.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#low"><span class="toc-number">2.1.2.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mid-high"><span class="toc-number">2.1.3.</span> <span class="toc-text">mid&#x2F;high</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#XPath-Injection-Search"><span class="toc-number">2.2.</span> <span class="toc-text">XPath Injection (Search)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#代码分析-1"><span class="toc-number">2.2.1.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#low-1"><span class="toc-number">2.2.2.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mid-high-1"><span class="toc-number">2.2.3.</span> <span class="toc-text">mid&#x2F;high</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#XPath-工具"><span class="toc-number">3.</span> <span class="toc-text">XPath 工具</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        bWAPP-XPathInjection
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Tansz</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-09-23T14:43:27.463Z" itemprop="datePublished">2020-09-23</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="Xpath注入"><a href="#Xpath注入" class="headerlink" title="Xpath注入"></a>Xpath注入</h1><h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><p>XPath是一种用来在内存中导航整个XML树的语言,它的设计初衷是作为一种面向XSLT和XPointer的语言,后来独立成了一种W3C标准</p>
+<p>Xpath是xml路径语言，用于配置文件的查找。数据库就是xml文件。因此只要是利用XPath语法的Web 应用程序如果未对输入的XPath查询做严格的处理都会存在XPath注入漏洞。</p>
+<h2 id="基础语法"><a href="#基础语法" class="headerlink" title="基础语法"></a>基础语法</h2><h2 id="节点类型"><a href="#节点类型" class="headerlink" title="节点类型"></a>节点类型</h2><table>
+<thead>
+<tr>
+<th>节点类型</th>
+<th>名称</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>element</td>
+<td>元素</td>
+</tr>
+<tr>
+<td>attribute</td>
+<td>属性</td>
+</tr>
+<tr>
+<td>text</td>
+<td>文本</td>
+</tr>
+<tr>
+<td>namespace</td>
+<td>命名空间</td>
+</tr>
+<tr>
+<td>processing-instruction</td>
+<td>处理指令</td>
+</tr>
+<tr>
+<td>comment</td>
+<td>注释</td>
+</tr>
+<tr>
+<td>root</td>
+<td>根节点</td>
+</tr>
+</tbody></table>
+<h3 id="语法规则"><a href="#语法规则" class="headerlink" title="语法规则"></a>语法规则</h3><h4 id="基本规则"><a href="#基本规则" class="headerlink" title="基本规则"></a>基本规则</h4><table>
+<thead>
+<tr>
+<th>表达式</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>nodename</td>
+<td>选取此节点的所有子节点</td>
+</tr>
+<tr>
+<td>/</td>
+<td>从根节点选取</td>
+</tr>
+<tr>
+<td>//</td>
+<td>从匹配选择的当前节点选择文档中的节点，而不考虑它们的位置</td>
+</tr>
+<tr>
+<td>.</td>
+<td>选取当前节点</td>
+</tr>
+<tr>
+<td>..</td>
+<td>选取当前节点的父节点</td>
+</tr>
+<tr>
+<td>@</td>
+<td>选取属性或　@*：匹配任何属性节点</td>
+</tr>
+<tr>
+<td>*</td>
+<td>匹配任何元素节点</td>
+</tr>
+</tbody></table>
+<h3 id="常规语法"><a href="#常规语法" class="headerlink" title="常规语法"></a>常规语法</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="ISO-8859-1"?&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">bookstore</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">book</span>&gt;</span></span><br><span class="line"></span><br><span class="line">  <span class="tag">&lt;<span class="name">title</span> <span class="attr">lang</span>=<span class="string">"eng"</span>&gt;</span>Harry Potter<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"></span><br><span class="line">  <span class="tag">&lt;<span class="name">price</span>&gt;</span>29.99<span class="tag">&lt;/<span class="name">price</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">book</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">book</span>&gt;</span></span><br><span class="line"></span><br><span class="line">  <span class="tag">&lt;<span class="name">title</span> <span class="attr">lang</span>=<span class="string">"eng"</span>&gt;</span>Learning XML<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"></span><br><span class="line">  <span class="tag">&lt;<span class="name">price</span>&gt;</span>39.95<span class="tag">&lt;/<span class="name">price</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">book</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">bookstore</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>表达式</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>bookstore</td>
+<td>选取 bookstore 元素的所有子节点</td>
+</tr>
+<tr>
+<td>/bookstore</td>
+<td>选取根元素 bookstore</td>
+</tr>
+<tr>
+<td>bookstore/book</td>
+<td>选取属于 bookstore 的子元素的所有 book 元素</td>
+</tr>
+<tr>
+<td>//book</td>
+<td>选取所有 book 子元素,而不管它们在文档中的位置</td>
+</tr>
+<tr>
+<td>bookstore//book</td>
+<td>选择属于 bookstore 元素的后代的所有 book 元素,而不管它们位于 bookstore 之下的什么位置</td>
+</tr>
+<tr>
+<td>//@lang</td>
+<td>选取名为 lang 的所有属性</td>
+</tr>
+</tbody></table>
+<h4 id="限定语"><a href="#限定语" class="headerlink" title="限定语"></a>限定语</h4><p>限定语是对路径表达式的附加条件,用来查找某个特定的节点或者包含某个指定的值的节点.限定语被嵌在方括号中.</p>
+<p>路径表达式结果：</p>
+<table>
+<thead>
+<tr>
+<th>表达式</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>/bookstore/book[1]</td>
+<td>选取属于 bookstore 子元素的第一个 book 元素</td>
+</tr>
+<tr>
+<td>/bookstore/book[last()]</td>
+<td>选取属于 bookstore 子元素的最后一个 book 元素</td>
+</tr>
+<tr>
+<td>//title[@lang]</td>
+<td>选取所有拥有名为 lang 的属性的 title 元素</td>
+</tr>
+<tr>
+<td>//title[@lang=’eng’]</td>
+<td>选取所有 title 元素，且这些元素拥有值为 eng 的 lang 属性</td>
+</tr>
+<tr>
+<td>/bookstore/book[price&gt;35.00]/title</td>
+<td>选取 bookstore 元素中的 book 元素的所有 title 元素，且其中的 price 元素的值须大于 35.00</td>
+</tr>
+</tbody></table>
+<h4 id="通配符"><a href="#通配符" class="headerlink" title="通配符"></a>通配符</h4><table>
+<thead>
+<tr>
+<th>通配符</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>*</td>
+<td>匹配任何元素节点</td>
+</tr>
+<tr>
+<td>@*</td>
+<td>匹配任何属性节点</td>
+</tr>
+<tr>
+<td>node()</td>
+<td>匹配任何类型的节点</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>表达式</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>/bookstore/*</td>
+<td>选取 bookstore 元素的所有子元素</td>
+</tr>
+<tr>
+<td>//*</td>
+<td>选取文档中的所有元素</td>
+</tr>
+<tr>
+<td>//title[@*]</td>
+<td>选取所有带有属性的 title 元素</td>
+</tr>
+</tbody></table>
+<h4 id="选取多个路径"><a href="#选取多个路径" class="headerlink" title="选取多个路径"></a>选取多个路径</h4><table>
+<thead>
+<tr>
+<th>表达式</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>//book/title | //book/price</td>
+<td>选取 book 元素的所有 title 和 price 元素</td>
+</tr>
+<tr>
+<td>bookstore/book/title | //price</td>
+<td>选取属于 bookstore 元素的 book 元素的所有 title 元素，以及文档中所有的 price 元素</td>
+</tr>
+</tbody></table>
+<h4 id="xpath函数"><a href="#xpath函数" class="headerlink" title="xpath函数"></a>xpath函数</h4><p><a href="https://www.runoob.com/xpath/xpath-functions.html" target="_blank" rel="noopener">XPath函数</a></p>
+<h2 id="xpath注入原理"><a href="#xpath注入原理" class="headerlink" title="xpath注入原理"></a>xpath注入原理</h2><p>xpath注入的原理其实和sql注入很像， XPath注入攻击主要是通过构建特殊的输入，这些输入往往是XPath语法中的一些组合，这些输入将作为参数传入Web 应用程序，<strong>通过执行XPath查询而执行入侵者想要的操作，但是，注入的对象不是数据库users表了，而是一个存储数据的XML文件</strong>。攻击者可以获取 XML 数据的组织结构，或者访问在正常情况下不允许访问的数据，如果 XML 数据被用于用户认证，那么攻击者就可以提升他的权限。因为xpath不存在访问控制，所以我们不会遇到许多在SQL注入中经常遇到的访问限制。XML 中没有访问控制或者用户认证，如果用户有权限使用 XPath 查询，并且之间没有防御系统或者查询语句没有被防御系统过滤，那么用户就能够访问整个 XML 文档。<strong>注入出现的位置也就是cookie，headers，request parameters/input等</strong></p>
+<p><a href="https://blog.csdn.net/quiet_girl/article/details/50588130" target="_blank" rel="noopener">XPath注入攻击</a></p>
+<p><a href="https://www.cnblogs.com/backlion/p/8554749.html" target="_blank" rel="noopener">xpath注入详解</a></p>
+<h1 id="演练"><a href="#演练" class="headerlink" title="演练"></a>演练</h1><h2 id="XPath-Injection-Login-Form"><a href="#XPath-Injection-Login-Form" class="headerlink" title="XPath Injection (Login Form)"></a>XPath Injection (Login Form)</h2><h3 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>($_REQUEST[<span class="string">"login"</span>]) &amp; <span class="keyword">isset</span>($_REQUEST[<span class="string">"password"</span>]))</span><br><span class="line">&#123;</span><br><span class="line"></span><br><span class="line">    $login = $_REQUEST[<span class="string">"login"</span>];</span><br><span class="line">    $login = xmli($login);</span><br><span class="line">    $password = $_REQUEST[<span class="string">"password"</span>];</span><br><span class="line">    $password = xmli($password);</span><br><span class="line">    <span class="comment">// Loads the XML file</span></span><br><span class="line">    $xml = simplexml_load_file(<span class="string">"passwords/heroes.xml"</span>);</span><br><span class="line">    <span class="comment">// XPath search</span></span><br><span class="line">    $result = $xml-&gt;xpath(<span class="string">"/heroes/hero[login='"</span> . $login . <span class="string">"' and password='"</span> . $password . <span class="string">"']"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>故只需对·<code>/heroes/hero[login=&#39;&quot; . $login . &quot;&#39; and password=&#39;&quot; . $password . &quot;&#39;]</code>进行适当闭合即可</p>
+<h3 id="low"><a href="#low" class="headerlink" title="low"></a>low</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">' or 1=1 or '</span><br><span class="line">a</span><br><span class="line"></span><br><span class="line">// /heroes/hero[login='' or 1=1 or '' and password='a']</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/23/bWAPP-XPathInjection/image-20200925224234017.png" alt="image-20200925224234017"></p>
+<h3 id="mid-high"><a href="#mid-high" class="headerlink" title="mid/high"></a>mid/high</h3><p>对 <code>( ) = &#39; [ ] : , * / WHITESPACE</code>危险字符进行过滤，无法绕过</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">xmli_check_1</span><span class="params">($data)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Replaces dangerous characters: ( ) = ' [ ] : , * / WHITESPACE</span></span><br><span class="line">    $input = str_replace(<span class="string">"("</span>, <span class="string">""</span>, $data);</span><br><span class="line">    $input = str_replace(<span class="string">")"</span>, <span class="string">""</span>, $input);</span><br><span class="line">    $input = str_replace(<span class="string">"="</span>, <span class="string">""</span>, $input);</span><br><span class="line">    $input = str_replace(<span class="string">"'"</span>, <span class="string">""</span>, $input);</span><br><span class="line">    $input = str_replace(<span class="string">"["</span>, <span class="string">""</span>, $input);</span><br><span class="line">    $input = str_replace(<span class="string">"]"</span>, <span class="string">""</span>, $input);</span><br><span class="line">    $input = str_replace(<span class="string">":"</span>, <span class="string">""</span>, $input);</span><br><span class="line">    $input = str_replace(<span class="string">","</span>, <span class="string">""</span>, $input);</span><br><span class="line">    $input = str_replace(<span class="string">"*"</span>, <span class="string">""</span>, $input);</span><br><span class="line">    $input = str_replace(<span class="string">"/"</span>, <span class="string">""</span>, $input);</span><br><span class="line">    $input = str_replace(<span class="string">" "</span>, <span class="string">""</span>, $input);</span><br><span class="line">   </span><br><span class="line">    <span class="keyword">return</span> $input;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="XPath-Injection-Search"><a href="#XPath-Injection-Search" class="headerlink" title="XPath Injection (Search)"></a>XPath Injection (Search)</h2><h3 id="代码分析-1"><a href="#代码分析-1" class="headerlink" title="代码分析"></a>代码分析</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$result = $xml-&gt;xpath(<span class="string">"//hero[contains(genre, '$genre')]/movie"</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="low-1"><a href="#low-1" class="headerlink" title="low"></a>low</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">action')] | //* | //*[('&amp;action=search</span><br><span class="line"></span><br><span class="line">//  /hero[contains(genre, 'action')] | //* | //*[('')]/movie"</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/23/bWAPP-XPathInjection/image-20200925225823929.png" alt="image-20200925225823929"></p>
+<h3 id="mid-high-1"><a href="#mid-high-1" class="headerlink" title="mid/high"></a>mid/high</h3><p>对 <code>( ) = &#39; [ ] : , * / WHITESPACE</code>危险字符进行过滤，无法绕过</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">xmli_check_1</span><span class="params">($data)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Replaces dangerous characters: ( ) = ' [ ] : , * / WHITESPACE</span></span><br><span class="line">    $input = str_replace(<span class="string">"("</span>, <span class="string">""</span>, $data);</span><br><span class="line">    $input = str_replace(<span class="string">")"</span>, <span class="string">""</span>, $input);</span><br><span class="line">    $input = str_replace(<span class="string">"="</span>, <span class="string">""</span>, $input);</span><br><span class="line">    $input = str_replace(<span class="string">"'"</span>, <span class="string">""</span>, $input);</span><br><span class="line">    $input = str_replace(<span class="string">"["</span>, <span class="string">""</span>, $input);</span><br><span class="line">    $input = str_replace(<span class="string">"]"</span>, <span class="string">""</span>, $input);</span><br><span class="line">    $input = str_replace(<span class="string">":"</span>, <span class="string">""</span>, $input);</span><br><span class="line">    $input = str_replace(<span class="string">","</span>, <span class="string">""</span>, $input);</span><br><span class="line">    $input = str_replace(<span class="string">"*"</span>, <span class="string">""</span>, $input);</span><br><span class="line">    $input = str_replace(<span class="string">"/"</span>, <span class="string">""</span>, $input);</span><br><span class="line">    $input = str_replace(<span class="string">" "</span>, <span class="string">""</span>, $input);</span><br><span class="line">   </span><br><span class="line">    <span class="keyword">return</span> $input;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="XPath-工具"><a href="#XPath-工具" class="headerlink" title="XPath 工具"></a>XPath 工具</h1><p><a href="https://getfirebug.com/" target="_blank" rel="noopener">Firebug</a></p>
+<p><a href="https://github.com/orf/xcat" target="_blank" rel="noopener">xcat</a></p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Xpath注入"><span class="toc-number">1.</span> <span class="toc-text">Xpath注入</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#基本概念"><span class="toc-number">1.1.</span> <span class="toc-text">基本概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#基础语法"><span class="toc-number">1.2.</span> <span class="toc-text">基础语法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#节点类型"><span class="toc-number">1.3.</span> <span class="toc-text">节点类型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#语法规则"><span class="toc-number">1.3.1.</span> <span class="toc-text">语法规则</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#基本规则"><span class="toc-number">1.3.1.1.</span> <span class="toc-text">基本规则</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#常规语法"><span class="toc-number">1.3.2.</span> <span class="toc-text">常规语法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#限定语"><span class="toc-number">1.3.2.1.</span> <span class="toc-text">限定语</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#通配符"><span class="toc-number">1.3.2.2.</span> <span class="toc-text">通配符</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#选取多个路径"><span class="toc-number">1.3.2.3.</span> <span class="toc-text">选取多个路径</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#xpath函数"><span class="toc-number">1.3.2.4.</span> <span class="toc-text">xpath函数</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#xpath注入原理"><span class="toc-number">1.4.</span> <span class="toc-text">xpath注入原理</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#演练"><span class="toc-number">2.</span> <span class="toc-text">演练</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#XPath-Injection-Login-Form"><span class="toc-number">2.1.</span> <span class="toc-text">XPath Injection (Login Form)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#代码分析"><span class="toc-number">2.1.1.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#low"><span class="toc-number">2.1.2.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mid-high"><span class="toc-number">2.1.3.</span> <span class="toc-text">mid&#x2F;high</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#XPath-Injection-Search"><span class="toc-number">2.2.</span> <span class="toc-text">XPath Injection (Search)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#代码分析-1"><span class="toc-number">2.2.1.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#low-1"><span class="toc-number">2.2.2.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#mid-high-1"><span class="toc-number">2.2.3.</span> <span class="toc-text">mid&#x2F;high</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#XPath-工具"><span class="toc-number">3.</span> <span class="toc-text">XPath 工具</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/09/23/bWAPP-XPathInjection/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/09/23/bWAPP-XPathInjection/&text=bWAPP-XPathInjection" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/09/23/bWAPP-XPathInjection/&title=bWAPP-XPathInjection" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/09/23/bWAPP-XPathInjection/&is_video=false&description=bWAPP-XPathInjection" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=bWAPP-XPathInjection&body=Check out this article: http://yoursite.com/2020/09/23/bWAPP-XPathInjection/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/09/23/bWAPP-XPathInjection/&title=bWAPP-XPathInjection" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/09/23/bWAPP-XPathInjection/&title=bWAPP-XPathInjection" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/09/23/bWAPP-XPathInjection/&title=bWAPP-XPathInjection" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/09/23/bWAPP-XPathInjection/&title=bWAPP-XPathInjection" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/09/23/bWAPP-XPathInjection/&name=bWAPP-XPathInjection&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/09/23/bWAPP-XPathInjection/&t=bWAPP-XPathInjection" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    1970-2020
+    Tansz
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>
