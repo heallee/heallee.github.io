@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="Sqlmap常规使用基本参数常规   参数 解释    -h,–help 显示基本帮助信息并退出   –version 显示程序版本信息并退出   -u ，–url 目标URL（get请求注入，直接使用该参数）   -r REQUESTFILE 一个文本文件中获取HTTP请求，这样就可以跳过设置一些其他参数（比如cookie，POST数据，等等），请求是HTTPS的时需要配合这个–force-ss">
+<meta property="og:type" content="article">
+<meta property="og:title" content="bWAPP-sqlmap">
+<meta property="og:url" content="http://yoursite.com/2020/09/26/bWAPP-sqlmap/index.html">
+<meta property="og:site_name" content="Tansz">
+<meta property="og:description" content="Sqlmap常规使用基本参数常规   参数 解释    -h,–help 显示基本帮助信息并退出   –version 显示程序版本信息并退出   -u ，–url 目标URL（get请求注入，直接使用该参数）   -r REQUESTFILE 一个文本文件中获取HTTP请求，这样就可以跳过设置一些其他参数（比如cookie，POST数据，等等），请求是HTTPS的时需要配合这个–force-ss">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-09-26T12:42:14.705Z">
+<meta property="article:modified_time" content="2020-09-27T05:34:01.786Z">
+<meta property="article:author" content="Tansz">
+<meta name="twitter:card" content="summary">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>bWAPP-sqlmap</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2020/09/27/SQLPrivilgeEscalation/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2020/09/23/bWAPP-XPathInjection/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/09/26/bWAPP-sqlmap/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/09/26/bWAPP-sqlmap/&text=bWAPP-sqlmap" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/09/26/bWAPP-sqlmap/&title=bWAPP-sqlmap" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/09/26/bWAPP-sqlmap/&is_video=false&description=bWAPP-sqlmap" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=bWAPP-sqlmap&body=Check out this article: http://yoursite.com/2020/09/26/bWAPP-sqlmap/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/09/26/bWAPP-sqlmap/&title=bWAPP-sqlmap" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/09/26/bWAPP-sqlmap/&title=bWAPP-sqlmap" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/09/26/bWAPP-sqlmap/&title=bWAPP-sqlmap" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/09/26/bWAPP-sqlmap/&title=bWAPP-sqlmap" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/09/26/bWAPP-sqlmap/&name=bWAPP-sqlmap&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/09/26/bWAPP-sqlmap/&t=bWAPP-sqlmap" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Sqlmap常规使用"><span class="toc-number">1.</span> <span class="toc-text">Sqlmap常规使用</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#基本参数"><span class="toc-number">1.1.</span> <span class="toc-text">基本参数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#常规"><span class="toc-number">1.1.1.</span> <span class="toc-text">常规</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#优化"><span class="toc-number">1.1.2.</span> <span class="toc-text">优化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#枚举"><span class="toc-number">1.1.3.</span> <span class="toc-text">枚举</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#操作系统访问"><span class="toc-number">1.1.4.</span> <span class="toc-text">操作系统访问</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Windows注册表访问"><span class="toc-number">1.1.5.</span> <span class="toc-text">Windows注册表访问</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#脚本"><span class="toc-number">1.1.6.</span> <span class="toc-text">脚本</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#常规用法"><span class="toc-number">1.2.</span> <span class="toc-text">常规用法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#GET注入"><span class="toc-number">1.2.1.</span> <span class="toc-text">GET注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#POST注入"><span class="toc-number">1.2.2.</span> <span class="toc-text">POST注入</span></a></li></ol></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        bWAPP-sqlmap
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Tansz</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-09-26T12:42:14.705Z" itemprop="datePublished">2020-09-26</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="Sqlmap常规使用"><a href="#Sqlmap常规使用" class="headerlink" title="Sqlmap常规使用"></a>Sqlmap常规使用</h1><h2 id="基本参数"><a href="#基本参数" class="headerlink" title="基本参数"></a>基本参数</h2><h3 id="常规"><a href="#常规" class="headerlink" title="常规"></a>常规</h3><table>
+<thead>
+<tr>
+<th>参数</th>
+<th align="left">解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>-h,–help</td>
+<td align="left">显示基本帮助信息并退出</td>
+</tr>
+<tr>
+<td>–version</td>
+<td align="left">显示程序版本信息并退出</td>
+</tr>
+<tr>
+<td>-u ，–url</td>
+<td align="left">目标URL（get请求注入，直接使用该参数）</td>
+</tr>
+<tr>
+<td>-r REQUESTFILE</td>
+<td align="left">一个文本文件中获取HTTP请求，这样就可以跳过设置一些其他参数（比如cookie，POST数据，等等），请求是HTTPS的时需要配合这个–force-ssl参数来使用，或者可以在Host头后门加上:443</td>
+</tr>
+<tr>
+<td>–cookie=COOKIE</td>
+<td align="left">HTTP Cookieheader 值</td>
+</tr>
+<tr>
+<td>–user-agent=AGENT</td>
+<td align="left">设置HTTP请求头，同时也可以使用–random-agent参数来随机的从./txt/user-agents.txt中获取。当–level参数设定为3或者3以上的时候，会尝试对User-Angent进行注入</td>
+</tr>
+<tr>
+<td>–referer=REFERER</td>
+<td align="left">在请求中伪造HTTP中的referer，当–level参数设定为3或者3以上的时候会尝试对referer注入</td>
+</tr>
+<tr>
+<td>–headers=HEADERS</td>
+<td align="left">可以通过–headers参数来增加额外的http头</td>
+</tr>
+<tr>
+<td>–delay=DELAY</td>
+<td align="left">可以设定两个HTTP(S)请求间的延迟，设定为0.5的时候是半秒，默认是没有延迟的</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>-f, –fingerprint</td>
+<td>执行广泛的DBMS版本指纹检查</td>
+</tr>
+<tr>
+<td>–mobile</td>
+<td>设定一个手机的User-Agent来模仿手机登陆</td>
+</tr>
+<tr>
+<td>–level=LEVEL</td>
+<td>执行测试的等级（1-5，默认为1）</td>
+</tr>
+<tr>
+<td>–string=STRING</td>
+<td>查询时有效时在页面匹配字符串</td>
+</tr>
+</tbody></table>
+<h3 id="优化"><a href="#优化" class="headerlink" title="优化"></a>优化</h3><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>-o</td>
+<td>打开所有的优化开关</td>
+</tr>
+<tr>
+<td>–predict-output</td>
+<td>预测普通查询输出</td>
+</tr>
+<tr>
+<td>–keep-alive</td>
+<td>使用持久HTTP（S）连接</td>
+</tr>
+<tr>
+<td>–null-connection</td>
+<td>获取页面长度</td>
+</tr>
+<tr>
+<td>–threads=THREADS</td>
+<td>当前http(s)最大请求数 (默认 1)</td>
+</tr>
+<tr>
+<td>–timeout=TIMEOUT</td>
+<td>可以设定一个HTTP(S)请求超过多久判定为超时，10表示10秒，默认是30秒。</td>
+</tr>
+<tr>
+<td>–retries=RETRIES</td>
+<td>当HTTP(S)超时时，可以设定重新尝试连接次数，默认是3次。</td>
+</tr>
+<tr>
+<td>–regexp=REGEXP</td>
+<td>查询时有效时在页面匹配正则表达式</td>
+</tr>
+</tbody></table>
+<h3 id="枚举"><a href="#枚举" class="headerlink" title="枚举"></a>枚举</h3><table>
+<thead>
+<tr>
+<th align="left">参数</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">-a, –all</td>
+<td>获取所有信息</td>
+</tr>
+<tr>
+<td align="left">-b, –banner</td>
+<td>获取数据库管理系统的标识</td>
+</tr>
+<tr>
+<td align="left">–current-user</td>
+<td>获取数据库管理系统当前用户</td>
+</tr>
+<tr>
+<td align="left">–privileges</td>
+<td>枚举数据库管理系统用户的权限</td>
+</tr>
+<tr>
+<td align="left">–hostname</td>
+<td>获取数据库服务器的主机名称</td>
+</tr>
+<tr>
+<td align="left">–is-dba</td>
+<td>检测DBMS当前用户是否DBA</td>
+</tr>
+<tr>
+<td align="left">–passwords</td>
+<td>枚举数据库管理系统用户密码哈希</td>
+</tr>
+<tr>
+<td align="left">–dump</td>
+<td>转储数据库表项</td>
+</tr>
+<tr>
+<td align="left">–count</td>
+<td>检索表的项目数</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>–dbs</td>
+<td>枚举数据库管理系统数据库</td>
+</tr>
+<tr>
+<td>-D DBName</td>
+<td>要进行枚举的指定数据库名</td>
+</tr>
+<tr>
+<td>–tables</td>
+<td>枚举的DBMS数据库中的表</td>
+</tr>
+<tr>
+<td>-T TableName</td>
+<td>DBMS数据库表枚举</td>
+</tr>
+<tr>
+<td>–columns</td>
+<td>枚举DBMS数据库表列</td>
+</tr>
+<tr>
+<td>-C ColumnName,ColumnName</td>
+<td>DBMS数据库表列枚举</td>
+</tr>
+</tbody></table>
+<h3 id="操作系统访问"><a href="#操作系统访问" class="headerlink" title="操作系统访问"></a>操作系统访问</h3><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>–os-cmd=OSCMD</td>
+<td>执行操作系统命令（OSCMD）</td>
+</tr>
+<tr>
+<td>–os-shell</td>
+<td>交互式的操作系统的shell</td>
+</tr>
+<tr>
+<td>–os-pwn</td>
+<td>获取一个OOB shell，meterpreter或VNC</td>
+</tr>
+<tr>
+<td>–os-smbrelay</td>
+<td>一键获取一个OOBshell，meterpreter或VNC</td>
+</tr>
+<tr>
+<td>–priv-esc</td>
+<td>数据库进程用户权限提升</td>
+</tr>
+</tbody></table>
+<h3 id="Windows注册表访问"><a href="#Windows注册表访问" class="headerlink" title="Windows注册表访问"></a>Windows注册表访问</h3><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>–reg-read</td>
+<td>读一个Windows注册表项值</td>
+</tr>
+<tr>
+<td>–reg-add</td>
+<td>写一个Windows注册表项值数据</td>
+</tr>
+<tr>
+<td>–reg-del</td>
+<td>删除Windows注册表键值</td>
+</tr>
+</tbody></table>
+<h3 id="脚本"><a href="#脚本" class="headerlink" title="脚本"></a>脚本</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">--tamper 脚本名称 脚本名称</span><br><span class="line"><span class="comment">#多个tamper脚本之间用空格隔开</span></span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>脚本名称</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>randomcomments.py</td>
+<td>用/**/分割sql关键字</td>
+</tr>
+<tr>
+<td>base64encode.py</td>
+<td>用base64编码替换</td>
+</tr>
+<tr>
+<td>apostrophenulencode.py</td>
+<td>绕过过滤双引号，替换字符和双引号</td>
+</tr>
+<tr>
+<td>between.py</td>
+<td>用between替换大于号（&gt;）</td>
+</tr>
+<tr>
+<td>randomcase.py</td>
+<td>随机大小写</td>
+</tr>
+<tr>
+<td>versionedmorekeywords.py</td>
+<td>注释绕过</td>
+</tr>
+<tr>
+<td>charencode.py</td>
+<td>url编码</td>
+</tr>
+<tr>
+<td>space2mssqlhash.py</td>
+<td>替换空格</td>
+</tr>
+<tr>
+<td>apostrophemask.py</td>
+<td>用utf8代替引号</td>
+</tr>
+</tbody></table>
+<p><a href="https://blog.csdn.net/qq_36374896/article/details/83658305?utm_medium=distribute.wap_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.wap_blog_relevant_no_pic&depth_1-utm_source=distribute.wap_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.wap_blog_relevant_no_pic" target="_blank" rel="noopener">sqlmap的常用tamper脚本</a></p>
+<p><a href="https://blog.csdn.net/whatday/article/details/54774043?utm_medium=distribute.pc_relevant.none-task-blog-title-3&spm=1001.2101.3001.4242" target="_blank" rel="noopener">sqlmap –tamper 绕过WAF脚本分类整理</a></p>
+<h2 id="常规用法"><a href="#常规用法" class="headerlink" title="常规用法"></a>常规用法</h2><h3 id="GET注入"><a href="#GET注入" class="headerlink" title="GET注入"></a>GET注入</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sqlmap -u URL --cookie=<span class="string">"COOKIE"</span> --banner --dbs --batch </span><br><span class="line"></span><br><span class="line"><span class="comment">#sqlmap -u URL --cookie="COOKIE" -D DatabaseName -T TableName -C ColumnName,ColumnName...  --dump --batch -o</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="POST注入"><a href="#POST注入" class="headerlink" title="POST注入"></a>POST注入</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sqlmap -u URL --data=<span class="string">"DATA"</span> --cookie=<span class="string">"COOKIE"</span> --banner --dbs --batch  -o</span><br><span class="line"></span><br><span class="line">sqlmap -r post.txt </span><br><span class="line"><span class="comment">#post.txt文件为提交抓包获取的数据包</span></span><br></pre></td></tr></table></figure>
+
+<p><a href="https://www.freebuf.com/sectool/164608.html" target="_blank" rel="noopener">Sqlmap攻略及技巧分享 </a></p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Sqlmap常规使用"><span class="toc-number">1.</span> <span class="toc-text">Sqlmap常规使用</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#基本参数"><span class="toc-number">1.1.</span> <span class="toc-text">基本参数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#常规"><span class="toc-number">1.1.1.</span> <span class="toc-text">常规</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#优化"><span class="toc-number">1.1.2.</span> <span class="toc-text">优化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#枚举"><span class="toc-number">1.1.3.</span> <span class="toc-text">枚举</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#操作系统访问"><span class="toc-number">1.1.4.</span> <span class="toc-text">操作系统访问</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Windows注册表访问"><span class="toc-number">1.1.5.</span> <span class="toc-text">Windows注册表访问</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#脚本"><span class="toc-number">1.1.6.</span> <span class="toc-text">脚本</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#常规用法"><span class="toc-number">1.2.</span> <span class="toc-text">常规用法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#GET注入"><span class="toc-number">1.2.1.</span> <span class="toc-text">GET注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#POST注入"><span class="toc-number">1.2.2.</span> <span class="toc-text">POST注入</span></a></li></ol></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/09/26/bWAPP-sqlmap/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/09/26/bWAPP-sqlmap/&text=bWAPP-sqlmap" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/09/26/bWAPP-sqlmap/&title=bWAPP-sqlmap" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/09/26/bWAPP-sqlmap/&is_video=false&description=bWAPP-sqlmap" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=bWAPP-sqlmap&body=Check out this article: http://yoursite.com/2020/09/26/bWAPP-sqlmap/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/09/26/bWAPP-sqlmap/&title=bWAPP-sqlmap" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/09/26/bWAPP-sqlmap/&title=bWAPP-sqlmap" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/09/26/bWAPP-sqlmap/&title=bWAPP-sqlmap" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/09/26/bWAPP-sqlmap/&title=bWAPP-sqlmap" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/09/26/bWAPP-sqlmap/&name=bWAPP-sqlmap&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/09/26/bWAPP-sqlmap/&t=bWAPP-sqlmap" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    1970-2020
+    Tansz
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>
