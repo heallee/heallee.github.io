@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="必读iptablesiptables概念iptables(包过滤防火墙,工作在TCP&#x2F;IP的2、3、4层)其实不是真正的防火墙，我们可以把它理解成一个客户端代理，用户通过iptables这个代理，将用户的安全设定执行到对应的”安全框架”中，这个”安全框架”才是真正的防火墙，这个框架的名字叫netfilter,netfilter才是防火墙真正的安全框架（framework），netfilter位于内">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iptables">
+<meta property="og:url" content="http://yoursite.com/2021/01/05/iptables/index.html">
+<meta property="og:site_name" content="Tansz">
+<meta property="og:description" content="必读iptablesiptables概念iptables(包过滤防火墙,工作在TCP&#x2F;IP的2、3、4层)其实不是真正的防火墙，我们可以把它理解成一个客户端代理，用户通过iptables这个代理，将用户的安全设定执行到对应的”安全框架”中，这个”安全框架”才是真正的防火墙，这个框架的名字叫netfilter,netfilter才是防火墙真正的安全框架（framework），netfilter位于内">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yoursite.com/2021/01/05/iptables/9.png">
+<meta property="article:published_time" content="2021-01-05T03:09:21.365Z">
+<meta property="article:modified_time" content="2021-01-05T11:30:43.387Z">
+<meta property="article:author" content="Tansz">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/2021/01/05/iptables/9.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>iptables</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" href="/2020/09/27/bWAPP-XSS/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2021/01/05/iptables/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2021/01/05/iptables/&text=iptables" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2021/01/05/iptables/&title=iptables" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2021/01/05/iptables/&is_video=false&description=iptables" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=iptables&body=Check out this article: http://yoursite.com/2021/01/05/iptables/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2021/01/05/iptables/&title=iptables" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2021/01/05/iptables/&title=iptables" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2021/01/05/iptables/&title=iptables" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2021/01/05/iptables/&title=iptables" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2021/01/05/iptables/&name=iptables&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2021/01/05/iptables/&t=iptables" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#必读iptables"><span class="toc-number">1.</span> <span class="toc-text">必读iptables</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#iptables概念"><span class="toc-number">2.</span> <span class="toc-text">iptables概念</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#结构"><span class="toc-number">2.1.</span> <span class="toc-text">结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4张表"><span class="toc-number">2.1.1.</span> <span class="toc-text">4张表</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5条链"><span class="toc-number">2.1.2.</span> <span class="toc-text">5条链</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#iptables常规操作"><span class="toc-number">3.</span> <span class="toc-text">iptables常规操作</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#查"><span class="toc-number">3.1.</span> <span class="toc-text">查</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#增"><span class="toc-number">3.2.</span> <span class="toc-text">增</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#删"><span class="toc-number">3.3.</span> <span class="toc-text">删</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#改"><span class="toc-number">3.4.</span> <span class="toc-text">改</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#保存规则"><span class="toc-number">3.5.</span> <span class="toc-text">保存规则</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#匹配条件"><span class="toc-number">3.6.</span> <span class="toc-text">匹配条件</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#基本匹配条件"><span class="toc-number">3.6.1.</span> <span class="toc-text">基本匹配条件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#扩展匹配条件"><span class="toc-number">3.6.2.</span> <span class="toc-text">扩展匹配条件</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#tcp扩展模块"><span class="toc-number">3.6.2.1.</span> <span class="toc-text">tcp扩展模块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#UCP扩展模块"><span class="toc-number">3.6.2.2.</span> <span class="toc-text">UCP扩展模块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#icmp扩展模块"><span class="toc-number">3.6.2.3.</span> <span class="toc-text">icmp扩展模块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#multiport扩展模块"><span class="toc-number">3.6.2.4.</span> <span class="toc-text">multiport扩展模块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#iprange扩展模块"><span class="toc-number">3.6.2.5.</span> <span class="toc-text">iprange扩展模块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#string模块"><span class="toc-number">3.6.2.6.</span> <span class="toc-text">string模块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#time模块"><span class="toc-number">3.6.2.7.</span> <span class="toc-text">time模块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#connlimit-模块"><span class="toc-number">3.6.2.8.</span> <span class="toc-text">connlimit 模块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#limit模块"><span class="toc-number">3.6.2.9.</span> <span class="toc-text">limit模块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#state模块"><span class="toc-number">3.6.2.10.</span> <span class="toc-text">state模块</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#白名单-黑名单"><span class="toc-number">4.</span> <span class="toc-text">白名单&#x2F;黑名单</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#null"><span class="toc-number">5.</span> <span class="toc-text"></span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#自定义链"><span class="toc-number">6.</span> <span class="toc-text">自定义链</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#创建自定义链"><span class="toc-number">6.1.</span> <span class="toc-text">创建自定义链</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#引用自定义链"><span class="toc-number">6.2.</span> <span class="toc-text">引用自定义链</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#重命名自定义链"><span class="toc-number">6.3.</span> <span class="toc-text">重命名自定义链</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#删除自定义链"><span class="toc-number">6.4.</span> <span class="toc-text">删除自定义链</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#iptables动作"><span class="toc-number">7.</span> <span class="toc-text">iptables动作</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#动作REJECT"><span class="toc-number">7.1.</span> <span class="toc-text">动作REJECT</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#动作LOG"><span class="toc-number">7.2.</span> <span class="toc-text">动作LOG</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#动作SNAT"><span class="toc-number">7.3.</span> <span class="toc-text">动作SNAT</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#动作DNAT"><span class="toc-number">7.4.</span> <span class="toc-text">动作DNAT</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#动作MASQUERADE"><span class="toc-number">7.5.</span> <span class="toc-text">动作MASQUERADE</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#动作REDIRECT"><span class="toc-number">7.6.</span> <span class="toc-text">动作REDIRECT</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#iptables配置技巧"><span class="toc-number">8.</span> <span class="toc-text">iptables配置技巧</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        iptables
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Tansz</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2021-01-05T03:09:21.365Z" itemprop="datePublished">2021-01-05</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="必读iptables"><a href="#必读iptables" class="headerlink" title="必读iptables"></a>必读<a href="https://www.zsythink.net/archives/1199" target="_blank" rel="noopener">iptables</a></h1><h1 id="iptables概念"><a href="#iptables概念" class="headerlink" title="iptables概念"></a>iptables概念</h1><p><strong>iptables</strong>(<strong>包过滤防火墙,工作在TCP/IP的2、3、4层</strong>)其实不是真正的防火墙，我们可以把它理解成一个客户端代理，用户通过iptables这个代理，将用户的安全设定执行到对应的”安全框架”中，这个”安全框架”才是真正的防火墙，这个框架的名字叫<strong>netfilter</strong>,netfilter才是防火墙真正的安全框架（framework），netfilter位于内核空间iptables其实是一个命令行工具，位于用户空间，我们用这个工具操作真正的框架。</p>
+<h2 id="结构"><a href="#结构" class="headerlink" title="结构"></a>结构</h2><h3 id="4张表"><a href="#4张表" class="headerlink" title="4张表"></a>4张表</h3><table>
+<thead>
+<tr>
+<th>filter表</th>
+<th>负责过滤功能，防火墙；内核模块：iptables_filter</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>nat表</td>
+<td>network address translation，网络地址转换功能；内核模块：iptable_nat</td>
+</tr>
+<tr>
+<td>mangle表</td>
+<td>拆解报文，做出修改，并重新封装 的功能；iptable_mangle</td>
+</tr>
+<tr>
+<td>raw表</td>
+<td>关闭nat表上启用的连接追踪机制；iptable_raw</td>
+</tr>
+</tbody></table>
+<h3 id="5条链"><a href="#5条链" class="headerlink" title="5条链"></a>5条链</h3><p>INPUT、OUTPUT、FORWARD、POSTROUTING、PREROUTING</p>
+<p>优先级次序（由高而低）：raw –&gt; mangle –&gt; nat –&gt; filter</p>
+<table>
+<thead>
+<tr>
+<th>raw 表中的规则可以被哪些链使用</th>
+<th>PREROUTING，OUTPUT</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>mangle  表中的规则可以被哪些链使用</td>
+<td>PREROUTING，INPUT，FORWARD，OUTPUT，POSTROUTING</td>
+</tr>
+<tr>
+<td>nat   表中的规则可以被哪些链使用</td>
+<td>PREROUTING，OUTPUT，POSTROUTING（centos7中还有INPUT，centos6中没有）</td>
+</tr>
+<tr>
+<td>filter  表中的规则可以被哪些链使用</td>
+<td>INPUT，FORWARD，OUTPUT</td>
+</tr>
+</tbody></table>
+<p><img src="/2021/01/05/iptables/9.png" alt="t"></p>
+<h1 id="iptables常规操作"><a href="#iptables常规操作" class="headerlink" title="iptables常规操作"></a>iptables常规操作</h1><h2 id="查"><a href="#查" class="headerlink" title="查"></a>查</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">iptables --line -t 表名 -nvxL [链名]</span><br><span class="line"><span class="meta">#</span><span class="bash">省略<span class="string">"-t 表名"</span>时，默认表示操作filter表</span></span><br><span class="line"><span class="meta">#</span><span class="bash">-L     表示列出规则</span></span><br><span class="line"><span class="meta">#</span><span class="bash">-v     表示verbose，表示详细的，冗长的</span></span><br><span class="line"><span class="meta">#</span><span class="bash">--line 显示规则的序号</span></span><br><span class="line"><span class="meta">#</span><span class="bash">-n     表示不解析IP地址</span></span><br><span class="line"><span class="meta">#</span><span class="bash">-x		表示显示计数器的精确值</span></span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>pkts</th>
+<th>对应规则匹配到的报文的个数。</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>bytes</strong></td>
+<td>对应匹配到的报文包的大小总和</td>
+</tr>
+<tr>
+<td><strong>target</strong></td>
+<td>规则对应的target，往往表示规则对应的”动作”，即规则匹配成功后需要采取的措施。</td>
+</tr>
+<tr>
+<td><strong>prot</strong></td>
+<td>表示规则对应的协议，是否只针对某些协议应用此规则。</td>
+</tr>
+<tr>
+<td><strong>opt</strong></td>
+<td>表示规则对应的选项。</td>
+</tr>
+<tr>
+<td><strong>in</strong></td>
+<td>表示数据包由哪个接口(网卡)流入，我们可以设置通过哪块网卡流入的报文需要匹配当前规则</td>
+</tr>
+<tr>
+<td><strong>out</strong></td>
+<td>表示数据包由哪个接口(网卡)流出，我们可以设置通过哪块网卡流出的报文需要匹配当前规则。</td>
+</tr>
+<tr>
+<td><strong>source</strong></td>
+<td>表示规则对应的源头地址，可以是一个IP，也可以是一个网段。</td>
+</tr>
+<tr>
+<td><strong>destination</strong></td>
+<td>表示规则对应的目标地址。可以是一个IP，也可以是一个网段</td>
+</tr>
+</tbody></table>
+<h2 id="增"><a href="#增" class="headerlink" title="增"></a>增</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">iptables -t 表名 -A 链名 匹配条件 -j 动作</span><br><span class="line"><span class="meta">#</span><span class="bash">-A			选项表示在对应链的末尾添加规则[-I  表示在对应链的头部添加规则]</span></span><br><span class="line">iptables -t 表名 -I 链名 规则序号 匹配条件 -j 动作</span><br><span class="line"><span class="meta">#</span><span class="bash">规则序号	  在指定表的指定链的指定位置添加一条规则</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="删"><a href="#删" class="headerlink" title="删"></a>删</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">iptables -t 表名 -D 链名 规则序号</span><br><span class="line"><span class="meta">#</span><span class="bash">删除指定表的指定链的指定规则 [通过规则序号匹配删除]</span></span><br><span class="line">iptables -t 表名 -D 链名 匹配条件 -j 动作</span><br><span class="line"><span class="meta">#</span><span class="bash">通过匹配条件和匹配动作删除</span></span><br><span class="line">iptables -t 表名 -F 链名</span><br><span class="line"><span class="meta">#</span><span class="bash">删除指定表的指定链中的所有规则</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="改"><a href="#改" class="headerlink" title="改"></a>改</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">iptables -t 表名 -R 链名 规则序号 规则原本的匹配条件 -j 动作</span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -t filter -R INPUT 3 -s 192.168.1.146 -j ACCEPT</span></span><br><span class="line"><span class="meta">#</span><span class="bash">修改filter表中INPUT链的第3条规则，将这条规则的动作修改为ACCEPT， -s 192.168.1.146为这条规则中原本的匹配条件，如果省略此匹配条件，修改后的规则中的源地址可能会变为0.0.0.0/0。</span></span><br><span class="line"></span><br><span class="line">iptables -t 表名 -P 链名 动作</span><br><span class="line"><span class="meta">#</span><span class="bash">指定表的指定链的默认策略（默认动作），并非添加规则。</span></span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -t filter -P FORWARD ACCEPT</span></span><br><span class="line"><span class="meta">#</span><span class="bash">将filter表中FORWARD链的默认策略设置为ACCEPT</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="保存规则"><a href="#保存规则" class="headerlink" title="保存规则"></a>保存规则</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">service iptables save</span><br><span class="line"><span class="meta">#</span><span class="bash">centos7</span></span><br><span class="line">iptables-save &gt; /etc/sysconfig/iptables</span><br><span class="line"><span class="meta">#</span><span class="bash">从指定的文件载入规则，注意：重载规则时，文件中的规则将会覆盖现有规则</span></span><br><span class="line">iptables-restore &lt; /etc/sysconfig/iptables</span><br></pre></td></tr></table></figure>
+
+<h2 id="匹配条件"><a href="#匹配条件" class="headerlink" title="匹配条件"></a>匹配条件</h2><p>iptables -t 表名 -A 链名 规则序号 <strong>匹配条件</strong> -j 动作</p>
+<h3 id="基本匹配条件"><a href="#基本匹配条件" class="headerlink" title="基本匹配条件"></a>基本匹配条件</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">iptables -t 表名 -I 链名  -p 协议 ! -s 报文的源地址 -d 报文目的地址 -i 入网卡 -o 出网卡 -j 动作</span><br><span class="line"><span class="meta">#</span><span class="bash"> ! 取反匹配</span></span><br><span class="line"><span class="meta">#</span><span class="bash">-p 协议匹配[tcp/udp/icmp]</span></span><br><span class="line"><span class="meta">#</span><span class="bash">-s 用于匹配报文的源地址,可以同时指定多个源地址，每个IP之间用逗号隔开，也可以指定为一个网段。</span></span><br><span class="line"><span class="meta">#</span><span class="bash">-i	用于匹配报文是从哪个网卡接口流入本机的，由于匹配条件只是用于匹配报文流入的网卡，所以在OUTPUT链与POSTROUTING链中不能使用此选项。</span></span><br><span class="line"><span class="meta">#</span><span class="bash">-o用于匹配报文将要从哪个网卡接口流出本机，于匹配条件只是用于匹配报文流出的网卡，所以在INPUT链与PREROUTING链中不能使用此选项。</span></span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -t filter -I INPUT -p tcp ! -s 192.168.80.1,192.168.80.2 -d 192.168.80.3 -i eth0  -j ACCEPT</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="扩展匹配条件"><a href="#扩展匹配条件" class="headerlink" title="扩展匹配条件"></a>扩展匹配条件</h3><h4 id="tcp扩展模块"><a href="#tcp扩展模块" class="headerlink" title="tcp扩展模块"></a>tcp扩展模块</h4><p>只对TCP协议报文进行端口匹配</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">-p tcp -m tcp --sport 用于匹配tcp协议报文的源端口，可以使用冒号指定一个连续的端口范围</span><br><span class="line">-p tcp -m tcp --dport 用于匹配tcp协议报文的目标端口，可以使用冒号指定一个连续的端口范围</span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -t filter -I OUTPUT -d 192.168.1.146 -p tcp -m tcp --sport 22:33 -j REJECT</span></span><br><span class="line"></span><br><span class="line">--tcp-flags 用于匹配报文的tcp头的标志位</span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -t filter -I INPUT -p tcp -m tcp --tcp-flags SYN,ACK,FIN,RST,URG,PSH SYN,ACK -j REJERCT</span></span><br><span class="line"><span class="meta">#</span><span class="bash">把标志位的SYN和ACK值置为1</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="UCP扩展模块"><a href="#UCP扩展模块" class="headerlink" title="UCP扩展模块"></a>UCP扩展模块</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">--sport：匹配udp报文的源地址</span><br><span class="line">--dport：匹配udp报文的目标地址</span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -t filter -I INPUT -p udp -m udp --dport 137:157 -j ACCEPT</span></span><br><span class="line"><span class="meta">#</span><span class="bash">可以结合multiport模块指定多个离散的端口</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="icmp扩展模块"><a href="#icmp扩展模块" class="headerlink" title="icmp扩展模块"></a>icmp扩展模块</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">--icmp-type：匹配icmp报文的具体类型</span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -t filter -I INPUT -p icmp -m icmp --icmp-type 8/0 -j REJECT</span></span><br></pre></td></tr></table></figure>
+
+<p>各种ICMP报文的前32bits都是三个长度固定的字段：type类型字段(8位)、code代码字段(8位)、checksum校验和字段(16位)<br>8bits类型和8bits代码字段：一起决定了ICMP报文的类型。常见的有：<br>　　类型8、代码0：回射请求。<br>　　类型0、代码0：回射应答。<br>　　类型11、代码0：超时。</p>
+<p><a href="https://blog.csdn.net/weixin_34238633/article/details/91505833" target="_blank" rel="noopener">icmp报文的具体类型</a></p>
+<h4 id="multiport扩展模块"><a href="#multiport扩展模块" class="headerlink" title="multiport扩展模块"></a>multiport扩展模块</h4><p>可对TCP/UDP多种报文端口进行匹配</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">iptables -t 表名 -I 链名  -p 协议 -m multiport --sport 端口号 -j 动作</span><br><span class="line"><span class="meta">#</span><span class="bash">-p tcp -m multiport --sports 用于匹配报文的源端口，可以指定离散的多个端口号,端口之间用<span class="string">"逗号"</span>隔开</span></span><br><span class="line"><span class="meta">#</span><span class="bash">-p udp -m multiport --dports 用于匹配报文的目标端口，可以指定离散的多个端口号，端口之间用<span class="string">"逗号"</span>隔开</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="iprange扩展模块"><a href="#iprange扩展模块" class="headerlink" title="iprange扩展模块"></a>iprange扩展模块</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">--src-range：指定连续的源地址范围</span><br><span class="line">-dst-range：指定连续的目标地址范围</span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -t filter -I INPUT -m iprange --src-range 192.168.1.127-192.168.1.146 -j DROP</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="string模块"><a href="#string模块" class="headerlink" title="string模块"></a>string模块</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">--algo：指定对应的匹配算法，可用算法为bm、kmp，此选项为必需选项。</span><br><span class="line">--string：指定需要匹配的字符串</span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -t filter -I INPUT -p tcp --sport 80 -m string --algo bm --string <span class="string">"OOXX"</span> -j REJECT</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="time模块"><a href="#time模块" class="headerlink" title="time模块"></a>time模块</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">--timestart：用于指定时间范围的开始时间，不可取反</span><br><span class="line">--timestop：用于指定时间范围的结束时间，不可取反</span><br><span class="line">--weekdays：用于指定"星期几"，可取反</span><br><span class="line">--monthdays：用于指定"几号"，可取反</span><br><span class="line">--datestart：用于指定日期范围的开始日期，不可取反</span><br><span class="line">--datestop：用于指定日期范围的结束时间，不可取反</span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -t filter -I OUTPUT -p tcp --dport 80 </span></span><br><span class="line"><span class="meta">#</span><span class="bash">-m time --timestart 09:00:00 --timestop 19:00:00 --weekdays 6,7 </span></span><br><span class="line"><span class="meta">#</span><span class="bash">--monthdays 22,23 --datestart 2017-12-24 --datestop 2017-12-27</span></span><br><span class="line"><span class="meta">#</span><span class="bash">-j REJECT</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="connlimit-模块"><a href="#connlimit-模块" class="headerlink" title="connlimit 模块"></a>connlimit 模块</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">--connlimit-above：单独使用此选项时，表示限制每个IP的链接数量。</span><br><span class="line">--connlimit-mask：此选项不能单独使用，在使用--connlimit-above选项时，配合此选项，则可以针对"某类IP段内的一定数量的IP"进行连接数量的限制，如果不明白可以参考上文的详细解释。</span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -t filter -I OUTPUT -p tcp --dport 22 -m connlimit --connlimit-above 2 --connlimit-mask 24 -j REJECT</span></span><br><span class="line"><span class="meta">#</span><span class="bash">--connlimit-above 表示一个IP最多只能创建两个连接</span></span><br><span class="line"><span class="meta">#</span><span class="bash">--connlimit-mask 表示在包含254(由mask 24得254)个IP的C类网络中最多只能有两个SSH连接</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="limit模块"><a href="#limit模块" class="headerlink" title="limit模块"></a>limit模块</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">--limit-burst：类比"令牌桶"算法，此选项用于指定令牌桶中令牌的最大数量，上文中已经详细的描述了"令牌桶"的概念，方便回顾。</span><br><span class="line">--limit：类比"令牌桶"算法，此选项用于指定令牌桶中生成新令牌的频率，可用时间单位有second、minute 、hour、day。</span><br><span class="line"><span class="meta">#</span><span class="bash">ptables -t filter -I OUTPUT -p icmp -m <span class="built_in">limit</span> --<span class="built_in">limit</span> 10/minute --<span class="built_in">limit</span>-burst 3 -j ACCEPT</span></span><br><span class="line"><span class="meta">#</span><span class="bash">木桶最多放3个令牌（icmp持令牌入网卡）</span></span><br><span class="line"><span class="meta">#</span><span class="bash">每分钟生产10个令牌[每6秒生成一个令牌]（如果木桶内存在3个令牌则丢弃第4个令牌）</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">使用<span class="string">"--limit"</span>选项时，可以选择的时间单位有多种，如下</span></span><br><span class="line"><span class="meta">#</span><span class="bash">/second</span></span><br><span class="line"><span class="meta">#</span><span class="bash">/minute</span></span><br><span class="line"><span class="meta">#</span><span class="bash">/hour</span></span><br><span class="line"><span class="meta">#</span><span class="bash">/day</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="state模块"><a href="#state模块" class="headerlink" title="state模块"></a>state模块</h4><p>对于state模块的连接而言，”连接”其中的报文可以分为5种状态，报文状态可以为NEW、ESTABLISHED、RELATED、INVALID、UNTRACKED</p>
+<table>
+<thead>
+<tr>
+<th><strong>NEW</strong></th>
+<th>连接中的第一个包，状态就是NEW，我们可以理解为新连接的第一个包的状态为NEW。</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>ESTABLISHED</strong></td>
+<td>我们可以把NEW状态包后面的包的状态理解为ESTABLISHED，表示连接已建立。</td>
+</tr>
+<tr>
+<td><strong>RELATED</strong></td>
+<td>进程间的关联</td>
+</tr>
+<tr>
+<td><strong>INVALID</strong></td>
+<td>如果一个包没有办法被识别，或者这个包没有任何状态，那么这个包的状态就是INVALID，我们可以主动屏蔽状态为INVALID的报文。</td>
+</tr>
+<tr>
+<td><strong>UNTRACKED</strong></td>
+<td>报文的状态为untracked时，表示报文未被追踪，当报文的状态为Untracked时通常表示无法找到相关的连接</td>
+</tr>
+</tbody></table>
+<h1 id="白名单-黑名单"><a href="#白名单-黑名单" class="headerlink" title="白名单/黑名单"></a>白名单/黑名单</h1><p>当链的默认策略为ACCEPT时，链中的规则对应的动作应该为DROP或者REJECT，表示只有匹配到规则的报文才会被拒绝，没有被规则匹配到的报文都会被默认接受，这就是<strong>黑名单机制</strong>。<br>       当链的默认策略为DROP时，链中的规则对应的动作应该为ACCEPT，表示只有匹配到规则的报文才会被放行，没有被规则匹配到的报文都会被默认拒绝，这就是<strong>白名单机制</strong>。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">iptables -t INPUT -P ACCEPT      				 #先将INPUT链的默认策略设置为ACCEPT</span><br><span class="line">iptables -A INPUT -p tcp --dport 20 -j ACCEPT	 #添加白名单</span><br><span class="line">iptables -A INPUT -j REJECT						 #拒绝其他</span><br></pre></td></tr></table></figure>
+
+<h1 id><a href="#" class="headerlink" title></a></h1><h1 id="自定义链"><a href="#自定义链" class="headerlink" title="自定义链"></a>自定义链</h1><h2 id="创建自定义链"><a href="#创建自定义链" class="headerlink" title="创建自定义链"></a>创建自定义链</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">iptables -t 表名 -N 链名</span><br><span class="line"><span class="meta">#</span><span class="bash">在表中创建自定义链</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="引用自定义链"><a href="#引用自定义链" class="headerlink" title="引用自定义链"></a>引用自定义链</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -t 表名 -I 默认链名  -j 自定义链</span><br></pre></td></tr></table></figure>
+
+<h2 id="重命名自定义链"><a href="#重命名自定义链" class="headerlink" title="重命名自定义链"></a>重命名自定义链</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -E 自定义链</span><br></pre></td></tr></table></figure>
+
+<h2 id="删除自定义链"><a href="#删除自定义链" class="headerlink" title="删除自定义链"></a>删除自定义链</h2><p>删除自定义链需要满足两个条件</p>
+<p>1、自定义链没有被引用</p>
+<p>2、自定义链中没有任何规则</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">iptables -X 自定义链</span><br></pre></td></tr></table></figure>
+
+<h1 id="iptables动作"><a href="#iptables动作" class="headerlink" title="iptables动作"></a>iptables动作</h1><h2 id="动作REJECT"><a href="#动作REJECT" class="headerlink" title="动作REJECT"></a>动作REJECT</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">--reject-with 可以设置提示信息，当对方被拒绝时，会提示对方为什么被拒绝</span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -I INPUT -j REJECT --reject-with icmp-error</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="动作LOG"><a href="#动作LOG" class="headerlink" title="动作LOG"></a>动作LOG</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">修改/etc/rsyslog.conf文件（或者/etc/syslog.conf），在rsyslog配置文件中添加如下配置即可。</span></span><br><span class="line">vim /etc/rsyslog.conf</span><br><span class="line">kern.warning /var/log/iptables.log</span><br><span class="line"><span class="meta">#</span><span class="bash">加入上述配置后，报文的相关信息将会被记录到/var/<span class="built_in">log</span>/iptables.log文件中。</span></span><br><span class="line"><span class="meta">#</span><span class="bash">完成上述配置后，重启rsyslog服务（或者syslogd）</span></span><br><span class="line">service rsyslog restart</span><br><span class="line"><span class="meta">#</span><span class="bash">服务重启后，配置即可生效，匹配到的报文的相关信息将被记录到指定的文件中。</span></span><br><span class="line"></span><br><span class="line">--log-level选项可以指定记录日志的日志级别，可用级别有emerg，alert，crit，error，warning，notice，info，debug。</span><br><span class="line">--log-prefix选项可以给记录到的相关信息添加"标签"之类的信息，以便区分各种记录到的报文信息，方便在分析时进行过滤。</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -I INPUT -p tcp --dport 22 -m state --state NEW -j LOG --<span class="built_in">log</span>-prefix <span class="string">"connport-22"</span></span></span><br></pre></td></tr></table></figure>
+
+<h2 id="动作SNAT"><a href="#动作SNAT" class="headerlink" title="动作SNAT"></a>动作SNAT</h2><p>私网IP—&gt;固定公网IP</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">iptables -t nat -A POSTROUTING -s IP网段 -j SNAT --to-source 公网IP</span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -t nat -A POSTROUTING -s 10.1.0.0/24 -j SNAT --to-source 1.2.3.4</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="动作DNAT"><a href="#动作DNAT" class="headerlink" title="动作DNAT"></a>动作DNAT</h2><p>固定公网IP—&gt;私网IP</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">iptables -t nat -A PREROUTING -d 公网IP -p 协议 --dport 端口号 -j DNAT --to-destination 内网IP:端口号 </span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -t nat -A PREROUTING -d 1.2.3.4 -p tcp --dport 3389 -j DNAT --to-destination 10.1.0.6:3389</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="动作MASQUERADE"><a href="#动作MASQUERADE" class="headerlink" title="动作MASQUERADE"></a>动作MASQUERADE</h2><p>私网IP—&gt;动态公网IP</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">iptables -t nat -A POSTROUTING -s IP网段 -o 出网卡 -j SNAT </span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -t nat -A POSTROUTING -s 10.1.0.0/24 -o eth0 	-j MASQUERADE</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="动作REDIRECT"><a href="#动作REDIRECT" class="headerlink" title="动作REDIRECT"></a>动作REDIRECT</h2><p>使用REDIRECT动作可以在本机上进行端口映射</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">iptables -t nat -A PREROUTING -p tcp --dport 源端口 -j REDIRECT --to-ports 目的端口</span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-ports 8080</span></span><br><span class="line"><span class="meta">#</span><span class="bash">将本机的80端口映射到本机的8080端口上</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="iptables配置技巧"><a href="#iptables配置技巧" class="headerlink" title="iptables配置技巧"></a>iptables配置技巧</h1><p><strong>1</strong>、规则的顺序非常重要 针对相同服务的规则，更严格的规则应该放在前面。</p>
+<p><strong>2</strong>、当规则中有多个匹配条件时，条件之间默认存在”与”的关系。报文必须同时满足这个规则中的所有匹配条件，报文才能被这条规则匹配到</p>
+<p><strong>3</strong>、在不考虑1的情况下，应该将更容易被匹配到的规则放置在前面。</p>
+<p><strong>4</strong>、当IPTABLES所在主机作为网络防火 墙时，在配置规则时，应着重考虑方向性，双向都要考虑，从外到内，从内到外。</p>
+<p><strong>5</strong>、在配置IPTABLES白名单时，往往会将链的默认策略设置为ACCEPT，通过在链的最后设置REJECT规则实现白名单机制，而不是将链的默认策略设置为DROP，如果将链的默认策略设置为DROP，当链中的规则被清空时，管理员的请求也将会被DROP掉。</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#必读iptables"><span class="toc-number">1.</span> <span class="toc-text">必读iptables</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#iptables概念"><span class="toc-number">2.</span> <span class="toc-text">iptables概念</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#结构"><span class="toc-number">2.1.</span> <span class="toc-text">结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4张表"><span class="toc-number">2.1.1.</span> <span class="toc-text">4张表</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5条链"><span class="toc-number">2.1.2.</span> <span class="toc-text">5条链</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#iptables常规操作"><span class="toc-number">3.</span> <span class="toc-text">iptables常规操作</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#查"><span class="toc-number">3.1.</span> <span class="toc-text">查</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#增"><span class="toc-number">3.2.</span> <span class="toc-text">增</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#删"><span class="toc-number">3.3.</span> <span class="toc-text">删</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#改"><span class="toc-number">3.4.</span> <span class="toc-text">改</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#保存规则"><span class="toc-number">3.5.</span> <span class="toc-text">保存规则</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#匹配条件"><span class="toc-number">3.6.</span> <span class="toc-text">匹配条件</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#基本匹配条件"><span class="toc-number">3.6.1.</span> <span class="toc-text">基本匹配条件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#扩展匹配条件"><span class="toc-number">3.6.2.</span> <span class="toc-text">扩展匹配条件</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#tcp扩展模块"><span class="toc-number">3.6.2.1.</span> <span class="toc-text">tcp扩展模块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#UCP扩展模块"><span class="toc-number">3.6.2.2.</span> <span class="toc-text">UCP扩展模块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#icmp扩展模块"><span class="toc-number">3.6.2.3.</span> <span class="toc-text">icmp扩展模块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#multiport扩展模块"><span class="toc-number">3.6.2.4.</span> <span class="toc-text">multiport扩展模块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#iprange扩展模块"><span class="toc-number">3.6.2.5.</span> <span class="toc-text">iprange扩展模块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#string模块"><span class="toc-number">3.6.2.6.</span> <span class="toc-text">string模块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#time模块"><span class="toc-number">3.6.2.7.</span> <span class="toc-text">time模块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#connlimit-模块"><span class="toc-number">3.6.2.8.</span> <span class="toc-text">connlimit 模块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#limit模块"><span class="toc-number">3.6.2.9.</span> <span class="toc-text">limit模块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#state模块"><span class="toc-number">3.6.2.10.</span> <span class="toc-text">state模块</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#白名单-黑名单"><span class="toc-number">4.</span> <span class="toc-text">白名单&#x2F;黑名单</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#null"><span class="toc-number">5.</span> <span class="toc-text"></span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#自定义链"><span class="toc-number">6.</span> <span class="toc-text">自定义链</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#创建自定义链"><span class="toc-number">6.1.</span> <span class="toc-text">创建自定义链</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#引用自定义链"><span class="toc-number">6.2.</span> <span class="toc-text">引用自定义链</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#重命名自定义链"><span class="toc-number">6.3.</span> <span class="toc-text">重命名自定义链</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#删除自定义链"><span class="toc-number">6.4.</span> <span class="toc-text">删除自定义链</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#iptables动作"><span class="toc-number">7.</span> <span class="toc-text">iptables动作</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#动作REJECT"><span class="toc-number">7.1.</span> <span class="toc-text">动作REJECT</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#动作LOG"><span class="toc-number">7.2.</span> <span class="toc-text">动作LOG</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#动作SNAT"><span class="toc-number">7.3.</span> <span class="toc-text">动作SNAT</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#动作DNAT"><span class="toc-number">7.4.</span> <span class="toc-text">动作DNAT</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#动作MASQUERADE"><span class="toc-number">7.5.</span> <span class="toc-text">动作MASQUERADE</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#动作REDIRECT"><span class="toc-number">7.6.</span> <span class="toc-text">动作REDIRECT</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#iptables配置技巧"><span class="toc-number">8.</span> <span class="toc-text">iptables配置技巧</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2021/01/05/iptables/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2021/01/05/iptables/&text=iptables" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2021/01/05/iptables/&title=iptables" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2021/01/05/iptables/&is_video=false&description=iptables" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=iptables&body=Check out this article: http://yoursite.com/2021/01/05/iptables/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2021/01/05/iptables/&title=iptables" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2021/01/05/iptables/&title=iptables" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2021/01/05/iptables/&title=iptables" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2021/01/05/iptables/&title=iptables" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2021/01/05/iptables/&name=iptables&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2021/01/05/iptables/&t=iptables" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    1970-2021
+    Tansz
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>

